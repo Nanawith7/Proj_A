@@ -207,18 +207,24 @@ function toggleExpand(node, g, mainG) {
   const rect=g.querySelector('.node-rect');
   applyNodeView(rect,node,{width:expW,height:expH});
 
-  const nx=node.x||0,ny=node.y||0;
-  currentNodes.forEach(n=>{
-    if(n.id===nid)return;
-    const g2=mainG.querySelector(`g[data-id="${n.id}"]`);if(!g2)return;
-    const rect2=g2.querySelector('.node-rect');if(!rect2)return;
-    const ox=n.x||0,oy=n.y||0,ow=n.width||200,oh=n.height||120;
-    if(nx+expW>ox&&nx<ox+ow&&ny+expH>oy&&ny<oy+oh){
-      const shift=Math.max(0,(nx+expW)-ox+20);
-      rect2.setAttribute('x',ox+shift);
-    }
-  });
+  // Clip expanded content to rect bounds
+  let clipPath=g.querySelector('.exp-clip');
+  if(!clipPath){
+    const svgNS='http://www.w3.org/2000/svg';
+    clipPath=document.createElementNS(svgNS,'clipPath');
+    clipPath.setAttribute('id',`clip-${nid}`);
+    clipPath.setAttribute('class','exp-clip');
+    g.appendChild(clipPath);
+  }
+  clipPath.innerHTML='';
+  const clipRect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  clipRect.setAttribute('x',node.x||0);clipRect.setAttribute('y',node.y||0);
+  clipRect.setAttribute('width',expW);clipRect.setAttribute('height',expH);
+  clipRect.setAttribute('rx',4);clipRect.setAttribute('ry',4);
+  clipPath.appendChild(clipRect);
+  g.setAttribute('clip-path',`url(#clip-${nid})`);
 
+  const nx=node.x||0,ny=node.y||0;
   g.querySelectorAll('.node-body').forEach(el=>el.remove());
   const svgNS='http://www.w3.org/2000/svg';
   let cy=ny+bodyPadY+12;
@@ -280,11 +286,7 @@ function collapseAll(mainG){
   const rect=g.querySelector('.node-rect');if(rect)applyNodeView(rect,node,false);
   g.querySelectorAll('.node-title').forEach(el=>el.style.opacity='1');
   g.querySelectorAll('.node-body').forEach(el=>el.remove());
-  currentNodes.forEach(n=>{
-    if(n.id===expandedId)return;
-    const g2=mainG.querySelector(`g[data-id="${n.id}"]`);if(!g2)return;
-    const rect2=g2.querySelector('.node-rect');if(rect2)rect2.setAttribute('x',n.x||0);
-  });
+  g.removeAttribute('clip-path');
   expandedId=null;
 }
 
