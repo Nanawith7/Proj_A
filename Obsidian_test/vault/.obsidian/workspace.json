@@ -11,20 +11,24 @@
             "id": "2ec1532ea9941862",
             "type": "leaf",
             "state": {
-              "type": "canvas",
-              "state": {
-                "file": "human_network.canvas",
-                "viewState": {
-                  "x": 593.632095860118,
-                  "y": 309.36555686294685,
-                  "zoom": -0.710455755594408
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "human_network"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "グラフビュー"
+            }
+          },
+          {
+            "id": "f03cac4a8793025c",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "グラフビュー"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -183,8 +187,14 @@
       "bases:新規ベースを作成": false
     }
   },
-  "active": "2ec1532ea9941862",
+  "active": "f03cac4a8793025c",
   "lastOpenFiles": [
+    "thief_era_viewer.html",
+    "characters_viewer.html",
+    "timeline_viewer.html",
+    "era/era_120_150.md",
+    "era/era_080_120.md",
+    "characters.canvas",
     "human_network.canvas",
     "scenario/最後の試練.md",
     "devil_timeline.canvas",
@@ -195,11 +205,9 @@
     "timeline_bigicons.canvas",
     "timeline.canvas",
     "thief_network.canvas",
-    "scenarios.canvas",
     "event/魔法学園創設.md",
     "event/大戦争勃発.md",
     "event/新魔王戴冠.md",
-    "characters_tags.canvas",
     "coronation]] [[succession.md",
     "scenario/竜との邂逅.md",
     "academy]] [[foundation.md",
@@ -220,8 +228,6 @@
     "scenario/塔の試練.md",
     "scenario/王都魔法大会.md",
     "scenario/魔法学園編入.md",
-    "era/era_150_180.md",
-    "era/era_120_150.md",
     "era",
     "tag",
     "_icons/node_四天王B.png",

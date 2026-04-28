@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canvas Viewer</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;display:flex;height:100vh;overflow:hidden;background:#1a1a2e}
+#graph{flex:1;position:relative;overflow:auto;cursor:grab}
+#graph:active{cursor:grabbing}
+#graph svg{display:block}
+#sidebar{width:320px;background:#16213e;color:#eee;overflow-y:auto;padding:12px;border-left:2px solid #0f3460;font-size:13px}
+#sidebar h3{color:#e94560;margin:8px 0 4px}
+#sidebar label{display:block;margin:2px 0;color:#aaa;font-size:11px}
+#sidebar input,#sidebar select{width:100%;padding:4px 6px;background:#0f3460;color:#eee;border:1px solid #533483;border-radius:3px;font-size:12px}
+#sidebar button{background:#e94560;color:#fff;border:none;padding:6px 14px;border-radius:3px;cursor:pointer;font-size:12px;margin:8px 4px 0 0}
+#sidebar button:hover{background:#ff6b81}
+#sidebar .filter-row{display:flex;gap:4px;margin:3px 0;align-items:center}
+#sidebar .filter-row select{flex:1}
+#sidebar .filter-row input{flex:1}
+#sidebar .filter-row .logic{width:40px;text-align:center;color:#e94560}
+#stats{color:#aaa;font-size:11px;margin:4px 0}
+.expanded{position:absolute;background:#1e1e3a;border:2px solid #e94560;border-radius:6px;padding:12px;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.5);max-width:500px;max-height:400px;overflow-y:auto;color:#ddd;font-size:12px;transition:opacity .2s}
+.expanded h1,.expanded h2{color:#e94560;font-size:14px}
+.expanded .prop{display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;font-size:11px}
+.node-icon{pointer-events:none}
+.edge-label{font-size:10px;fill:#aaa;text-anchor:middle}
+.edge-path{fill:none;stroke-width:1.5;opacity:.7}
+.edge-path:hover{stroke-width:3;opacity:1}
+</style>
+</head>
+<body>
+
+<div id="graph"></div>
+<div id="sidebar">
+  <h3>Filter / Sort</h3>
+  <div id="filter-rows"></div>
+  <button onclick="addFilterRow('filter-rows','filter')">+ Filter AND</button>
+  <button onclick="addOrGroup()">+ $or Group</button>
+
+  <h3>Exclude</h3>
+  <div id="exclude-rows"></div>
+  <button onclick="addFilterRow('exclude-rows','exclude')">+ Exclude</button>
+
+  <h3>Sort</h3>
+  <select id="sort-key"><option value="">none</option></select>
+  <label style="display:inline;margin-left:8px">
+    <input type="checkbox" id="sort-desc"> desc
+  </label>
+
+  <h3>Layout</h3>
+  <label>Row Height <input type="number" id="row-height" value="250" min="50"></label>
+  <label>Col Width <input type="number" id="col-width" value="350" min="50"></label>
+  <label><input type="checkbox" id="prune-orphans"> Prune orphans</label>
+
+  <div style="margin-top:8px">
+    <button onclick="applyFilters()">Apply</button>
+    <button onclick="resetAll()">Reset</button>
+  </div>
+  <div id="stats">Nodes: 0 | Edges: 0</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════
+const DATA = JSON.parse(/*__VAULT_DATA_PLACEHOLDER__*/);
+const ALL_NODES = DATA.canvas.nodes || [];
+const ALL_EDGES = DATA.canvas.edges || [];
+const VAULT = DATA.vault || {};
+const ICONS = DATA.icons || {};
+const STYLE = DATA.style || {};
+
+// Separate file nodes from icon nodes
+const FILE_NODES = ALL_NODES.filter(n => n.type === 'file' && !n.id.endsWith('_icon'));
+const ICON_NODES = ALL_NODES.filter(n => n.type === 'file' && n.id.endsWith('_icon'));
+
+// Build maps
+const FILE_BY_ID = {};
+FILE_NODES.forEach(n => FILE_BY_ID[n.id] = n);
+const ICON_BY_ID = {};
+ICON_NODES.forEach(n => ICON_BY_ID[n.id] = n);
+
+// Derive node type from file path
+function nodeType(file) {
+  const folder = (file || '').split('/')[0];
+  if (folder && folder !== file) return folder;
+  const stem = (file || '').replace('.md','').split('/').pop();
+  const v = VAULT[stem];
+  return (v && v.props && v.props.type) || 'default';
+}
+
+// ══════════════════════════════════════════════════════════
+// FILTER ENGINE (JS port of filter_sort.py)
+// ══════════════════════════════════════════════════════════
+
+function matchCondition(nodeData, key, expected) {
+  /* $or: expected is array of {key:val} objects */
+  if (key === '$or' && Array.isArray(expected)) {
+    return expected.some(cond =>
+      Object.entries(cond).every(([k, v]) => matchCondition(nodeData, k, v))
+    );
+  }
+  const stem = (nodeData.file || '').replace('.md','').split('/').pop();
+  const v = VAULT[stem];
+  if (!v) return false;
+  const actual = (v.props || {})[key];
+  if (actual === undefined || actual === null) return false;
+
+  if (Array.isArray(actual)) {
+    if (actual.includes(expected)) return true;
+    return actual.includes('[[' + expected + ']]');
+  }
+  if (Array.isArray(expected)) {
+    if (expected.includes(actual)) return true;
+    const stripped = actual.startsWith('[[') && actual.endsWith(']]') ? actual.slice(2,-2) : null;
+    return stripped !== null && expected.includes(stripped);
+  }
+  if (actual === expected) return true;
+  if (typeof actual === 'string' && actual.startsWith('[[') && actual.endsWith(']]')) {
+    return actual.slice(2,-2) === expected;
+  }
+  if (typeof expected === 'string' && expected.startsWith('[[') && expected.endsWith(']]')) {
+    return actual === expected.slice(2,-2);
+  }
+  return false;
+}
+
+function cloneNode(n) { const stem=(n.file||'').replace('.md','').split('/').pop(); return {...n, _stem:stem}; }
+
+function applyFilter(nodes, conditions) {
+  if (!conditions || !Object.keys(conditions).length) return nodes;
+  return nodes.filter(n => Object.entries(conditions).every(([k,v]) => matchCondition(n,k,v)));
+}
+
+function applyExclude(nodes, conditions) {
+  if (!conditions || !Object.keys(conditions).length) return nodes;
+  return nodes.filter(n => !Object.entries(conditions).every(([k,v]) => matchCondition(n,k,v)));
+}
+
+function applySort(nodes, sortKey, desc) {
+  if (!sortKey) return nodes;
+  return [...nodes].sort((a,b) => {
+    const sa = VAULT[a._stem]?.props?.[sortKey] ?? '';
+    const sb = VAULT[b._stem]?.props?.[sortKey] ?? '';
+    const va = sa === '' || sa === null ? (desc ? '' : '\uffff') : sa;
+    const vb = sb === '' || sb === null ? (desc ? '' : '\uffff') : sb;
+    if (va < vb) return desc ? 1 : -1;
+    if (va > vb) return desc ? -1 : 1;
+    return 0;
+  });
+}
+
+function pruneOrphans(nodes, edges, pruneFlag) {
+  if (!pruneFlag) return nodes;
+  const connected = new Set();
+  edges.forEach(e => { connected.add(e.fromNode); connected.add(e.toNode); });
+  return nodes.filter(n => connected.has(n.id));
+}
+
+// Parse simple key=value string into dict
+function parseConditions(raw) {
+  if (!raw) return {};
+  const result = {};
+  raw.split(',').forEach(pair => {
+    const eq = pair.indexOf('=');
+    if (eq > 0) {
+      const k = pair.slice(0, eq).trim();
+      let v = pair.slice(eq+1).trim().replace(/^["']|["']$/g, '');
+      if (v.includes('|')) v = v.split('|').map(s => s.trim());
+      if (result[k] !== undefined) {
+        if (Array.isArray(result[k])) result[k].push(...(Array.isArray(v)?v:[v]));
+        else result[k] = [result[k], ...(Array.isArray(v)?v:[v])];
+      } else {
+        result[k] = v;
+      }
+    }
+  });
+  return result;
+}
+
+function runFilterPipeline(nodes, edges, config) {
+  let n = nodes.map(cloneNode);
+  // Filter
+  if (config.filterStr) n = applyFilter(n, parseConditions(config.filterStr));
+  // Exclude
+  if (config.excludeStr) n = applyExclude(n, parseConditions(config.excludeStr));
+  // Sort
+  n = applySort(n, config.sortKey, config.sortDesc);
+  // Prune
+  if (config.prune) n = pruneOrphans(n, edges, true);
+  // Filter edges to only those where both endpoints remain
+  const remainingIds = new Set(n.map(x => x.id));
+  const e = edges.filter(ed => remainingIds.has(ed.fromNode) && remainingIds.has(ed.toNode));
+  return { nodes: n, edges: e };
+}
+
+// ══════════════════════════════════════════════════════════
+// SVG RENDERER
+// ══════════════════════════════════════════════════════════
+
+const graph = document.getElementById('graph');
+let svg = null;
+let currentData = { nodes: [], edges: [] };
+let expandedNode = null;
+let panX = 0, panY = 0, dragging = false, dragStart = {};
+
+function setupSvg() {
+  if (svg) svg.remove();
+  svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  graph.appendChild(svg);
+  // Pan
+  graph.onmousedown = e => {
+    if (e.target === graph || e.target === svg) {
+      dragging = true; dragStart = {x: e.clientX - panX, y: e.clientY - panY};
+      e.preventDefault();
+    }
+  };
+  window.onmousemove = e => {
+    if (!dragging) return;
+    panX = e.clientX - dragStart.x; panY = e.clientY - dragStart.y;
+    svg.setAttribute('transform', `translate(${panX},${panY})`);
+  };
+  window.onmouseup = () => dragging = false;
+  // Wheel zoom
+  graph.onwheel = e => {
+    e.preventDefault();
+    const scale = parseFloat(svg.dataset.scale || 1) + (e.deltaY > 0 ? -0.1 : 0.1);
+    const s = Math.max(0.2, Math.min(3, scale));
+    svg.dataset.scale = s;
+    svg.style.transform = `scale(${s})`;
+  };
+}
+
+function iconUrl(node) {
+  const file = node.file || '';
+  if (file.startsWith('_icons/')) {
+    const name = file.split('/').pop();
+    if (ICONS[name]) return ICONS[name];
+  }
+  return null;
+}
+
+function getTypeStyle(node) {
+  const type = nodeType(node.file);
+  const tdef = (STYLE.types || {})[type] || {};
+  const fileNode = FILE_BY_ID[node.id];
+  return {
+    color: (fileNode && fileNode.color) || tdef.bg || '#555',
+    shape: tdef.shape || 'rect',
+    textColor: tdef.textColor || '#fff',
+    font: tdef.font || STYLE.node?.font || 'sans-serif',
+  };
+}
+
+function renderGraph(nodes, edges, layout) {
+  setupSvg();
+  const colW = layout?.colWidth || 350;
+  const rowH = layout?.rowHeight || 250;
+  const nodeW = layout?.nodeWidth || 300;
+  const nodeH = layout?.nodeHeight || 200;
+
+  let maxX = 0, maxY = 0;
+  nodes.forEach(n => {
+    if (n.x + nodeW > maxX) maxX = n.x + nodeW;
+    if (n.y + nodeH > maxY) maxY = n.y + nodeH;
+  });
+
+  svg.setAttribute('viewBox', `0 0 ${maxX + 100} ${maxY + 100}`);
+  svg.setAttribute('width', maxX + 100);
+  svg.setAttribute('height', maxY + 100);
+  svg.innerHTML = '';
+
+  // Edges
+  const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+  const fileIds = new Set(nodes.map(n => n.id));
+  edges.filter(e => fileIds.has(e.fromNode) && fileIds.has(e.toNode)).forEach(e => {
+    const fn = nodes.find(n => n.id === e.fromNode);
+    const tn = nodes.find(n => n.id === e.toNode);
+    if (!fn || !tn) return;
+    const x1 = fn.x + nodeW / 2, y1 = fn.y + nodeH / 2;
+    const x2 = tn.x + nodeW / 2, y2 = tn.y + nodeH / 2;
+    const midX = (x1 + x2) / 2, midY = (y1 + y2) / 2;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    const edgeColor = e.color || '#666';
+    path.setAttribute('d', `M${x1},${y1} Q${midX+30},${midY-30} ${x2},${y2}`);
+    path.setAttribute('class','edge-path');
+    path.setAttribute('stroke', edgeColor);
+
+    if (e.label) {
+      const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x', midX); lbl.setAttribute('y', midY - 6);
+      lbl.setAttribute('class','edge-label');
+      lbl.setAttribute('fill', edgeColor);
+      lbl.textContent = e.label;
+      edgeGroup.appendChild(lbl);
+    }
+    edgeGroup.appendChild(path);
+  });
+  svg.appendChild(edgeGroup);
+
+  // Nodes
+  nodes.forEach(n => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    const style = getTypeStyle(n);
+    const icnUrl = iconUrl(n);
+    const stem = (n.file||'').replace('.md','').split('/').pop();
+    const title = (VAULT[stem]?.props?.title) || stem;
+
+    const iconW = icnUrl ? 28 : 0;
+    const cx = n.x + iconW + 6, cy = n.y + 14;
+
+    if (icnUrl) {
+      const img = document.createElementNS('http://www.w3.org/2000/svg','image');
+      img.setAttribute('href', icnUrl);
+      img.setAttribute('x', n.x); img.setAttribute('y', n.y);
+      img.setAttribute('width', iconW); img.setAttribute('height', iconW);
+      img.setAttribute('class','node-icon');
+      g.appendChild(img);
+    }
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x', cx); rect.setAttribute('y', n.y);
+    rect.setAttribute('width', nodeW - iconW - 6); rect.setAttribute('height', nodeH);
+    rect.setAttribute('rx', style.shape === 'circle' ? nodeH / 2 : 4);
+    rect.setAttribute('ry', style.shape === 'circle' ? nodeH / 2 : 4);
+    rect.setAttribute('fill', style.color);
+    rect.setAttribute('stroke', '#fff');
+    rect.setAttribute('stroke-width', 1);
+    rect.setAttribute('cursor','pointer');
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x', cx + 8); text.setAttribute('y', n.y + nodeH / 2 + 4);
+    text.setAttribute('fill', style.textColor);
+    text.setAttribute('font-size', 12);
+    text.setAttribute('font-family', style.font);
+    text.textContent = title;
+
+    rect.onclick = () => toggleExpand(n, cx + nodeW, n.y);
+    g.appendChild(rect);
+    g.appendChild(text);
+    svg.appendChild(g);
+  });
+
+  updateStats(nodes.length, edges.length);
+}
+
+function toggleExpand(node, ex, ey) {
+  const existing = document.getElementById('expanded-panel');
+  if (existing) {
+    if (existing.dataset.nodeId === node.id) { existing.remove(); expandedNode = null; return; }
+    existing.remove();
+  }
+  expandedNode = node;
+  const stem = (node.file||'').replace('.md','').split('/').pop();
+  const v = VAULT[stem];
+  const panel = document.createElement('div');
+  panel.id = 'expanded-panel';
+  panel.className = 'expanded';
+  panel.dataset.nodeId = node.id;
+  panel.style.left = Math.min(ex + 10, window.innerWidth - 520) + 'px';
+  panel.style.top = Math.min(ey, window.innerHeight - 420) + 'px';
+
+  let html = '';
+  if (v?.props?.title) html += `<h2>${v.props.title}</h2>`;
+
+  // Properties
+  if (v?.props) {
+    const propStyles = STYLE.properties || {};
+    Object.entries(v.props).forEach(([k, val]) => {
+      if (k === 'title') return;
+      const ps = propStyles[k] || {};
+      const color = ps.color || '#666';
+      const icon = ps.icon || '';
+      const display = Array.isArray(val) ? val.join(', ') : String(val);
+      html += `<span class="prop" style="background:${color}22;color:${color};border:1px solid ${color}44">${icon} <b>${k}</b>: ${display}</span>`;
+    });
+    html += '<hr style="border-color:#333;margin:8px 0">';
+  }
+
+  // Body (Markdown)
+  if (v?.body && typeof marked !== 'undefined') {
+    html += marked.parse(v.body);
+  } else if (v?.body) {
+    html += `<pre>${v.body}</pre>`;
+  }
+
+  panel.innerHTML = html;
+  graph.appendChild(panel);
+}
+
+function updateStats(nCount, eCount) {
+  document.getElementById('stats').textContent = `Nodes: ${nCount} | Edges: ${eCount}`;
+}
+
+// ══════════════════════════════════════════════════════════
+// GUI
+// ══════════════════════════════════════════════════════════
+
+// Populate sort-key dropdown
+(function() {
+  const keys = new Set();
+  Object.values(VAULT).forEach(v => {
+    if (v.props) Object.keys(v.props).forEach(k => keys.add(k));
+  });
+  const sel = document.getElementById('sort-key');
+  [...keys].sort().forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = k;
+    sel.appendChild(opt);
+  });
+})();
+
+function addFilterRow(containerId, prefix) {
+  const div = document.getElementById(containerId);
+  const row = document.createElement('div');
+  row.className = 'filter-row';
+
+  const logicSpan = document.createElement('span');
+  logicSpan.className = 'logic';
+  logicSpan.textContent = div.children.length === 0 ? 'WHERE' : 'AND';
+
+  const keySel = document.createElement('select');
+  const keys = new Set();
+  Object.values(VAULT).forEach(v => { if(v.props) Object.keys(v.props).forEach(k => keys.add(k)); });
+  keySel.innerHTML = '<option value="$or">$or</option>';
+  [...keys].sort().forEach(k => { keySel.innerHTML += `<option value="${k}">${k}</option>`; });
+
+  const valInput = document.createElement('input');
+  valInput.placeholder = 'value or val|val2';
+
+  const delBtn = document.createElement('button');
+  delBtn.textContent = 'x';
+  delBtn.style.background = '#533483';
+  delBtn.style.padding = '2px 6px';
+  delBtn.onclick = () => row.remove();
+
+  row.appendChild(logicSpan);
+  row.appendChild(keySel);
+  row.appendChild(valInput);
+  row.appendChild(delBtn);
+  div.appendChild(row);
+}
+
+function addOrGroup() {
+  const div = document.getElementById('filter-rows');
+  const row = document.createElement('div');
+  row.className = 'filter-row';
+  row.innerHTML = '<span class="logic">$or</span><span style="color:#e94560;font-size:11px">ADD $or GROUP</span>';
+  const del = document.createElement('button');
+  del.textContent = 'x'; del.style.background='#533483';del.style.padding='2px 6px';
+  del.onclick = () => row.remove();
+  row.appendChild(del);
+  div.appendChild(row);
+}
+
+function buildFilterString(containerId) {
+  const rows = document.getElementById(containerId).children;
+  const pairs = [];
+  for (let r of rows) {
+    const sel = r.querySelector('select');
+    const inp = r.querySelector('input');
+    if (sel && inp && inp.value.trim()) {
+      pairs.push(sel.value + '=' + inp.value.trim());
+    }
+  }
+  return pairs.join(',');
+}
+
+function applyFilters() {
+  const config = {
+    filterStr: buildFilterString('filter-rows'),
+    excludeStr: buildFilterString('exclude-rows'),
+    sortKey: document.getElementById('sort-key').value,
+    sortDesc: document.getElementById('sort-desc').checked,
+    prune: document.getElementById('prune-orphans').checked,
+  };
+  const {nodes, edges} = runFilterPipeline(FILE_NODES, ALL_EDGES, config);
+  const rowH = parseInt(document.getElementById('row-height').value) || 250;
+  const colW = parseInt(document.getElementById('col-width').value) || 350;
+  currentData = {nodes, edges};
+  renderGraph(nodes, edges, {rowHeight: rowH, colWidth: colW});
+}
+
+function resetAll() {
+  document.getElementById('filter-rows').innerHTML = '';
+  document.getElementById('exclude-rows').innerHTML = '';
+  document.getElementById('sort-key').value = '';
+  document.getElementById('sort-desc').checked = false;
+  document.getElementById('prune-orphans').checked = false;
+  panX = 0; panY = 0;
+  renderGraph(FILE_NODES, ALL_EDGES, {});
+}
+
+// Initial render
+renderGraph(FILE_NODES, ALL_EDGES, {});
+addFilterRow('filter-rows','filter');
+</script>
+</body>
+</html>

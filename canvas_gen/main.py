@@ -139,6 +139,10 @@ Example:
         help="Always include nodes matching these conditions (protected from pruning).",
     )
     p.add_argument(
+        "--export-viewer", type=str, default=None,
+        help="Generate self-contained HTML viewer for a .canvas file. Args: canvas_path[:output_path].",
+    )
+    p.add_argument(
         "--sort-by", type=str, default=None,
         help='Sort specification: a key name or JSON array [{"key":"date","order":"asc"}].',
     )
@@ -210,6 +214,16 @@ def main(argv: list[str] | None = None) -> int:
 
     type_defs = load_type_definitions(type_def_path)
     label_map = load_label_mappings(label_mapping_path)
+
+    # --- Export viewer HTML (bypasses full pipeline) ---
+    if args.export_viewer:
+        parts = args.export_viewer.split(":", 1)
+        canvas_file = parts[0]
+        out_file = parts[1] if len(parts) > 1 else canvas_file.replace(".canvas", ".html")
+        from .viewer import export_viewer
+        result = export_viewer(str(vault_path), canvas_file, out_file)
+        print(f"[INFO] Viewer exported to: {result}")
+        return 0
 
     # --- Generate type icons (always, for fallback) ---
     icon_size = args.icon_size
