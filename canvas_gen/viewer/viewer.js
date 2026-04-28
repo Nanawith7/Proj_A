@@ -261,11 +261,13 @@ function toggleExpand(node, g, mainG) {
   const rect=g.querySelector('.node-rect');
   applyNodeView(rect,node,{width:expW,height:expH});
 
+  const nx=node.x||0,ny=node.y||0;
+
   // Expanded icon: top-left
   const exIconPath=v?.props?.icon;
   if(exIconPath){
     g.querySelectorAll('.node-icon-ex').forEach(el=>el.remove());
-    const isz=Math.min(40,nw>0?nw:40);
+    const isz=Math.min(40,(node.width||200)>0?(node.width||200):40);
     const img=document.createElementNS('http://www.w3.org/2000/svg','image');
     img.setAttribute('href','/_icons/'+exIconPath.split('/').pop());
     img.setAttribute('x',nx+bodyPadX);img.setAttribute('y',ny+4);
@@ -289,7 +291,6 @@ function toggleExpand(node, g, mainG) {
     g.insertBefore(bg,g.firstChild);
   }
 
-  const nx=node.x||0,ny=node.y||0;
   currentNodes.forEach(n=>{
     if(n.id===nid)return;
     const g2=mainG.querySelector(`g[data-id="${n.id}"]`);if(!g2)return;
