@@ -21,9 +21,9 @@ def _match_condition(node: NoteNode, key: str, expected: Any) -> bool:
            Returns True if at least one sub-condition fully matches.
 
     Regular key:
-      - If node's property is a list, checks expected in list.
-      - If expected is a list, checks actual in expected (OR).
-      - Otherwise, exact equality.
+      - List actual: checks expected in list, also tries [[expected]] (wiki link).
+      - List expected: checks actual in expected (OR).
+      - Scalar: exact equality, also tries stripping [[ ]] from actual.
     """
     if key == "$or":
         if isinstance(expected, list):
@@ -38,10 +38,26 @@ def _match_condition(node: NoteNode, key: str, expected: Any) -> bool:
         return False
 
     if isinstance(actual, list):
-        return expected in actual
+        if expected in actual:
+            return True
+        return f"[[{expected}]]" in actual
+
     if isinstance(expected, list):
-        return actual in expected
-    return actual == expected
+        if actual in expected:
+            return True
+        # Also check wiki-link-normalized actual
+        if actual.startswith("[[") and actual.endswith("]]"):
+            return actual[2:-2] in expected
+        return False
+
+    if actual == expected:
+        return True
+    # Compare stripped wiki link
+    if isinstance(actual, str) and actual.startswith("[[") and actual.endswith("]]"):
+        return actual[2:-2] == expected
+    if isinstance(expected, str) and expected.startswith("[[") and expected.endswith("]]"):
+        return actual == expected[2:-2]
+    return False
 
 
 def apply_filter(
