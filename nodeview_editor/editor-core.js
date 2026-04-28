@@ -67,12 +67,15 @@ function renderProps(){
     r1.innerHTML=`<span>${i+1}</span><input value="${pr.key}" placeholder="key" oninput="propRows[${i}].key=this.value;updatePreview()"><select onchange="propRows[${i}].style=this.value;renderProps();updatePreview()"><option ${pr.style==='pill'?'selected':''}>pill</option><option ${pr.style==='text'?'selected':''}>text</option></select><button onclick="propRows.splice(${i},1);renderProps();updatePreview()" style="background:#533483;padding:2px 6px;font-size:10px">x</button>`;
     wrapper.appendChild(r1);
 
-    // Row 2: position + optional pill extras
+    // Row 2: position + optional pill extras or text color
     const r2=document.createElement('div');r2.className='prop-row';
-    let html2=`<span></span><input value="${pr.px}" placeholder="x" style="width:50px" oninput="propRows[${i}].px=this.value;updatePreview()"><input value="${pr.py}" placeholder="y" style="width:50px" oninput="propRows[${i}].py=this.value;updatePreview()"><span></span>`;
+    let html2='';
     if(isPill){
       html2=`<span></span><select onchange="propRows[${i}].shape=this.value;updatePreview()" style="width:60px"><option ${pr.shape==='round'?'selected':''}>round</option><option ${pr.shape==='diamond'?'selected':''}>diamond</option><option ${pr.shape==='rect'?'selected':''}>rect</option></select><input value="${pr.bg}" placeholder="bg" style="width:55px" oninput="propRows[${i}].bg=this.value;updatePreview()"><input value="${pr.textColor}" placeholder="fg" style="width:55px" oninput="propRows[${i}].textColor=this.value;updatePreview()"><span></span>`;
+    }else{
+      html2=`<span></span><input value="${pr.textColor}" placeholder="text color" style="width:70px" oninput="propRows[${i}].textColor=this.value;updatePreview()"><span></span>`;
     }
+    html2+=`<input value="${pr.px}" placeholder="x" style="width:50px" oninput="propRows[${i}].px=this.value;updatePreview()"><input value="${pr.py}" placeholder="y" style="width:50px" oninput="propRows[${i}].py=this.value;updatePreview()"><span></span>`;
     r2.innerHTML=html2;
     wrapper.appendChild(r2);
     div.appendChild(wrapper);
@@ -82,7 +85,7 @@ function addProp(){propRows.push({key:'newKey',style:'text',shape:'round',bg:'#f
 
 function buildNV(){
   const props={};
-  propRows.forEach(pr=>{const p={};if(pr.style==='pill'){p.style='pill';p.shape=pr.shape;p.bg=pr.bg;p.textColor=pr.textColor;}if(pr.px||pr.py){p.position={};if(pr.px)p.position.x=pr.px;if(pr.py)p.position.y=pr.py;}if(Object.keys(p).length)props[pr.key]=p;});
+  propRows.forEach(pr=>{if(!pr.key)return;const p={};if(pr.style==='pill'){p.style='pill';p.shape=pr.shape;p.bg=pr.bg;p.textColor=pr.textColor;}else if(pr.textColor)p.textColor=pr.textColor;if(pr.px||pr.py){p.position={};if(pr.px)p.position.x=pr.px;if(pr.py)p.position.y=pr.py;}props[pr.key]=p;});
   const layout={};
   if(getNum('nv-tpx')!==10)layout.titlePadX=getNum('nv-tpx');if(getNum('nv-tpy')!==10)layout.titlePadY=getNum('nv-tpy');
   if(getNum('nv-cfop')!==1)layout.collapsedFillOpacity=getNum('nv-cfop');if(getNum('nv-efop')!==1)layout.expandedFillOpacity=getNum('nv-efop');

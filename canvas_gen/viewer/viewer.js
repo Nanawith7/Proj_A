@@ -381,7 +381,7 @@ function toggleExpand(node, g, mainG) {
     let fs2=ln.t==='h'?14:10;
     let fill=(nv.layout?.titleColor||'#e94560');
     if(ln.t==='q')fill=(nv.layout?.quoteColor||'#aaa');
-    else if(ln.t==='p')fill=(nv.layout?.bodyColor||'#ddd');
+    else if(ln.t==='p')fill=ln.color||(nv.layout?.bodyColor||'#ddd');
     if(ln.text){
       let txt=ln.text;
       if(mode==='wrap'){
@@ -414,7 +414,7 @@ function buildBodyLines(v,nv){
         const items=Array.isArray(val)?val:[val];
         const cleaned=items.map(it=>typeof it==='string'?it.replace(/^\[\[|\]\]$/g,''):it);
         lines.push({t:'pill',items:cleaned,shape:ps.shape||'round',bg:ps.bg||'#fff2',textColor:ps.textColor||'#eee',label:k,pos});
-      }else{lines.push({t:'p',text:`${k}: ${Array.isArray(val)?val.join(', '):val}`,pos});}
+      }else{lines.push({t:'p',text:`${k}: ${Array.isArray(val)?val.join(', '):val}`,pos,color:ps?.textColor||null});}
     });
   }
   if(v.body){lines.push({t:'hr'});v.body.split('\n').forEach(l=>{const t=l.trim();if(!t){lines.push({t:'br'});return;}if(t.startsWith('#'))lines.push({t:'h',text:t.replace(/^#+\s*/,'')});else if(t.startsWith('>'))lines.push({t:'q',text:t.slice(1).trim()});else if(t.startsWith('```')){lines.push({t:'code'});return;}else lines.push({t:'p',text:t});});}
