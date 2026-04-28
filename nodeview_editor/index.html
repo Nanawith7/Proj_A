@@ -15,8 +15,8 @@
 
 <div id="center">
   <div id="preview-section">
-    <div class="preview-box"><h4>Collapsed (120x80)</h4><svg id="prev-collapsed"></svg></div>
-    <div class="preview-box"><h4>Expanded (380x280)</h4><svg id="prev-expanded"></svg></div>
+    <div class="preview-box"><h4>Collapsed</h4><svg id="prev-collapsed"></svg></div>
+    <div class="preview-box"><h4>Expanded</h4><svg id="prev-expanded"></svg></div>
   </div>
   <div id="bottom">
     <button onclick="copyJSON()">Copy JSON</button>
@@ -26,74 +26,47 @@
 </div>
 
 <div id="right">
-  <h3>Shape &amp; Style</h3>
-  <label>Shape</label>
+  <h3>Shape</h3>
   <select id="nv-shape" onchange="updatePreview()"><option>rect</option><option>round</option><option>circle</option></select>
-  <div class="row">
-    <label>rx <input type="number" id="nv-rx" value="4" min="0" oninput="updatePreview()"></label>
-    <label>strokeWidth <input type="number" id="nv-sw" value="1" step="0.5" oninput="updatePreview()"></label>
-  </div>
+  <label>rx <input type="number" id="nv-rx" value="4" min="0" oninput="updatePreview()"></label>
+  <label>strokeWidth <input type="number" id="nv-sw" value="1" step="0.5" oninput="updatePreview()"></label>
   <label>Stroke <input type="text" id="nv-stroke" value="#fff6" oninput="updatePreview()"></label>
   <label>fontSize <input type="number" id="nv-fs" value="12" min="8" max="24" oninput="updatePreview()"></label>
 
   <h3>Title</h3>
-  <div class="row">
-    <label>titleY <select id="nv-ty" onchange="updatePreview()"><option>center</option><option>top</option></select></label>
-    <label>titleWrap <input type="checkbox" id="nv-tw" onchange="updatePreview()"></label>
-  </div>
-  <div class="row">
-    <label>titlePadX <input type="number" id="nv-tpx" value="10" min="0" oninput="updatePreview()"></label>
-    <label>titlePadY <input type="number" id="nv-tpy" value="10" min="0" oninput="updatePreview()"></label>
-  </div>
+  <select id="nv-ty" onchange="updatePreview()"><option>center</option><option>top</option></select>
+  <label>titleWrap <input type="checkbox" id="nv-tw" onchange="updatePreview()"></label>
+  <label>titlePadX <input type="number" id="nv-tpx" value="10" min="0" oninput="updatePreview()"></label>
+  <label>titlePadY <input type="number" id="nv-tpy" value="10" min="0" oninput="updatePreview()"></label>
 
   <h3>Opacity</h3>
-  <div class="row">
-    <label>collapsed <input type="range" id="nv-cfop" value="1" min="0" max="1" step="0.05" oninput="updatePreview()"></label>
-    <label>expanded <input type="range" id="nv-efop" value="1" min="0" max="1" step="0.05" oninput="updatePreview()"></label>
-  </div>
-  <label>Background opacity <input type="range" id="nv-bgop" value="0.15" min="0" max="1" step="0.05" oninput="updatePreview()"></label>
-  <label>Background image <input type="text" id="nv-bg" placeholder="char_bg.png" oninput="updatePreview()"></label>
+  <label>collapsed <input type="range" id="nv-cfop" value="1" min="0" max="1" step="0.05" oninput="updatePreview()"></label>
+  <label>expanded <input type="range" id="nv-efop" value="1" min="0" max="1" step="0.05" oninput="updatePreview()"></label>
+  <label>bgOpacity <input type="range" id="nv-bgop" value="0.15" min="0" max="1" step="0.05" oninput="updatePreview()"></label>
+  <label>BG Image <input type="text" id="nv-bg" placeholder="char_bg.png" oninput="updatePreview()"></label>
   <label>Load preview BG <input type="file" id="bg-file" accept="image/*" onchange="loadBGFile(this)"></label>
-  <input type="text" id="bg-url" placeholder="or paste image URL" onchange="loadBGURL(this.value)" style="margin-top:2px;font-size:10px">
 
-  <h3>Expand Size</h3>
-  <div class="row">
-    <label>minW <input type="number" id="nv-ew" value="300" oninput="updatePreview()"></label>
-    <label>minH <input type="number" id="nv-eh" value="200" oninput="updatePreview()"></label>
-  </div>
+  <h3>Expand</h3>
+  <label>minW <input type="number" id="nv-ew" value="300" oninput="updatePreview()"></label>
+  <label>minH <input type="number" id="nv-eh" value="200" oninput="updatePreview()"></label>
 
-  <h3>Content Padding</h3>
-  <div class="row">
-    <label>padX <input type="number" id="nv-cpx" value="10" min="0" oninput="updatePreview()"></label>
-    <label>padY <input type="number" id="nv-cpy" value="10" min="0" oninput="updatePreview()"></label>
-  </div>
+  <h3>Padding</h3>
+  <label>contentPadX <input type="number" id="nv-cpx" value="10" min="0" oninput="updatePreview()"></label>
+  <label>contentPadY <input type="number" id="nv-cpy" value="10" min="0" oninput="updatePreview()"></label>
 
-  <h3>Title & Body</h3>
-  <div class="row">
-    <label>tColor <input type="text" id="nv-tc" value="#e94560" oninput="updatePreview()"></label>
-    <label>bColor <input type="text" id="nv-bc" value="#ddd" oninput="updatePreview()"></label>
-  </div>
-  <div class="row">
-    <label>Title X <input type="number" id="nv-tdx" value="" placeholder="auto" oninput="_titlePos.x=this.value;updatePreview()"></label>
-    <label>Title Y <input type="number" id="nv-tdy" value="" placeholder="auto" oninput="_titlePos.y=this.value;updatePreview()"></label>
-  <div class="row">
-    <label>Title X <input type="number" id="nv-tdx" value="" placeholder="auto" oninput="_titlePos.x=this.value;updatePreview()"></label>
-    <label>Title Y <input type="number" id="nv-tdy" value="" placeholder="auto" oninput="_titlePos.y=this.value;updatePreview()"></label>
-  </div>
-  <div class="row">
-    <label>Body X <input type="number" id="nv-bdx" value="" placeholder="auto" oninput="_bodyPos.x=this.value;updatePreview()"></label>
-    <label>Body Y <input type="number" id="nv-bdy" value="" placeholder="auto" oninput="_bodyPos.y=this.value;updatePreview()"></label>
-  </div>
+  <h3>Position &amp; Color</h3>
+  <label>titleColor <input type="text" id="nv-tc" value="#e94560" oninput="updatePreview()"></label>
+  <label>bodyColor <input type="text" id="nv-bc" value="#ddd" oninput="updatePreview()"></label>
+  <label>Title X <input type="text" id="nv-tdx" value="" placeholder="auto" oninput="_titlePos.x=this.value;updatePreview()"></label>
+  <label>Title Y <input type="text" id="nv-tdy" value="" placeholder="auto" oninput="_titlePos.y=this.value;updatePreview()"></label>
+  <label>Body X <input type="text" id="nv-bdx" value="" placeholder="auto" oninput="_bodyPos.x=this.value;updatePreview()"></label>
+  <label>Body Y <input type="text" id="nv-bdy" value="" placeholder="auto" oninput="_bodyPos.y=this.value;updatePreview()"></label>
 
   <h3>Icon</h3>
-  <div class="row">
-    <label>anchorX <select id="nv-iax" onchange="updatePreview()"><option>center</option><option>left</option><option>right</option></select></label>
-    <label>anchorY <select id="nv-iay" onchange="updatePreview()"><option>center</option><option>top</option><option>bottom</option></select></label>
-  </div>
-  <div class="row">
-    <label>padX <input type="number" id="nv-ipx" value="0" oninput="updatePreview()"></label>
-    <label>padY <input type="number" id="nv-ipy" value="0" oninput="updatePreview()"></label>
-  </div>
+  <select id="nv-iax" onchange="updatePreview()"><option>center</option><option>left</option><option>right</option></select>
+  <select id="nv-iay" onchange="updatePreview()"><option>center</option><option>top</option><option>bottom</option></select>
+  <label>iconPadX <input type="number" id="nv-ipx" value="0" oninput="updatePreview()"></label>
+  <label>iconPadY <input type="number" id="nv-ipy" value="0" oninput="updatePreview()"></label>
 
   <h3>Properties</h3>
   <div id="props-editor"></div>
