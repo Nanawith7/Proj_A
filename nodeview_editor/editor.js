@@ -267,17 +267,18 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
     tt.setAttribute('fill','#e94560');tt.setAttribute('font-size','13');tt.setAttribute('font-weight','bold');
     tt.textContent='Title';g.appendChild(tt);
 
-    // Body marker (draggable)
-    const cy0=titleY+16;
+    // Body marker (draggable, independent of title)
+    const by=nv.layout?.bodyPosition?.y||(lp.contentY+12);
+    const bx=nv.layout?.bodyPosition?.x||lp.contentX;
     const bmk=document.createElementNS(SVGNS,'rect');
-    bmk.setAttribute('x',bodyX-4);bmk.setAttribute('y',cy0-4);
+    bmk.setAttribute('x',bx-4);bmk.setAttribute('y',by-4);
     bmk.setAttribute('width',8);bmk.setAttribute('height',8);
     bmk.setAttribute('fill','#4CAF50');bmk.setAttribute('rx','2');
     bmk.setAttribute('cursor','grab');
     bmk.onmousedown=e=>{e.stopPropagation();e.preventDefault();dragMode='body';dragIdx='prev-expanded';};
     g.appendChild(bmk);
     const bt=document.createElementNS(SVGNS,'text');
-    bt.setAttribute('x',bodyX+8);bt.setAttribute('y',cy0+4);
+    bt.setAttribute('x',bx+8);bt.setAttribute('y',by+4);
     bt.setAttribute('fill','#aaa');bt.setAttribute('font-size','9');
     bt.textContent='Body text ...';g.appendChild(bt);
 
