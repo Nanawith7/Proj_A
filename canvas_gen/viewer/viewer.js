@@ -222,10 +222,15 @@ function toggleExpand(node, g, mainG) {
   // Compute expand size from measured content
   const minW=nv.layout?.expandMinW ?? 300;
   const minH=nv.layout?.expandMinH ?? 200;
-  const isCircle=nv.shape==='circle';
-  let expW=Math.max(minW,maxLineW+cpX*2+16);
-  let expH=Math.max(minH,lineH+cpY*2+16);
-  if(isCircle){ const d=Math.max(expW,expH); expW=expH=d; }
+  const neededW=maxLineW+cpX*2+16;
+  const neededH=lineH+cpY*2+16;
+  let expW=Math.max(minW,neededW);
+  let expH=Math.max(minH,neededH);
+  if(nv.shape==='circle'){
+    // Pill: ensure diameter >= max content need so text fits at widest point
+    const d=Math.max(expW,expH,neededW,neededH);
+    expW=Math.max(expW,d); expH=Math.max(expH,d);
+  }
 
   const expLP=layoutParams(nv,expW,expH);
   const bodyPadX=expLP.contentX;
