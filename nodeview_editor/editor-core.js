@@ -75,8 +75,8 @@ function buildNV(){
   if(getNum('nv-cpx')!==10)layout.contentPadX=getNum('nv-cpx');if(getNum('nv-cpy')!==10)layout.contentPadY=getNum('nv-cpy');
   function getRaw(id){return document.getElementById(id)?.value||'';}
   const bdx=getRaw('nv-bdx'),bdy=getRaw('nv-bdy'),tdx=getRaw('nv-tdx'),tdy=getRaw('nv-tdy');
-  if(bdx)layout.bodyPosition={};if(bdx)layout.bodyPosition.x=bdx;if(bdy)layout.bodyPosition.y=bdy;
-  if(tdx)layout.titlePosition={};if(tdx)layout.titlePosition.x=tdx;if(tdy)layout.titlePosition.y=tdy;
+  if(bdx||bdy){layout.bodyPosition={};if(bdx)layout.bodyPosition.x=bdx;if(bdy)layout.bodyPosition.y=bdy;}
+  if(tdx||tdy){layout.titlePosition={};if(tdx)layout.titlePosition.x=tdx;if(tdy)layout.titlePosition.y=tdy;}
   if(getVal('nv-iax')!=='center')layout.iconAnchorX=getVal('nv-iax');if(getVal('nv-iay')!=='center')layout.iconAnchorY=getVal('nv-iay');
   if(getNum('nv-ipx'))layout.iconPadX=getNum('nv-ipx');if(getNum('nv-ipy'))layout.iconPadY=getNum('nv-ipy');
   if(getVal('nv-eiax'))layout.expandedIconAnchorX=getVal('nv-eiax');if(getVal('nv-eiay'))layout.expandedIconAnchorY=getVal('nv-eiay');
