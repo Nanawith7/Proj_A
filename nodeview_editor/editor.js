@@ -233,8 +233,9 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
     const startY=nv.layout?.bodyPosition?.y||(lp.contentY+12);
     propRows.forEach((pr,i)=>{
       if(!pr.key)return;
-      const y=pr.py?parseInt(pr.py):startY+i*22;
-      const x=pr.px?parseInt(pr.px):lp.contentX;
+      const pctX=String(pr.px||'').endsWith('%')?parseFloat(pr.px)/100*w:parseInt(pr.px)||lp.contentX;
+      const pctY=String(pr.py||'').endsWith('%')?parseFloat(pr.py)/100*h:(parseInt(pr.py)||startY+i*22);
+      const x=pctX, y=pctY;
 
       // Draggable marker at absolute position
       const marker=document.createElementNS(SVGNS,'rect');
@@ -313,9 +314,11 @@ window.addEventListener('mousemove',e=>{
   if(dragPI<0)return;
   const svg=document.getElementById(dragSvgId);
   if(!svg)return;
-  const rect=svg.getBoundingClientRect();
-  const pctX=((e.clientX-rect.left)/rect.width*100).toFixed(1);
-  const pctY=((e.clientY-rect.top)/rect.height*100).toFixed(1);
+  const vb=svg.viewBox.baseVal;
+  const r=svg.getBoundingClientRect();
+  const sx=vb.width/r.width, sy=vb.height/r.height;
+  const pctX=Math.max(0,Math.min(100,(e.clientX-r.left)*sx/vb.width*100)).toFixed(1);
+  const pctY=Math.max(0,Math.min(100,(e.clientY-r.top)*sy/vb.height*100)).toFixed(1);
   propRows[dragPI].px=pctX+'%';
   propRows[dragPI].py=pctY+'%';
   renderProps();update();
