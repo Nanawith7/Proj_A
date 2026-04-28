@@ -84,19 +84,21 @@ function render() {
     if(nv.titleWrap) {
       const isCircle=nv.shape==='circle';
       const diameter=isCircle?Math.min(nw,nh):nw;
-      const shapePad=isCircle?Math.floor((nw-diameter)/2+tpad):tpad;
-      const maxW=diameter-shapePad*2;
+      const shapePadX=isCircle?Math.floor((nw-diameter)/2+tpad):tpad;
+      const shapePadY=isCircle?Math.floor((nh-diameter)/2+tpad):tpad;
+      const maxW=diameter-shapePadX*2;
+      const maxH=diameter-shapePadY*2;
+      const startY=ny+shapePadY+fs;
       let pos=0,line=0;
-      while(pos<title.length){
+      while(pos<title.length&&(line+1)*(fs+2)<=maxH){
         let len=1;
         while(pos+len<=title.length&&measureText(title.slice(pos,pos+len),fs,'sans-serif')<maxW)len++;
         if(len===1&&pos+1<=title.length)len=2;
         const t2=document.createElementNS(svgNS,'text');t2.setAttribute('class','node-title');
         t2.setAttribute('font-size',fs);if(nv.boldTitle)t2.setAttribute('font-weight','bold');
         t2.setAttribute('text-anchor','middle');
-        const cx=nx+shapePad+maxW/2;
-        t2.setAttribute('x',cx);
-        t2.setAttribute('y',ny+(isCircle?diameter/2+fs/3:tpad+fs)+line*(fs+2));
+        t2.setAttribute('x',nx+shapePadX+maxW/2);
+        t2.setAttribute('y',startY+line*(fs+2));
         t2.setAttribute('fill','#fff');t2.textContent=title.slice(pos,pos+len-1);
         g.appendChild(t2);pos+=len-1;line++;
       }
