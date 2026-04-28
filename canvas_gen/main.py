@@ -50,10 +50,25 @@ def _parse_sort_by(raw: str) -> Any:
 
 
 def _parse_conditions(raw: str) -> dict[str, Any] | None:
-    """Parse a JSON dict string like '{"type":"character"}'."""
+    """Parse filter/exclude conditions.
+
+    Accepts two formats:
+      1. JSON dict:    '{"type":"character","tags":"main"}'
+      2. Key=value:    'type=character,tags=main'
+    """
     if not raw:
         return None
-    return json.loads(raw.strip())
+    raw = raw.strip()
+    if raw.startswith("{"):
+        return json.loads(raw)
+    # key=value,key=value format
+    result: dict[str, Any] = {}
+    for pair in raw.split(","):
+        pair = pair.strip()
+        if "=" in pair:
+            key, _, val = pair.partition("=")
+            result[key.strip()] = val.strip().strip("\"'")
+    return result if result else None
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
@@ -90,11 +105,11 @@ Example:
     )
     p.add_argument(
         "--filter", type=str, default=None,
-        help='JSON dict of AND conditions: \'{"type":"character","tags":"main"}\'.',
+        help='Filter conditions (JSON or key=value): \'{"type":"character"}\' or \'type=character,tags=main\'.',
     )
     p.add_argument(
         "--exclude", type=str, default=None,
-        help='JSON dict of AND exclusion conditions: \'{"title":"draft"}\'.',
+        help='Exclusion conditions (JSON or key=value): \'{"title":"draft"}\' or \'title=draft\'.',
     )
     p.add_argument(
         "--sort-by", type=str, default=None,

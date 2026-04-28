@@ -112,7 +112,11 @@ def _collect_container_keys(
     nodes: list[NoteNode],
     x_axis_key: str,
 ) -> list[str]:
-    """Collect unique, sorted x_axis_key values from nodes."""
+    """Collect unique, sorted x_axis_key values from nodes.
+
+    Attempts numeric sorting (integer or float) before falling back
+    to lexicographic string sort.
+    """
     seen: set[str] = set()
     for node in nodes:
         val = node.properties.get(x_axis_key)
@@ -122,7 +126,19 @@ def _collect_container_keys(
                     seen.add(str(v))
             else:
                 seen.add(str(val))
-    return sorted(seen)
+
+    keys = list(seen)
+
+    # Attempt numeric sort
+    def _sort_key(k: str):
+        try:
+            if "." in k:
+                return (0, float(k))
+            return (0, int(k))
+        except (ValueError, TypeError):
+            return (1, k)
+
+    return sorted(keys, key=_sort_key)
 
 
 def _build_containers(

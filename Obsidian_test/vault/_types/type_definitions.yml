@@ -1,0 +1,15 @@
+# Type definition file for Canvas layout
+# lining: nodes per subrow (1 = no splitting, all in one row)
+# centering: horizontal centering within the row (ignored when x_axis_key is set)
+character:
+  lining: 3
+  centering: false
+scenario:
+  lining: 1
+  centering: false
+event:
+  lining: 2
+  centering: false
+organization:
+  lining: 1
+  centering: true
