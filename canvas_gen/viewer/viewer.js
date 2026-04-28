@@ -378,7 +378,10 @@ function toggleExpand(node, g, mainG) {
       if(ln.pos)cy=savedCY; // restore flow after positioned pill
       return;
     }
-    let fs2=ln.t==='h'?14:10,fill=ln.t==='h'?'#e94560':ln.t==='q'?'#aaa':'#ddd';
+    let fs2=ln.t==='h'?14:10;
+    let fill=(nv.layout?.titleColor||'#e94560');
+    if(ln.t==='q')fill=(nv.layout?.quoteColor||'#aaa');
+    else if(ln.t==='p')fill=(nv.layout?.bodyColor||'#ddd');
     if(ln.text){
       let txt=ln.text;
       if(mode==='wrap'){

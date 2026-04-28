@@ -36,6 +36,7 @@ function applyToForm(nv){
   setVal('nv-bgop',l.backgroundOpacity??0.15);setVal('nv-bg',nv.background||'');
   setVal('nv-ew',l.expandMinW??300);setVal('nv-eh',l.expandMinH??200);
   setVal('nv-cpx',l.contentPadX??10);setVal('nv-cpy',l.contentPadY??10);
+  setVal('nv-tc',l.titleColor||'#e94560');setVal('nv-bc',l.bodyColor||'#ddd');
   _titlePos={x:l.titlePosition?.x??'',y:l.titlePosition?.y??''};
   _bodyPos={x:l.bodyPosition?.x??'',y:l.bodyPosition?.y??''};
   setVal('nv-tdx',_titlePos.x);setVal('nv-tdy',_titlePos.y);
@@ -76,6 +77,8 @@ function buildNV(){
   if(getNum('nv-bgop')!==0.15)layout.backgroundOpacity=getNum('nv-bgop');
   if(getNum('nv-ew')!==300)layout.expandMinW=getNum('nv-ew');if(getNum('nv-eh')!==200)layout.expandMinH=getNum('nv-eh');
   if(getNum('nv-cpx')!==10)layout.contentPadX=getNum('nv-cpx');if(getNum('nv-cpy')!==10)layout.contentPadY=getNum('nv-cpy');
+  const tc=getVal('nv-tc');if(tc!=='#e94560')layout.titleColor=tc;
+  const bc=getVal('nv-bc');if(bc!=='#ddd')layout.bodyColor=bc;
   if(_titlePos.x||_titlePos.y){layout.titlePosition={};if(_titlePos.x)layout.titlePosition.x=_titlePos.x;if(_titlePos.y)layout.titlePosition.y=_titlePos.y;}
   if(_bodyPos.x||_bodyPos.y){layout.bodyPosition={};if(_bodyPos.x)layout.bodyPosition.x=_bodyPos.x;if(_bodyPos.y)layout.bodyPosition.y=_bodyPos.y;}
   if(getVal('nv-iax')!=='center')layout.iconAnchorX=getVal('nv-iax');if(getVal('nv-iay')!=='center')layout.iconAnchorY=getVal('nv-iay');
