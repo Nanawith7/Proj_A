@@ -16,7 +16,7 @@ from .models import EdgeData, PositionedNode
 
 def _make_node_object(node: PositionedNode, node_id: str) -> dict[str, Any]:
     """Convert a PositionedNode into a JSON Canvas node object."""
-    return {
+    obj: dict[str, Any] = {
         "id": node_id,
         "type": "file",
         "file": str(node.file_path),
@@ -25,6 +25,9 @@ def _make_node_object(node: PositionedNode, node_id: str) -> dict[str, Any]:
         "width": int(node.width),
         "height": int(node.height),
     }
+    if node.color:
+        obj["color"] = node.color
+    return obj
 
 
 def _make_edge_object(
@@ -46,6 +49,8 @@ def _make_edge_object(
     }
     if edge.label:
         edge_obj["label"] = edge.label
+    if edge.color:
+        edge_obj["color"] = edge.color
     return edge_obj
 
 
@@ -67,13 +72,11 @@ def write_canvas(
     Returns:
         The absolute path of the written file.
     """
-    # Build stem -> canvas_node_id mapping
     stem_to_canvas_id: dict[str, str] = {}
     canvas_nodes: list[dict[str, Any]] = []
 
     for node in positioned_nodes:
         canvas_id = node.stem
-        # If duplicate stems exist (unlikely), append a suffix
         counter = 1
         while canvas_id in stem_to_canvas_id.values():
             canvas_id = f"{node.stem}_{counter}"
@@ -81,14 +84,12 @@ def write_canvas(
         stem_to_canvas_id[node.stem] = canvas_id
         canvas_nodes.append(_make_node_object(node, canvas_id))
 
-    # Build edge objects, filtering out those with unresolvable endpoints
     canvas_edges: list[dict[str, Any]] = []
     for edge in edges:
         edge_obj = _make_edge_object(edge, stem_to_canvas_id)
         if edge_obj is not None:
             canvas_edges.append(edge_obj)
 
-    # Handle edge id dedup if needed
     seen_edge_ids: set[str] = set()
     deduped_edges: list[dict[str, Any]] = []
     for e in canvas_edges:

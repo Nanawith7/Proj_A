@@ -23,12 +23,21 @@ class NoteNode:
 
 
 @dataclass
+class LabelInfo:
+    """Display label and optional color for an edge key."""
+
+    label: str
+    color: str = ""
+
+
+@dataclass
 class EdgeData:
-    """Represents a directional edge between two nodes with a label."""
+    """Represents a directional edge between two nodes with a label and color."""
 
     from_node: str
     to_node: str
     label: str
+    color: str = ""
 
     @property
     def edge_key(self) -> tuple[str, str, str]:
@@ -37,10 +46,11 @@ class EdgeData:
 
 @dataclass
 class TypeDefinition:
-    """Layout rules for a single type."""
+    """Layout rules and visual style for a single type."""
 
     lining: int = 1
     centering: bool = False
+    color: str = ""
 
 
 @dataclass
@@ -68,7 +78,7 @@ class Container:
 
 @dataclass
 class PositionedNode:
-    """A NoteNode with computed canvas coordinates."""
+    """A NoteNode with computed canvas coordinates and visual style."""
 
     stem: str
     file_path: str
@@ -79,6 +89,7 @@ class PositionedNode:
     y: float
     width: float
     height: float
+    color: str = ""
 
     @property
     def node_id(self) -> str:

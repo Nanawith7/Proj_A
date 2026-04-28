@@ -73,6 +73,11 @@ def _get_centering(type_name: str, type_defs: dict[str, TypeDefinition]) -> bool
     return td.centering if td else False
 
 
+def _get_color(type_name: str, type_defs: dict[str, TypeDefinition]) -> str:
+    td = type_defs.get(type_name)
+    return td.color if td else ""
+
+
 def _effective_width(node_count: int, lining: int) -> int:
     """Compute the column width a type contributes to a container.
 
@@ -273,6 +278,7 @@ def _compute_container_layout(
                     if not sub_nodes:
                         continue
                     sub_y = y_base + sub_row * row_height
+                    node_color = _get_color(type_name, type_defs)
                     for col, node in enumerate(sub_nodes):
                         pos_x = c.start_x + col * column_width
                         result.append(PositionedNode(
@@ -285,6 +291,7 @@ def _compute_container_layout(
                             y=sub_y,
                             width=node_width,
                             height=node_height,
+                            color=node_color,
                         ))
 
         total_container_width = sum(c.width_columns for c in containers) * column_width
@@ -359,6 +366,7 @@ def _compute_grid_layout(
             else:
                 offset_x = 0.0
 
+            node_color = _get_color(type_name, type_defs)
             for col, node in enumerate(sub_nodes):
                 result.append(PositionedNode(
                     stem=node.stem,
@@ -370,6 +378,7 @@ def _compute_grid_layout(
                     y=sub_y,
                     width=node_width,
                     height=node_height,
+                    color=node_color,
                 ))
 
         y_cursor += subrows * row_height

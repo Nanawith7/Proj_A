@@ -1,13 +1,34 @@
-# Label mapping file for edge display names
-related: "関連"
-characters: "登場人物"
-affiliation: "所属"
-location: "舞台"
+# Label mapping file for edge display names and colors
+# Format: key: {label: "表示名", color: "#hex"}  or  key: "表示名"
+related:
+  label: "関連"
+  color: "#9E9E9E"
+characters:
+  label: "登場人物"
+  color: "#2196F3"
+affiliation:
+  label: "所属"
+  color: "#4CAF50"
+location:
+  label: "舞台"
+  color: "#795548"
 tags: "タグ"
 aliases: "別名"
-ally: "味方"
-rival: "敵対"
-likes: "好意"
-dislikes: "嫌悪"
-mentor: "師弟"
-family: "家族"
+ally:
+  label: "味方"
+  color: "#4CAF50"
+rival:
+  label: "敵対"
+  color: "#F44336"
+likes:
+  label: "好意"
+  color: "#E91E63"
+dislikes:
+  label: "嫌悪"
+  color: "#9C27B0"
+mentor:
+  label: "師弟"
+  color: "#FF9800"
+family:
+  label: "家族"
+  color: "#00BCD4"

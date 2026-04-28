@@ -7,20 +7,20 @@ no edge is generated for that link — the canvas remains self-contained.
 Edges are created per unique (source, target, key_name) tuple.
 Duplicate links from the same key to the same target are collapsed.
 Links from different keys to the same target produce separate edges.
-Labels are transformed via an external label mapping file.
+Labels and colors are transformed via an external label mapping file.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from .models import EdgeData, NoteNode, RESERVED_KEYS
+from .models import EdgeData, LabelInfo, NoteNode, RESERVED_KEYS
 
 
 def generate_edges(
     canvas_nodes: list[NoteNode],
     vault_index: dict[str, NoteNode],
-    label_map: dict[str, str],
+    label_map: dict[str, LabelInfo],
     reserved_keys: set[str] | None = None,
 ) -> list[EdgeData]:
     """Generate edge objects from canvas nodes' wiki links.
@@ -35,9 +35,8 @@ def generate_edges(
     Args:
         canvas_nodes: The nodes currently in the canvas.
         vault_index: Full vault node index (stem -> NoteNode).
-        label_map: Mapping from property key to display label.
+        label_map: Mapping from property key to LabelInfo.
         reserved_keys: Property keys excluded from edge generation.
-                       Defaults to {"type", "title"}.
 
     Returns:
         A list of deduplicated EdgeData objects.
@@ -59,13 +58,16 @@ def generate_edges(
                 if target_stem not in canvas_stems:
                     continue
 
-                label = label_map.get(key, key)
+                info = label_map.get(key)
+                label = info.label if info else key
+                color = info.color if info else ""
                 edge_key = (node.stem, target_stem, label)
                 if edge_key not in edge_index:
                     edge_index[edge_key] = EdgeData(
                         from_node=node.stem,
                         to_node=target_stem,
                         label=label,
+                        color=color,
                     )
 
     return list(edge_index.values())

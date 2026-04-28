@@ -11,10 +11,17 @@
             "id": "5de152c9fde8f149",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "グラフビュー"
+              "type": "canvas",
+              "state": {
+                "file": "timeline.canvas",
+                "viewState": {
+                  "x": 1950.5715386143404,
+                  "y": 1153.4061883380714,
+                  "zoom": -1.407235407511869
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "timeline"
             }
           }
         ]

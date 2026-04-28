@@ -12,7 +12,7 @@ research-date: ["2026-04-19"]
 
 ## 1. 概要
 
-Obsidian Vault内のMarkdownノートに埋め込まれた構造化メタデータを源泉とし、ユーザーが指定する動的パラメータに基づいてCanvasファイルを都度生成するシステムの技術仕様を示す。ノートは`type`、`tags`、`date`などのプロパティによって分類され、それらの値に応じてCanvas上のノード配置が決定される。生成プロセスは、データ抽出、フィルタリング、ソート、座標計算、JSONシリアライズの順に進行する。ソート順やレイアウトの細部は、別途定義された**type定義ファイル**によって動的に制御され、エッジの表示ラベルは**ラベルマッピングファイル**によって置換される。
+Obsidian Vault内のMarkdownノートに埋め込まれた構造化メタデータを源泉とし、ユーザーが指定する動的パラメータに基づいてCanvasファイルを都度生成するシステムの技術仕様を示す。ノートは`type`、`tags`、`date`などのプロパティによって分類され、それらの値に応じてCanvas上のノード配置が決定される。生成プロセスは、データ抽出、フィルタリング、ソート、座標計算、JSONシリアライズの順に進行する。ソート順やレイアウトの細部は、別途定義された**type定義ファイル**によって動的に制御され、エッジの表示ラベルと色は**ラベルマッピングファイル**によって置換される。ノードの背景色もtype定義ファイルから一括指定される。
 
 ```mermaid
 flowchart TD
@@ -103,17 +103,29 @@ tags:
 
 ### 2.4 ラベルマッピングファイル
 
-キー名からエッジ表示用ラベルへの変換は、**ラベルマッピングファイル**（例：`_config/label_mappings.yml`）によって行われる。このファイルはキーと表示ラベルのペアを列挙する単純なYAMLファイルである。
+キー名からエッジ表示用ラベルと色への変換は、**ラベルマッピングファイル**（例：`_config/label_mappings.yml`）によって行われる。各エントリは以下の二形式のいずれかで記述できる。
 
 ```yaml
 # _config/label_mappings.yml
+# 形式A: 文字列のみ（ラベルのみ、色なし）
 date: "日付"
-related: "関連"
-characters: "登場人物"
 tags: "タグ"
+
+# 形式B: ネストdict（ラベル + エッジ色）
+related:
+  label: "関連"
+  color: "#9E9E9E"
+ally:
+  label: "味方"
+  color: "#4CAF50"
+rival:
+  label: "敵対"
+  color: "#F44336"
 ```
 
-マッピングに存在しないキーに対しては、キー名自体（例：`"year"`）がラベルとして用いられる。この仕組みにより、ユーザーは自由にエッジのラベルをローカライズしたり、より意味的に明示的な表現に置き換えたりできる。
+`color` にはCSS互換の16進数カラーコード（例：`"#F44336"`）またはJSON Canvas仕様のプリセット番号（`"1"` 〜 `"6"`）を指定できる。省略時はエッジに色が付与されない。
+
+マッピングに存在しないキーに対しては、キー名自体がラベルとして用いられる（色なし）。この仕組みにより、ユーザーはエッジのラベルをローカライズしつつ、関係種別ごとに色分けすることが可能となる。
 
 ### 2.5 type定義ファイル
 
@@ -121,20 +133,25 @@ Canvas上のレイアウト規則（サブ行分割、センタリングなど�
 
 `lining` はそのtypeに割り当てられる**横列（サブ行）の数**を指定する。ノードは column-major 方式で各サブ行に振り分けられる。すなわち、全ノードをソート順に並べたとき、1番目はサブ行0、2番目はサブ行1、…、L番目はサブ行 L-1、L+1番目は再びサブ行0、という具合に巡回配置される。
 
+`color` はそのtypeに属する全ノードの背景色を指定する。CSS互換の16進数カラーコード（`"#2196F3"`）またはJSON Canvas仕様のプリセット番号（`"1"` 〜 `"6"`）で指定する。
+
 ```yaml
 # _types/type_definitions.yml
 character:
-  lining: 3       # サブ行分割数（デフォルト1）
-  centering: true # 水平方向センタリング（デフォルトfalse）
+  lining: 3
+  centering: true
+  color: "#2196F3"
 scenario:
   lining: 1
   centering: false
+  color: "#FF9800"
 event:
   lining: 2
+  color: "#E91E63"
   # centering未指定はfalse
 ```
 
-定義されていないtypeが出現した場合、`lining: 1`, `centering: false` のデフォルト値が適用される。この機構により、新たなtypeの追加時にも、type定義ファイルにエントリを追加するだけでレイアウトが制御され、ノート側の修正は一切不要である。
+定義されていないtypeが出現した場合、`lining: 1`, `centering: false`, `color: ""` のデフォルト値が適用される。この機構により、新たなtypeの追加時にも、type定義ファイルにエントリを追加するだけでレイアウトと配色が制御され、ノート側の修正は一切不要である。
 
 ## 3. データ抽出層
 
@@ -199,7 +216,7 @@ STORY-ROW | 1      | 2      | 3      || 4      | 5      | 6      || 7      | (�
 
 ### 4.2 JSON Canvas仕様への変換
 
-生成されたノードリストとエッジリストは、JSON Canvas仕様（バージョン1.0）に準拠したオブジェクトに変換され、`.canvas`拡張子を持つファイルとして出力される。エッジオブジェクトには、マッピング後の`label`プロパティが含まれる。
+生成されたノードリストとエッジリストは、JSON Canvas仕様（バージョン1.0）に準拠したオブジェクトに変換され、`.canvas`拡張子を持つファイルとして出力される。ノードにはtype定義から取得した`color`が、エッジにはラベルマッピングから取得した`label`および`color`が付与される。
 
 ```json
 {
@@ -207,20 +224,22 @@ STORY-ROW | 1      | 2      | 3      || 4      | 5      | 6      || 7      | (�
     {
       "id": "node1",
       "type": "file",
-      "file": "主人公.md",
+      "file": "character/主人公.md",
       "x": 0,
       "y": 0,
       "width": 300,
-      "height": 200
+      "height": 200,
+      "color": "#2196F3"
     },
     {
       "id": "node2",
       "type": "file",
-      "file": "Scenario A.md",
-      "x": 300,
-      "y": 0,
+      "file": "character/賢者.md",
+      "x": 0,
+      "y": 250,
       "width": 300,
-      "height": 200
+      "height": 200,
+      "color": "#2196F3"
     }
   ],
   "edges": [
@@ -228,7 +247,8 @@ STORY-ROW | 1      | 2      | 3      || 4      | 5      | 6      || 7      | (�
       "id": "edge1",
       "fromNode": "node1",
       "toNode": "node2",
-      "label": "関連"
+      "label": "師弟",
+      "color": "#FF9800"
     }
   ]
 }
@@ -279,6 +299,10 @@ STORY-ROW | 1      | 2      | 3      || 4      | 5      | 6      || 7      | (�
 
 ノート（Markdown）、type定義ファイル（YAML）、ラベルマッピングファイル（YAML）、生成スクリプトはいずれもテキストベースであり、Git等のバージョン管理で完全に追跡可能である。Canvasファイルは生成物として扱い、リポジトリから除外できる。
 
+### 5.7 配色の外部制御
+
+ノードの背景色はtype定義ファイルの `color` フィールドでtype単位に一括指定される。同一typeの全ノードが同一色で描画されるため、Canvas上でのtype識別が直感的になる。エッジの色はラベルマッピングファイルの `color` フィールドで関係種別ごとに指定され、たとえば「味方」を緑、「敵対」を赤、というように関係の性質を色で表現できる。いずれも16進数カラーコードまたはプリセット番号で指定し、ノート側の修正は一切不要である。
+
 ## 6. 実装例
 
 以下はPythonによる生成スクリプトの擬似コードである。type定義の読み込み、ラベルマッピングの適用、キー別のエッジ管理が中心となる。
@@ -304,30 +328,34 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
         else:
             nodes = sort_nodes_multi_key(nodes, sort_by)
     
-    # 4. エッジ生成（canvas内ノード間のみ、キー別、ラベル付き）
+    # 4. エッジ生成（canvas内ノード間のみ、キー別、ラベル+色付き）
     reserved_keys = {"type", "title"}
-    canvas_stems = {n.id for n in nodes}  # Canvasノード群の茎集合
-    edge_dict = {}  # key: (source_id, target, key_name)
+    canvas_stems = {n.id for n in nodes}
+    edge_dict = {}
     for node in nodes:
         for key, value in node.metadata.items():
             if key in reserved_keys:
                 continue
             links = extract_wikilinks(value)
             for target in links:
-                if target not in canvas_stems:  # Canvas内に存在する場合のみエッジ化
+                if target not in canvas_stems:
                     continue
                 edge_key = (node.id, target, key)
                 if edge_key not in edge_dict:
+                    info = label_map.get(key, {})
                     edge_dict[edge_key] = {
                         "from": node.id,
                         "to": target,
-                        "label": label_map.get(key, key)
+                        "label": info.get("label", key),
+                        "color": info.get("color", ""),
                     }
     edges = list(edge_dict.values())
     
-    # 5. レイアウト計算 (type定義を参照, column-major分配)
+    # 5. レイアウト計算 (type定義を参照, column-major分配, 色付与)
     def get_lining(node_type):
         return type_defs.get(node_type, {}).get("lining", 1)
+    def get_color(node_type):
+        return type_defs.get(node_type, {}).get("color", "")
     def get_centering(node_type):
         return type_defs.get(node_type, {}).get("centering", False)
     
@@ -345,9 +373,11 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
                     sub_nodes = type_nodes[sub_row::lining]
                     sub_y = y_base + sub_row * row_height
                     node_x = container.start_x
+                    node_color = get_color(type_name)
                     for node in sub_nodes:
                         node.x = node_x
                         node.y = sub_y
+                        node.color = node_color
                         node_x += column_width
                         all_canvas_nodes.append(node)
     else:
@@ -357,6 +387,7 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
             lining = get_lining(type_name)
             y_base = type_y[type_name]
             max_cols = math.ceil(len(type_nodes) / lining)
+            node_color = get_color(type_name)
             for sub_row in range(lining):
                 sub_nodes = type_nodes[sub_row::lining]
                 if not sub_nodes:
@@ -369,6 +400,7 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
                 for node in sub_nodes:
                     node.x = x_pos
                     node.y = sub_y
+                    node.color = node_color
                     x_pos += column_width
                     all_canvas_nodes.append(node)
     
@@ -379,4 +411,4 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
 
 ## 7. 結論
 
-本システムは、Obsidian Vaultのノートに記述された構造化メタデータを源泉とし、type定義ファイルによる統一的なレイアウト制御と、柔軟なフィルタ・ソート機構、さらにラベルマッピングによるエッジの意味的明示を組み合わせることで、データの一貫性と表現の自由度を極限まで高めている。エッジはCanvasノード群の内部でのみ生成されるため、各Canvasは自己完結したビューとなる。ノートは純粋なデータと関係性のみを保持し、それらがどう視覚化されるかは外部の定義ファイルと動的パラメータに委ねられる。このアーキテクチャにより、複雑な知識ネットワークをあらゆる角度から直感的に俯瞰できるCanvasが、メンテナンス負荷なしに実現される。
+本システムは、Obsidian Vaultのノートに記述された構造化メタデータを源泉とし、type定義ファイルによる統一的なレイアウト制御と配色、柔軟なフィルタ・ソート機構、さらにラベルマッピングによるエッジの意味的明示と色分けを組み合わせることで、データの一貫性と表現の自由度を極限まで高めている。エッジはCanvasノード群の内部でのみ生成されるため、各Canvasは自己完結したビューとなる。ノートは純粋なデータと関係性のみを保持し、それらがどう視覚化されるかは外部の定義ファイルと動的パラメータに委ねられる。このアーキテクチャにより、複雑な知識ネットワークをあらゆる角度から直感的に俯瞰できるCanvasが、メンテナンス負荷なしに実現される。

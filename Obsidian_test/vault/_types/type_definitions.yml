@@ -1,15 +1,20 @@
 # Type definition file for Canvas layout
-# lining: nodes per subrow (1 = no splitting, all in one row)
-# centering: horizontal centering within the row (ignored when x_axis_key is set)
+# lining: number of subrows (column-major distribution)
+# centering: horizontal centering within the row
+# color: node background color (hex or preset number 1-6)
 character:
   lining: 3
   centering: false
+  color: "#2196F3"
 scenario:
   lining: 1
   centering: false
+  color: "#FF9800"
 event:
   lining: 2
   centering: false
+  color: "#E91E63"
 organization:
   lining: 1
   centering: true
+  color: "#4CAF50"
