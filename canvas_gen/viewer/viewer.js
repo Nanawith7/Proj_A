@@ -215,6 +215,12 @@ function applyNodeView(rect, node, expanded) {
 function updateTransform(g){g.setAttribute('transform',`translate(${panX},${panY}) scale(${zoom})`);}
 function updateZoomInfo(){let el=document.getElementById('zoom-info');if(!el){el=document.createElement('div');el.id='zoom-info';document.getElementById('graph').appendChild(el);}el.textContent=`${Math.round(zoom*100)}%`;}
 
+function resolvePos(raw, total){
+  if(raw===undefined||raw===null||raw==='')return -1;
+  if(typeof raw==='string'&&raw.endsWith('%'))return parseFloat(raw)/100*total;
+  return parseFloat(raw);
+}
+
 // ═══════ EXPAND ═══════
 function toggleExpand(node, g, mainG) {
   const nid=node.id,mode=document.getElementById('expand-mode')?.value||'wrap';
@@ -262,9 +268,17 @@ function toggleExpand(node, g, mainG) {
   let expW=Math.max(minW,neededW);
   let expH=Math.max(minH,neededH);
   if(nv.shape==='circle'){
-    // Pill: ensure diameter >= max content need so text fits at widest point
     const d=Math.max(expW,expH,neededW,neededH);
     expW=Math.max(expW,d); expH=Math.max(expH,d);
+  }else{
+    // Maintain original aspect ratio from collapsed node
+    const ow=node.width||200, oh=node.height||120;
+    if(ow>0&&oh>0){
+      const ratio=ow/oh;
+      if(expW/expH>ratio) expH=expW/ratio;
+      else expW=expH*ratio;
+      expW=Math.max(expW,neededW); expH=Math.max(expH,neededH);
+    }
   }
 
   const expLP=layoutParams(nv,expW,expH);
@@ -338,16 +352,20 @@ function toggleExpand(node, g, mainG) {
   const bodyPos=nv.layout?.bodyPosition;
   if(bodyPos)cy=ny+(bodyPos.y||bodyPadY+12);
   lines.forEach(ln=>{
-    // Absolute position override
+    // Absolute/percentage position override
     if(ln.pos){
-      cy=ny+(ln.pos.y||cy-ny);
+      const py=resolvePos(ln.pos.y,expH);
+      const px=resolvePos(ln.pos.x,expW);
+      if(py>=0)cy=ny+py;
     }
     if(ln.t==='br'){cy+=10;return;} if(ln.t==='hr'){cy+=4;return;} if(ln.t==='code')return;
     if(ln.t==='pill'){
-      const fs=9,padX=6,padY=3; let bx=ln.pos?nx+(ln.pos.x||bodyPadX):nx+bodyPadX;
+      const fs=9,padX=6,padY=3;
+      const posX=ln.pos?resolvePos(ln.pos.x,expW):-1;
+      let bx=posX>=0?nx+posX:nx+bodyPadX;
       ln.items.forEach(item=>{
         const tw=measureText(item,fs,'sans-serif')+padX*2;
-        if(!ln.pos&&bx+tw>nx+expW-8){bx=nx+bodyPadX;cy+=fs+padY*2+4;}
+        if(ln.pos&&posX<0&&bx+tw>nx+expW-8){bx=nx+bodyPadX;cy+=fs+padY*2+4;}
         const r=document.createElementNS(svgNS,'rect');r.setAttribute('x',bx);r.setAttribute('y',cy-fs-padY);
         r.setAttribute('width',tw);r.setAttribute('height',fs+padY*2);
         const rx=ln.shape==='diamond'?4:ln.shape==='round'?10:3;
@@ -365,11 +383,12 @@ function toggleExpand(node, g, mainG) {
       let txt=ln.text;
       if(mode==='wrap'){
         let pos=0;
-        const lx=ln.pos?nx+(ln.pos.x||bodyPadX):nx+bodyPadX;
+        const lx=ln.pos&&resolvePos(ln.pos.x,expW)>=0?nx+resolvePos(ln.pos.x,expW):nx+bodyPadX;
         while(pos<txt.length){if(cy>ny+expH-8)return;let len=1;while(pos+len<=txt.length&&measureText(txt.slice(pos,pos+len),fs,'sans-serif')<expW-16)len++;if(len===1&&pos+1<=txt.length)len=2;addBodyLine(g,svgNS,lx,cy,fill,fs,txt.slice(pos,pos+len-1));pos+=len-1;cy+=fs+4;}
       }else{
         if(cy>ny+expH-8)return;
-        addBodyLine(g,svgNS,ln.pos?nx+(ln.pos.x||bodyPadX):nx+bodyPadX,cy,fill,fs,txt);cy+=fs+4;
+        const lx2=ln.pos&&resolvePos(ln.pos.x,expW)>=0?nx+resolvePos(ln.pos.x,expW):nx+bodyPadX;
+        addBodyLine(g,svgNS,lx2,cy,fill,fs,txt);cy+=fs+4;
       }
     }
   });

@@ -303,7 +303,7 @@ function loadBGURL(url){
   img.src=url;
 }
 
-// ═══════ Drag property positions in preview ═══════
+// ═══════ Drag property positions in preview (percentage mode) ═══════
 let dragPI=-1,dragSvgId='';
 function startDragProp(e,pi,svgId){
   e.stopPropagation();e.preventDefault();
@@ -314,10 +314,10 @@ window.addEventListener('mousemove',e=>{
   const svg=document.getElementById(dragSvgId);
   if(!svg)return;
   const rect=svg.getBoundingClientRect();
-  const x=Math.round((e.clientX-rect.left)/(rect.width/380));
-  const y=Math.round((e.clientY-rect.top)/(rect.height/280));
-  propRows[dragPI].px=x>0?String(x):'';
-  propRows[dragPI].py=y>0?String(y):'';
+  const pctX=((e.clientX-rect.left)/rect.width*100).toFixed(1);
+  const pctY=((e.clientY-rect.top)/rect.height*100).toFixed(1);
+  propRows[dragPI].px=pctX+'%';
+  propRows[dragPI].py=pctY+'%';
   renderProps();update();
 });
 window.addEventListener('mouseup',()=>{dragPI=-1;});
