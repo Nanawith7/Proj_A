@@ -191,17 +191,41 @@ function toggleExpand(node, g, mainG) {
   const stem=nodeStem(node),v=VAULT[stem];if(!v)return;
   const type=nodeType(node),td=TYPEDEFS[type]||{},nv=NODEVIEWS[td.nodeview||'plain']||{shape:'rect',rx:4};
   const lines=buildBodyLines(v,nv);
-  const bodyPadX0=nv.layout?.contentPadX ?? 8;
-  const bodyPadY0=nv.layout?.contentPadY ?? 8;
+  const cpX=nv.layout?.contentPadX ?? 8;
+  const cpY=nv.layout?.contentPadY ?? 8;
 
-  let expW=420,expH=340;
-  if(nv.shape==='circle'){ expW=expH=380; }
-  if(mode==='stretch'){
-    let maxW=0,lineCount=0;
-    lines.forEach(l=>{if(l.t==='br'){lineCount++;return;} if(l.t==='hr'||l.t==='code')return; const fs=l.t==='h'?14:10; if(l.text){const w=measureText(l.text,fs,'sans-serif');if(w>maxW)maxW=w;lineCount++;}});
-    const sz=Math.max(expW,maxW+bodyPadX0*2+16);
-    expW=sz; expH=nv.shape==='circle'?sz:Math.max(expH,lineCount*16+bodyPadY0+40);
-  }
+  // Measure content to compute required size
+  let maxLineW=0, lineH=0;
+  lines.forEach(ln=>{
+    if(ln.t==='br'){lineH+=10;return;}
+    if(ln.t==='hr'){lineH+=4;return;}
+    if(ln.t==='code')return;
+    const fs=ln.t==='h'?14:ln.t==='pill'?9:10;
+    if(ln.t==='pill'){
+      let pillW=cpX; ln.items.forEach(item=>{pillW+=measureText(item,fs,'sans-serif')+18;});
+      if(pillW>maxLineW)maxLineW=pillW;
+      lineH+=fs+10;
+    }else if(ln.text){
+      if(mode==='wrap'){
+        let lc=Math.ceil(measureText(ln.text,fs,'sans-serif')/300);
+        if(lc<1)lc=1;
+        if(measureText(ln.text,fs,'sans-serif')>maxLineW)maxLineW=Math.min(measureText(ln.text,fs,'sans-serif'),600);
+        lineH+=lc*(fs+4);
+      }else{
+        const w=measureText(ln.text,fs,'sans-serif');
+        if(w>maxLineW)maxLineW=w;
+        lineH+=fs+4;
+      }
+    }
+  });
+
+  // Compute expand size from measured content
+  const minW=nv.layout?.expandMinW ?? 300;
+  const minH=nv.layout?.expandMinH ?? 200;
+  const isCircle=nv.shape==='circle';
+  let expW=Math.max(minW,maxLineW+cpX*2+16);
+  let expH=Math.max(minH,lineH+cpY*2+16);
+  if(isCircle){ const d=Math.max(expW,expH); expW=expH=d; }
 
   const expLP=layoutParams(nv,expW,expH);
   const bodyPadX=expLP.contentX;
