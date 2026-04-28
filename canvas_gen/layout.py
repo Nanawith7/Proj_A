@@ -207,10 +207,10 @@ def _assign_y_offsets(
     containers: list[Container],
     type_defs: dict[str, TypeDefinition],
     row_height: float,
-) -> dict[str, float]:
+) -> tuple[dict[str, float], float]:
     """Determine the Y base offset for each type row.
 
-    Returns a dict mapping type_name -> y_base.
+    Returns a tuple of (type_name -> y_base dict, total_y_height).
     """
     type_order: list[str] = list(OrderedDict.fromkeys(
         n.node_type for n in nodes
@@ -232,7 +232,7 @@ def _assign_y_offsets(
                 max_subrows = subrows_needed
         y_cursor += max(1, max_subrows) * row_height
 
-    return type_y
+    return type_y, y_cursor
 
 
 def _has_x_axis_value(node: NoteNode, x_axis_key: str) -> bool:
@@ -267,7 +267,9 @@ def _compute_container_layout(
         containers = _build_containers(container_nodes, x_axis_key, container_keys)
         _compute_container_widths(containers, type_defs)
         _compute_container_start_positions(containers, column_width)
-        type_y_offsets = _assign_y_offsets(container_nodes, containers, type_defs, row_height)
+        type_y_offsets, total_container_y = _assign_y_offsets(
+            container_nodes, containers, type_defs, row_height
+        )
 
         for c in containers:
             if c.width_columns == 0:
@@ -301,16 +303,19 @@ def _compute_container_layout(
         # Compute the X offset for fallback region
         total_container_width = sum(c.width_columns for c in containers) * column_width
         fallback_x_offset = total_container_width + column_width  # gap after containers
+        fallback_y_offset = total_container_y + row_height  # gap below container rows
     else:
         fallback_x_offset = 0.0
+        fallback_y_offset = 0.0
 
-    # Place fallback nodes using grid layout, shifted to the right
+    # Place fallback nodes using grid layout, shifted to the right/bottom
     if fallback_nodes:
         if container_nodes:
             print(f"[WARN] {len(fallback_nodes)} node(s) lack '{x_axis_key}' -- placed in uncategorized area.")
 
         fallback_positions = _compute_grid_layout(
-            fallback_nodes, type_defs, column_width, row_height, node_width, node_height
+            fallback_nodes, type_defs, column_width, row_height,
+            node_width, node_height, y_base=fallback_y_offset
         )
         for pn in fallback_positions:
             pn.x += fallback_x_offset
@@ -330,8 +335,13 @@ def _compute_grid_layout(
     row_height: float,
     node_width: float,
     node_height: float,
+    y_base: float = 0.0,
 ) -> list[PositionedNode]:
-    """Simple grid layout grouped by type, with lining and centering."""
+    """Simple grid layout grouped by type, with lining and centering.
+
+    Args:
+        y_base: Base Y offset (used when embedding grid below a container region).
+    """
     type_order: list[str] = list(OrderedDict.fromkeys(
         n.node_type for n in nodes
     ))
@@ -341,7 +351,7 @@ def _compute_grid_layout(
         nodes_by_type.setdefault(node.node_type, []).append(node)
 
     result: list[PositionedNode] = []
-    y_cursor = 0.0
+    y_cursor = y_base
 
     for type_name in type_order:
         type_nodes = nodes_by_type.get(type_name, [])

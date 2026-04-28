@@ -59,7 +59,7 @@
       "type": "file",
       "file": "主人公.md",
       "x": 2450,
-      "y": 0,
+      "y": 750,
       "width": 300,
       "height": 200
     },
@@ -68,7 +68,7 @@
       "type": "file",
       "file": "賢者.md",
       "x": 2800,
-      "y": 0,
+      "y": 750,
       "width": 300,
       "height": 200
     },
@@ -77,7 +77,7 @@
       "type": "file",
       "file": "魔王.md",
       "x": 3150,
-      "y": 0,
+      "y": 750,
       "width": 300,
       "height": 200
     },
@@ -86,7 +86,7 @@
       "type": "file",
       "file": "王国.md",
       "x": 2450,
-      "y": 250,
+      "y": 1000,
       "width": 300,
       "height": 200
     },
@@ -95,194 +95,194 @@
       "type": "file",
       "file": "魔族連合.md",
       "x": 2800,
-      "y": 250,
+      "y": 1000,
       "width": 300,
       "height": 200
     }
   ],
   "edges": [
     {
-      "id": "7937463d-7e38-414b-9c8d-93d98ba54da6",
+      "id": "73bb1e41-d03a-4bc5-9ca8-615b97238d2c",
       "fromNode": "王国建国",
       "toNode": "王国",
       "label": "舞台"
     },
     {
-      "id": "b6fd3a46-365c-4e9a-ac1d-44506b8accee",
+      "id": "cee204e6-0df8-49e6-a021-8c982c6215a2",
       "fromNode": "王国建国",
       "toNode": "冒険の始まり",
       "label": "関連"
     },
     {
-      "id": "38c3f286-448e-4e90-a6a3-e706f24f2432",
+      "id": "1b83363e-0242-4507-a492-e8b5923c2246",
       "fromNode": "冒険の始まり",
       "toNode": "主人公",
       "label": "登場人物"
     },
     {
-      "id": "91903acf-5732-4344-9bbf-a8661338c72e",
+      "id": "652b73a4-9d8c-4660-bcc8-c34dc2b03952",
       "fromNode": "冒険の始まり",
       "toNode": "王国建国",
       "label": "関連"
     },
     {
-      "id": "48f87327-c3dc-4fcf-8643-563adbc0e62d",
+      "id": "50f61ec0-2902-4f88-b055-80d21dcf83d5",
       "fromNode": "冒険の始まり",
       "toNode": "王国",
       "label": "関連"
     },
     {
-      "id": "ccfccbbb-9e89-4d39-a2b6-69e202553da6",
+      "id": "286d9e46-72b5-49da-a261-b70ef7ef015f",
       "fromNode": "賢者との出会い",
       "toNode": "主人公",
       "label": "登場人物"
     },
     {
-      "id": "e005e08e-6e1f-4a99-b1c5-f64b50572553",
+      "id": "afacda30-d7ce-4a15-afc8-29e695f3531b",
       "fromNode": "賢者との出会い",
       "toNode": "賢者",
       "label": "登場人物"
     },
     {
-      "id": "db77554b-1591-4919-a8d9-eb78a8fbe3ef",
+      "id": "43a7640a-c373-4897-8e70-477f877a2590",
       "fromNode": "賢者との出会い",
       "toNode": "王国",
       "label": "関連"
     },
     {
-      "id": "e049558a-cf80-4746-bbfc-a186322ba7ec",
+      "id": "40e686ce-0534-442d-a13e-6eef024c7e4e",
       "fromNode": "大戦争勃発",
       "toNode": "魔王",
       "label": "関連"
     },
     {
-      "id": "e3dbff3c-ec19-4418-9946-9a03f0196645",
+      "id": "4e38092c-ffce-4fd1-8312-99c9e6b25f69",
       "fromNode": "大戦争勃発",
       "toNode": "最終決戦",
       "label": "関連"
     },
     {
-      "id": "0eedee10-37ba-46bc-8e62-2ae42fe51c64",
+      "id": "5d8b4254-862d-4d41-a467-f838addb6ce9",
       "fromNode": "最終決戦",
       "toNode": "主人公",
       "label": "登場人物"
     },
     {
-      "id": "613678f7-432f-4719-83b2-be60587c725f",
+      "id": "67dc728b-3b4d-49bb-9bed-25336406c9f6",
       "fromNode": "最終決戦",
       "toNode": "賢者",
       "label": "登場人物"
     },
     {
-      "id": "879d6c69-7153-4d8d-b152-3fbd82a76fbf",
+      "id": "e411912a-49ea-468c-9113-09d2f351469f",
       "fromNode": "最終決戦",
       "toNode": "魔王",
       "label": "登場人物"
     },
     {
-      "id": "38390ee6-5cfc-44a2-8e52-cd631bec19f9",
+      "id": "b5f16ed7-8799-48b5-92c3-71410e532294",
       "fromNode": "最終決戦",
       "toNode": "大戦争勃発",
       "label": "関連"
     },
     {
-      "id": "a415c3ee-f16b-4a13-927f-6303483fd326",
+      "id": "76bde420-b268-4280-8148-f073483d7cb7",
       "fromNode": "最終決戦",
       "toNode": "王国",
       "label": "関連"
     },
     {
-      "id": "af9ff15b-3a14-4a9f-9296-9959ece601ff",
+      "id": "1dd5ef76-1962-41e4-b203-a7014d0e056d",
       "fromNode": "最終決戦",
       "toNode": "魔族連合",
       "label": "関連"
     },
     {
-      "id": "e9c541c0-2de3-4aa6-b32d-06ea3fcc69fa",
+      "id": "6784ccc0-09b9-4939-afa5-79a0aeb923f4",
       "fromNode": "平和条約締結",
       "toNode": "最終決戦",
       "label": "関連"
     },
     {
-      "id": "e0a8afa0-2454-4524-bf11-a3d0bc253563",
+      "id": "c33e7c0b-4639-4d6a-80da-64ef2ab3efd9",
       "fromNode": "平和条約締結",
       "toNode": "魔王",
       "label": "関連"
     },
     {
-      "id": "94183191-54f8-40d5-879b-039f4a853d32",
+      "id": "477a078c-acd0-47e1-8462-2c21aad0239f",
       "fromNode": "平和条約締結",
       "toNode": "王国",
       "label": "関連"
     },
     {
-      "id": "f0b6ac9d-5997-4d3f-8c00-8a0ddcfb9dbb",
+      "id": "3810a81c-af31-4bf2-8f74-7bf6033df842",
       "fromNode": "平和条約締結",
       "toNode": "魔族連合",
       "label": "関連"
     },
     {
-      "id": "569ed54b-e800-4b73-80b0-cd6065cbf9fa",
+      "id": "f1e0ecff-977c-4590-a8ef-65d05e93fb50",
       "fromNode": "主人公",
       "toNode": "王国",
       "label": "所属"
     },
     {
-      "id": "4b3c75b0-9a94-44dd-b264-4c88264d73aa",
+      "id": "e766837d-e4c7-414a-8551-592911c7de12",
       "fromNode": "主人公",
       "toNode": "冒険の始まり",
       "label": "関連"
     },
     {
-      "id": "baa3ad47-87a7-455f-a1a9-f56d2ff8e9c0",
+      "id": "d15c3088-b4db-4bba-9360-189415c364b4",
       "fromNode": "主人公",
       "toNode": "賢者との出会い",
       "label": "関連"
     },
     {
-      "id": "119ef67e-8665-45e0-9284-05f84ea1f1f6",
+      "id": "3cabc493-84a9-41e0-b052-a413ac329f08",
       "fromNode": "主人公",
       "toNode": "最終決戦",
       "label": "関連"
     },
     {
-      "id": "04680049-0ea3-4bdc-a494-bd1107a8b97c",
+      "id": "4bdb0931-07f3-4290-8fad-947e9cd7790b",
       "fromNode": "賢者",
       "toNode": "王国",
       "label": "所属"
     },
     {
-      "id": "3176db60-a48b-48b8-afcc-9f6740bc732a",
+      "id": "44be0821-0950-4573-991d-ffc045d17ef2",
       "fromNode": "賢者",
       "toNode": "賢者との出会い",
       "label": "関連"
     },
     {
-      "id": "b31805d6-ae07-42bb-a326-fc78334882aa",
+      "id": "0d7d7f52-a5e0-4311-ac00-6729deedcdb9",
       "fromNode": "賢者",
       "toNode": "最終決戦",
       "label": "関連"
     },
     {
-      "id": "b79aab75-0b91-41c0-9b56-2480f8001f12",
+      "id": "6290dc2b-c898-4402-b62a-404710169435",
       "fromNode": "魔王",
       "toNode": "魔族連合",
       "label": "所属"
     },
     {
-      "id": "90105733-b5eb-42f9-ab9a-f2522991d979",
+      "id": "5557f81f-88aa-4a88-96ca-e116756e6b78",
       "fromNode": "魔王",
       "toNode": "大戦争勃発",
       "label": "関連"
     },
     {
-      "id": "61d1f471-e73c-487f-941c-c8b5408ce443",
+      "id": "6f5de15e-0588-4583-bd58-486adcc1f63f",
       "fromNode": "魔王",
       "toNode": "最終決戦",
       "label": "関連"
     },
     {
-      "id": "d7025c77-a8a5-4010-8481-aeb6d7606760",
+      "id": "b66d76a1-fc4f-4dc9-8e0e-06d3cd2853f6",
       "fromNode": "魔王",
       "toNode": "平和条約締結",
       "label": "関連"

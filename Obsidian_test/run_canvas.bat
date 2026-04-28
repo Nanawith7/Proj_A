@@ -2,6 +2,9 @@
 setlocal
 cd /d "%~dp0"
 
+REM Add parent directory to Python path so canvas_gen can be imported
+set PYTHONPATH=%~dp0..;%PYTHONPATH%
+
 echo ========================================
 echo  Bottom-up Canvas Generator
 echo ========================================

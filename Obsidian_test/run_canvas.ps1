@@ -11,6 +11,10 @@ $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 
+# Add parent directory to Python path
+$ParentDir = Resolve-Path (Join-Path $ScriptDir "..")
+$env:PYTHONPATH = "$ParentDir;$env:PYTHONPATH"
+
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Bottom-up Canvas Generator" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
