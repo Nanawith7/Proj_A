@@ -15,9 +15,9 @@
               "state": {
                 "file": "timeline.canvas",
                 "viewState": {
-                  "x": 1985.604383378612,
-                  "y": 1030.3377286082598,
-                  "zoom": -1.7405687408452024
+                  "x": 2354.475270312081,
+                  "y": 1030.2750257925081,
+                  "zoom": -1.4072354075118692
                 }
               },
               "icon": "lucide-layout-dashboard",
@@ -185,6 +185,18 @@
   },
   "active": "5de152c9fde8f149",
   "lastOpenFiles": [
+    "_icons/node_盗賊.png",
+    "_icons/node_元魔王.png",
+    "_icons/node_予言者.png",
+    "_icons/node_魔王.png",
+    "_icons/node_騎士団長.png",
+    "_icons/node_賢者.png",
+    "_icons/node_王女.png",
+    "_icons/node_幼なじみ.png",
+    "_icons/node_四天王B.png",
+    "_icons/node_四天王A.png",
+    "_icons/node_主人公.png",
+    "_icons",
     "characters.canvas",
     "timeline.canvas",
     "character/魔王.md",

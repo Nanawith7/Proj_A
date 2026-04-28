@@ -30,6 +30,7 @@ from .config import (
 from .edges import generate_edges
 from .extractor import collect_related_nodes, scan_vault
 from .filter_sort import run_filter_pipeline
+from .icons import generate_type_icons, generate_node_icon
 from .layout import compute_layout
 from .models import DEFAULT_LABEL_MAPPING_PATH, DEFAULT_TYPE_DEF_PATH
 from .writer import write_canvas
@@ -141,7 +142,15 @@ Example:
     )
     p.add_argument(
         "--node-height", type=int, default=200,
-        help="Height of each canvas node element (default: 200).",
+        help="Default height of canvas node elements (default: 200). Overridden per-type.",
+    )
+    p.add_argument(
+        "--icon-size", type=int, default=50,
+        help="Icon node size in pixels (default: 50). Set to 0 to disable icons.",
+    )
+    p.add_argument(
+        "--icon-gap", type=int, default=4,
+        help="Gap between icon and file node in pixels (default: 4).",
     )
 
     return p
@@ -171,6 +180,22 @@ def main(argv: list[str] | None = None) -> int:
 
     type_defs = load_type_definitions(type_def_path)
     label_map = load_label_mappings(label_mapping_path)
+
+    # --- Generate type icons (always, for fallback) ---
+    icon_size = args.icon_size
+    icon_map: dict[str, str] = {}
+    if icon_size > 0:
+        icons_dir = Path(str(vault_path)) / "_icons"
+        icon_map = generate_type_icons(str(icons_dir), size=icon_size)
+
+    # --- Compute effective row_height from per-type node heights ---
+    type_heights = [td.node_height for td in type_defs.values()]
+    max_type_height = max(type_heights) if type_heights else args.node_height
+    effective_row_height = args.row_height
+    if icon_size > 0:
+        icon_row_height = icon_size + args.icon_gap + max_type_height
+        effective_row_height = max(args.row_height, icon_row_height)
+    print(f"[INFO] Effective row height: {effective_row_height} (icon={icon_size}, max_node_h={max_type_height})")
 
     # --- Scan vault ---
     print("[INFO] Scanning vault...")
@@ -206,10 +231,29 @@ def main(argv: list[str] | None = None) -> int:
     if not nodes:
         print("[WARN] No nodes match the criteria. Writing empty canvas.")
         # Still write an empty canvas file
-        write_canvas(args.output, [], [])
+        write_canvas(args.output, [], [], icon_map, icon_size, args.icon_gap)
         return 0
 
     print(f"[INFO] Canvas node set: {len(nodes)} nodes.")
+
+    # --- Generate per-node icons ---
+    if icon_size > 0:
+        icons_dir = Path(str(vault_path)) / "_icons"
+        custom_count = 0
+        for node in nodes:
+            icon_val = node.properties.get("icon")
+            if isinstance(icon_val, str):
+                # Direct path: "icon: _icons/hero.png"
+                node.icon_path = icon_val
+                custom_count += 1
+            elif isinstance(icon_val, dict):
+                # Shape spec: generate per-node icon
+                node.icon_path = generate_node_icon(
+                    str(icons_dir), node.stem, node.node_type, icon_val, size=icon_size
+                )
+                custom_count += 1
+        if custom_count:
+            print(f"[INFO] {custom_count} node(s) have custom icons.")
 
     # --- Generate edges ---
     edges = generate_edges(nodes, vault_index, label_map)
@@ -221,14 +265,17 @@ def main(argv: list[str] | None = None) -> int:
         x_axis_key=args.x_axis_key,
         type_defs=type_defs,
         column_width=args.column_width,
-        row_height=args.row_height,
+        row_height=effective_row_height,
         node_width=args.node_width,
         node_height=args.node_height,
     )
     print(f"[INFO] Layout computed: {len(positioned)} positioned nodes.")
 
     # --- Write output ---
-    output_path = write_canvas(args.output, positioned, edges)
+    output_path = write_canvas(
+        args.output, positioned, edges,
+        icon_map, icon_size, args.icon_gap
+    )
     print(f"[INFO] Canvas written to: {output_path}")
 
     return 0

@@ -7,7 +7,14 @@ from typing import Optional
 
 import yaml
 
-from .models import DEFAULT_LABEL_MAPPING_PATH, DEFAULT_TYPE_DEF_PATH, LabelInfo, TypeDefinition
+from .models import (
+    DEFAULT_LABEL_MAPPING_PATH,
+    DEFAULT_TYPE_DEF_PATH,
+    DEFAULT_NODE_HEIGHT,
+    DEFAULT_NODE_WIDTH,
+    LabelInfo,
+    TypeDefinition,
+)
 
 
 def load_type_definitions(path: Optional[str]) -> dict[str, TypeDefinition]:
@@ -45,6 +52,8 @@ def load_type_definitions(path: Optional[str]) -> dict[str, TypeDefinition]:
                 lining=int(config.get("lining", 1)),
                 centering=bool(config.get("centering", False)),
                 color=str(config.get("color", "")),
+                node_width=int(config.get("node_width", DEFAULT_NODE_WIDTH)),
+                node_height=int(config.get("node_height", DEFAULT_NODE_HEIGHT)),
             )
         else:
             result[str(type_name)] = TypeDefinition()

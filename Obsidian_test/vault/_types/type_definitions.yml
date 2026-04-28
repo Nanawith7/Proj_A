@@ -2,19 +2,28 @@
 # lining: number of subrows (column-major distribution)
 # centering: horizontal centering within the row
 # color: node background color (hex or preset number 1-6)
+# node_width / node_height: override default node dimensions
 character:
   lining: 3
   centering: false
   color: "#2196F3"
+  node_width: 160
+  node_height: 120
 scenario:
   lining: 1
   centering: false
   color: "#FF9800"
+  node_width: 280
+  node_height: 160
 event:
   lining: 2
   centering: false
   color: "#E91E63"
+  node_width: 220
+  node_height: 140
 organization:
   lining: 1
   centering: true
   color: "#4CAF50"
+  node_width: 200
+  node_height: 120

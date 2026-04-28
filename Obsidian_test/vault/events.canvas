@@ -1,14 +1,32 @@
 {
   "nodes": [
     {
+      "id": "王国建国_icon",
+      "type": "file",
+      "file": "_icons/type_event.png",
+      "x": 0,
+      "y": -54,
+      "width": 50,
+      "height": 50
+    },
+    {
       "id": "王国建国",
       "type": "file",
       "file": "event/王国建国.md",
       "x": 0,
       "y": 0,
-      "width": 300,
-      "height": 200,
+      "width": 220,
+      "height": 140,
       "color": "#E91E63"
+    },
+    {
+      "id": "大戦争勃発_icon",
+      "type": "file",
+      "file": "_icons/type_event.png",
+      "x": 350,
+      "y": -54,
+      "width": 50,
+      "height": 50
     },
     {
       "id": "大戦争勃発",
@@ -16,9 +34,18 @@
       "file": "event/大戦争勃発.md",
       "x": 350,
       "y": 0,
-      "width": 300,
-      "height": 200,
+      "width": 220,
+      "height": 140,
       "color": "#E91E63"
+    },
+    {
+      "id": "平和条約締結_icon",
+      "type": "file",
+      "file": "_icons/type_event.png",
+      "x": 700,
+      "y": -54,
+      "width": 50,
+      "height": 50
     },
     {
       "id": "平和条約締結",
@@ -26,8 +53,8 @@
       "file": "event/平和条約締結.md",
       "x": 700,
       "y": 0,
-      "width": 300,
-      "height": 200,
+      "width": 220,
+      "height": 140,
       "color": "#E91E63"
     }
   ],

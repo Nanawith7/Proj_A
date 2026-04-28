@@ -6,6 +6,7 @@ aliases:
 tags:
   - demon
   - general
+icon: "_icons/node_四天王A.png"
 affiliation: "[[魔族連合]]"
 rival:
   - "[[主人公]]"

@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
+DEFAULT_NODE_WIDTH = 300
+DEFAULT_NODE_HEIGHT = 200
+
 
 @dataclass
 class NoteNode:
@@ -16,6 +19,7 @@ class NoteNode:
     node_type: str
     properties: dict[str, Any] = field(default_factory=dict)
     wikilinks: dict[str, list[str]] = field(default_factory=dict)
+    icon_path: str = ""
 
     @property
     def node_id(self) -> str:
@@ -39,10 +43,6 @@ class EdgeData:
     label: str
     color: str = ""
 
-    @property
-    def edge_key(self) -> tuple[str, str, str]:
-        return (self.from_node, self.to_node, self.label)
-
 
 @dataclass
 class TypeDefinition:
@@ -51,6 +51,8 @@ class TypeDefinition:
     lining: int = 1
     centering: bool = False
     color: str = ""
+    node_width: int = DEFAULT_NODE_WIDTH
+    node_height: int = DEFAULT_NODE_HEIGHT
 
 
 @dataclass
@@ -64,11 +66,7 @@ class Container:
     nodes_by_type: dict[str, list[NoteNode]] = field(default_factory=dict)
 
     def effective_width(self, type_name: str, lining: int) -> int:
-        """Return the effective column width for a type within this container.
-
-        Column-major distribution across <lining> subrows:
-        width = ceil(node_count / lining).
-        """
+        """Return the effective column width for a type within this container."""
         import math
         nodes = self.nodes_by_type.get(type_name, [])
         if not nodes:
@@ -90,6 +88,7 @@ class PositionedNode:
     width: float
     height: float
     color: str = ""
+    icon_path: str = ""
 
     @property
     def node_id(self) -> str:
@@ -113,8 +112,10 @@ class GenerationParams:
         label_mapping_path: Optional[str] = None,
         column_width: int = 350,
         row_height: int = 250,
-        node_width: int = 300,
-        node_height: int = 200,
+        node_width: int = DEFAULT_NODE_WIDTH,
+        node_height: int = DEFAULT_NODE_HEIGHT,
+        icon_size: int = 50,
+        icon_gap: int = 4,
     ):
         self.vault_path = vault_path
         self.output_path = output_path
@@ -130,11 +131,11 @@ class GenerationParams:
         self.row_height = row_height
         self.node_width = node_width
         self.node_height = node_height
+        self.icon_size = icon_size
+        self.icon_gap = icon_gap
 
 
-# Default paths relative to the vault root
 DEFAULT_TYPE_DEF_PATH = "_types/type_definitions.yml"
 DEFAULT_LABEL_MAPPING_PATH = "_config/label_mappings.yml"
 
-# Properties reserved for layout/display, excluded from edge generation
-RESERVED_KEYS: set[str] = {"type", "title"}
+RESERVED_KEYS: set[str] = {"type", "title", "icon"}

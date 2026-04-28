@@ -78,6 +78,16 @@ def _get_color(type_name: str, type_defs: dict[str, TypeDefinition]) -> str:
     return td.color if td else ""
 
 
+def _get_node_width(type_name: str, type_defs: dict[str, TypeDefinition], default: float) -> float:
+    td = type_defs.get(type_name)
+    return td.node_width if td else default
+
+
+def _get_node_height(type_name: str, type_defs: dict[str, TypeDefinition], default: float) -> float:
+    td = type_defs.get(type_name)
+    return td.node_height if td else default
+
+
 def _effective_width(node_count: int, lining: int) -> int:
     """Compute the column width a type contributes to a container.
 
@@ -279,6 +289,8 @@ def _compute_container_layout(
                         continue
                     sub_y = y_base + sub_row * row_height
                     node_color = _get_color(type_name, type_defs)
+                    nw = _get_node_width(type_name, type_defs, node_width)
+                    nh = _get_node_height(type_name, type_defs, node_height)
                     for col, node in enumerate(sub_nodes):
                         pos_x = c.start_x + col * column_width
                         result.append(PositionedNode(
@@ -289,9 +301,10 @@ def _compute_container_layout(
                             properties=node.properties,
                             x=pos_x,
                             y=sub_y,
-                            width=node_width,
-                            height=node_height,
+                            width=nw,
+                            height=nh,
                             color=node_color,
+                            icon_path=node.icon_path,
                         ))
 
         total_container_width = sum(c.width_columns for c in containers) * column_width
@@ -367,6 +380,8 @@ def _compute_grid_layout(
                 offset_x = 0.0
 
             node_color = _get_color(type_name, type_defs)
+            nw = _get_node_width(type_name, type_defs, node_width)
+            nh = _get_node_height(type_name, type_defs, node_height)
             for col, node in enumerate(sub_nodes):
                 result.append(PositionedNode(
                     stem=node.stem,
@@ -376,9 +391,10 @@ def _compute_grid_layout(
                     properties=node.properties,
                     x=offset_x + col * column_width,
                     y=sub_y,
-                    width=node_width,
-                    height=node_height,
+                    width=nw,
+                    height=nh,
                     color=node_color,
+                    icon_path=node.icon_path,
                 ))
 
         y_cursor += subrows * row_height

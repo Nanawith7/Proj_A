@@ -48,17 +48,19 @@ flowchart TD
 ---
 type: "character"
 title: "主人公"
+icon: "_icons/hero.png"
 tags:
   - "main"
   - "human"
-date: "2026-04-19"
+affiliation: "[[王国]]"
+ally:
+  - "[[騎士団長]]"
 related:
   - "[[Scenario A]]"
-  - "[[Organization X]]"
 ---
 ```
 
-`type` はCanvasのY軸方向の行を決定する唯一の識別子である。`title` はCanvasノードの表示ラベルとして利用される（省略時はファイル名が用いられる）。その他のプロパティ（`tags`, `date`, `related` など）は、後述のルールに従ってエッジの源泉となる。
+`type` はCanvasのY軸方向の行を決定する唯一の識別子である。`title` はCanvasノードの表示ラベルとして利用される（省略時はファイル名が用いられる）。`icon` は Vault内の画像ファイルへのパス（例：`_icons/hero.png`）を指定する予約プロパティであり、指定がある場合、ファイルノードの上部に小さなアイコンノードが追加配置される。その他のプロパティ（`tags`, `ally`, `related` など）は、後述のルールに従ってエッジの源泉となる。
 
 ### 2.2 X軸コンテナ
 
@@ -71,7 +73,7 @@ related:
 ノート間の関係は、以下のルールに従ってCanvas上のエッジに変換される。各エッジには、関係の種類を表す**ラベル**が自動的に付与される。
 
 - **レイアウト予約プロパティの扱い**  
-  `type` および `title` はノードの配置・表示にのみ用いられ、関係性を意味しないため、エッジ生成の対象から除外される。将来、個別ノートに対して追加される表示専用プロパティ（例：`color`, `icon`）も同様に予約キーとして扱われる。
+  `type`、`title`、`icon` はノードの配置・表示にのみ用いられ、関係性を意味しないため、エッジ生成の対象から除外される。
 
 - **エッジ抽出とラベル付与**  
   予約プロパティ以外のすべてのYAMLキーの値から、Wikiリンク（`[[ノート名]]`）の形で記述されたリンクを抽出する。  
@@ -133,25 +135,31 @@ Canvas上のレイアウト規則（サブ行分割、センタリングなど�
 
 `lining` はそのtypeに割り当てられる**横列（サブ行）の数**を指定する。ノードは column-major 方式で各サブ行に振り分けられる。すなわち、全ノードをソート順に並べたとき、1番目はサブ行0、2番目はサブ行1、…、L番目はサブ行 L-1、L+1番目は再びサブ行0、という具合に巡回配置される。
 
-`color` はそのtypeに属する全ノードの背景色を指定する。CSS互換の16進数カラーコード（`"#2196F3"`）またはJSON Canvas仕様のプリセット番号（`"1"` 〜 `"6"`）で指定する。
+`color` はそのtypeに属する全ノードの背景色を指定する。`node_width` / `node_height` はそのtypeのノード寸法を上書きする（省略時はデフォルトの 300×200）。
 
 ```yaml
 # _types/type_definitions.yml
 character:
   lining: 3
-  centering: true
+  centering: false
   color: "#2196F3"
+  node_width: 160
+  node_height: 120
 scenario:
   lining: 1
   centering: false
   color: "#FF9800"
+  node_width: 280
+  node_height: 160
 event:
   lining: 2
+  centering: false
   color: "#E91E63"
-  # centering未指定はfalse
+  node_width: 220
+  node_height: 140
 ```
 
-定義されていないtypeが出現した場合、`lining: 1`, `centering: false`, `color: ""` のデフォルト値が適用される。この機構により、新たなtypeの追加時にも、type定義ファイルにエントリを追加するだけでレイアウトと配色が制御され、ノート側の修正は一切不要である。
+定義されていないtypeが出現した場合、`lining: 1`, `centering: false`, `color: ""`, `node_width: 300`, `node_height: 200` のデフォルト値が適用される。
 
 ## 3. データ抽出層
 
@@ -216,37 +224,36 @@ STORY-ROW | 1      | 2      | 3      || 4      | 5      | 6      || 7      | (�
 
 ### 4.2 JSON Canvas仕様への変換
 
-生成されたノードリストとエッジリストは、JSON Canvas仕様（バージョン1.0）に準拠したオブジェクトに変換され、`.canvas`拡張子を持つファイルとして出力される。ノードにはtype定義から取得した`color`が、エッジにはラベルマッピングから取得した`label`および`color`が付与される。
+生成されたノードリストとエッジリストは、JSON Canvas仕様（バージョン1.0）に準拠したオブジェクトに変換され、`.canvas`拡張子を持つファイルとして出力される。`icon` プロパティを持つノートに対しては、ファイルノードの上部に小さなアイコンノード（`type: "file"`、画像ファイルを指す）が追加配置される。ファイルノードにはtype定義から取得した`color`が、エッジにはラベルマッピングから取得した`label`および`color`が付与される。
 
 ```json
 {
   "nodes": [
     {
-      "id": "node1",
+      "id": "主人公_icon",
+      "type": "file",
+      "file": "_icons/node_主人公.png",
+      "x": 0,
+      "y": -54,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "主人公",
       "type": "file",
       "file": "character/主人公.md",
       "x": 0,
       "y": 0,
-      "width": 300,
-      "height": 200,
-      "color": "#2196F3"
-    },
-    {
-      "id": "node2",
-      "type": "file",
-      "file": "character/賢者.md",
-      "x": 0,
-      "y": 250,
-      "width": 300,
-      "height": 200,
+      "width": 160,
+      "height": 120,
       "color": "#2196F3"
     }
   ],
   "edges": [
     {
       "id": "edge1",
-      "fromNode": "node1",
-      "toNode": "node2",
+      "fromNode": "主人公",
+      "toNode": "賢者",
       "label": "師弟",
       "color": "#FF9800"
     }
@@ -313,6 +320,7 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
     # 1. 設定ファイルの読み込み
     type_defs = load_yaml(type_def_path) if type_def_path else {}
     label_map = load_yaml(label_mapping_path) if label_mapping_path else {}
+    icon_map = generate_type_icons(icons_dir, icon_size)
     
     # 2. ノード抽出とフィルタ
     nodes = extract_nodes(base_node, depth)
@@ -356,8 +364,9 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
         return type_defs.get(node_type, {}).get("lining", 1)
     def get_color(node_type):
         return type_defs.get(node_type, {}).get("color", "")
-    def get_centering(node_type):
-        return type_defs.get(node_type, {}).get("centering", False)
+    def get_node_size(node_type):
+        td = type_defs.get(node_type, {})
+        return td.get("node_width", 300), td.get("node_height", 200)
     
     if x_axis_key:
         containers = build_containers(nodes, x_axis_key, get_lining)
@@ -374,10 +383,14 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
                     sub_y = y_base + sub_row * row_height
                     node_x = container.start_x
                     node_color = get_color(type_name)
+                    nw, nh = get_node_size(type_name)
                     for node in sub_nodes:
                         node.x = node_x
                         node.y = sub_y
+                        node.width = nw
+                        node.height = nh
                         node.color = node_color
+                        node.icon_path = node.props.get("icon", "")
                         node_x += column_width
                         all_canvas_nodes.append(node)
     else:
@@ -388,6 +401,7 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
             y_base = type_y[type_name]
             max_cols = math.ceil(len(type_nodes) / lining)
             node_color = get_color(type_name)
+            nw, nh = get_node_size(type_name)
             for sub_row in range(lining):
                 sub_nodes = type_nodes[sub_row::lining]
                 if not sub_nodes:
@@ -400,12 +414,31 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
                 for node in sub_nodes:
                     node.x = x_pos
                     node.y = sub_y
+                    node.width = nw
+                    node.height = nh
                     node.color = node_color
+                    node.icon_path = node.props.get("icon", "")
                     x_pos += column_width
                     all_canvas_nodes.append(node)
-    
-    # 6. JSON出力
-    canvas_json = build_canvas_json(all_canvas_nodes, edges)
+
+    # 6. JSON出力（icon付き）
+    canvas_nodes = []
+    for node in all_canvas_nodes:
+        if node.icon_path:
+            canvas_nodes.append({
+                "id": node.id + "_icon", "type": "file",
+                "file": node.icon_path,
+                "x": int(node.x), "y": int(node.y - icon_size - icon_gap),
+                "width": icon_size, "height": icon_size,
+            })
+        canvas_nodes.append({
+            "id": node.id, "type": "file",
+            "file": node.file,
+            "x": int(node.x), "y": int(node.y),
+            "width": int(node.width), "height": int(node.height),
+            "color": node.color,
+        })
+    canvas_json = {"nodes": canvas_nodes, "edges": edges}
     write_file("output.canvas", canvas_json)
 ```
 
