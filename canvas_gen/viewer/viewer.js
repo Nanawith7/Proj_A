@@ -109,13 +109,25 @@ function render() {
     rect.setAttribute('data-id',n.id);rect.setAttribute('class','node-rect');rect.style.cursor='pointer';
     rect.onclick=e=>{e.stopPropagation();toggleExpand(n,g,mainG);};
     applyNodeView(rect,n,false);
+    // Collapsed fill opacity
+    const cfOp=nv.layout?.collapsedFillOpacity;
+    if(cfOp!==undefined)rect.setAttribute('opacity',cfOp);
     g.appendChild(rect);
 
-    // Collapsed icon: centered
+    // Collapsed icon: centered by default, overridable via layout
     const iconPath=v?.props?.icon;
     if(iconPath){
       const isz=Math.min(nw,nh)*0.45;
-      const ix=nx+(nw-isz)/2, iy=ny+(nh-isz)/2;
+      const anchorX=nv.layout?.iconAnchorX||'center';
+      const anchorY=nv.layout?.iconAnchorY||'center';
+      const ipx=nv.layout?.iconPadX||0, ipy=nv.layout?.iconPadY||0;
+      let ix,iy;
+      if(anchorX==='left')ix=nx+ipx;
+      else if(anchorX==='right')ix=nx+nw-isz-ipx;
+      else ix=nx+(nw-isz)/2;
+      if(anchorY==='top')iy=ny+ipy;
+      else if(anchorY==='bottom')iy=ny+nh-isz-ipy;
+      else iy=ny+(nh-isz)/2;
       const img=document.createElementNS(svgNS,'image');
       img.setAttribute('href','/_icons/'+iconPath.split('/').pop());
       img.setAttribute('x',ix);img.setAttribute('y',iy);
@@ -260,6 +272,9 @@ function toggleExpand(node, g, mainG) {
 
   const rect=g.querySelector('.node-rect');
   applyNodeView(rect,node,{width:expW,height:expH});
+  // Expanded fill opacity
+  const efOp=nv.layout?.expandedFillOpacity;
+  rect.setAttribute('opacity',efOp!==undefined?efOp:1);
 
   const nx=node.x||0,ny=node.y||0;
 
@@ -287,7 +302,8 @@ function toggleExpand(node, g, mainG) {
     bg.setAttribute('width',expW);bg.setAttribute('height',expH);
     bg.setAttribute('class','node-bg');
     bg.setAttribute('preserveAspectRatio','none');
-    bg.style.opacity='0.15';bg.style.pointerEvents='none';
+    bg.style.opacity=nv.layout?.backgroundOpacity??0.15;
+    bg.style.pointerEvents='none';
     g.insertBefore(bg,g.firstChild);
   }
 
