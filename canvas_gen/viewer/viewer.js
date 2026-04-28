@@ -106,12 +106,24 @@ function render() {
         txt.setAttribute('text-anchor','middle');
         txt.setAttribute('x',nx+nw/2);
         txt.setAttribute('y',ny+diam/2+fs/3);
+        txt.setAttribute('fill','#fff');
+        // Truncate if too wide for circle
+        let tText=title;
+        while(tText.length>1&&measureText(tText+'..',fs,'sans-serif')>diam-2*tpad)tText=tText.slice(0,-1);
+        if(tText.length<title.length)tText+='..';
+        txt.textContent=tText;
       }else{
         txt.setAttribute('y',ty==='top'?ny+tpad+fs:(ny+nh/2+fs/3));
         txt.setAttribute('x',nx+Math.max(tpad,6));
+        txt.setAttribute('fill','#fff');
+        // Truncate if too wide for node
+        const maxTitleW=nw-2*Math.max(tpad,6);
+        let tText=title;
+        while(tText.length>1&&measureText(tText+'..',fs,'sans-serif')>maxTitleW)tText=tText.slice(0,-1);
+        if(tText.length<title.length)tText+='..';
+        txt.textContent=tText;
       }
-      txt.setAttribute('fill','#fff');
-      txt.textContent=title;g.appendChild(txt);
+      g.appendChild(txt);
     }
     mainG.appendChild(g);
   });
