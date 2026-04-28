@@ -267,18 +267,14 @@ function toggleExpand(node, g, mainG) {
   const neededH=lineH+cpY*2+16;
   let expW=Math.max(minW,neededW);
   let expH=Math.max(minH,neededH);
-  if(nv.shape==='circle'){
-    const d=Math.max(expW,expH,neededW,neededH);
-    expW=Math.max(expW,d); expH=Math.max(expH,d);
-  }else{
-    // Maintain original aspect ratio from collapsed node
-    const ow=node.width||200, oh=node.height||120;
-    if(ow>0&&oh>0){
-      const ratio=ow/oh;
-      if(expW/expH>ratio) expH=expW/ratio;
-      else expW=expH*ratio;
-      expW=Math.max(expW,neededW); expH=Math.max(expH,neededH);
-    }
+  // Maintain ratio from expandMin (or original node)
+  const ow=nv.shape==='circle'?minW:(node.width||200);
+  const oh=nv.shape==='circle'?minH:(node.height||120);
+  if(ow>0&&oh>0){
+    const ratio=ow/oh;
+    if(expW/expH>ratio)expH=expW/ratio;
+    else expW=expH*ratio;
+    expW=Math.max(expW,neededW);expH=Math.max(expH,neededH);
   }
 
   const expLP=layoutParams(nv,expW,expH);
