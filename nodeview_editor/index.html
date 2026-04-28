@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Nodeview Editor</title>
+<link rel="stylesheet" href="/editor.css">
+</head>
+<body>
+<div id="left">
+  <h3>Templates</h3>
+  <div id="template-list"><span style="color:#aaa;font-size:11px">Loading...</span></div>
+  <button onclick="newTemplate()" style="margin-top:12px;background:#533483">+ New</button>
+  <button onclick="importJSON()" style="margin-top:4px;background:#0f3460">Import JSON</button>
+</div>
+
+<div id="center">
+  <div id="preview-section">
+    <div class="preview-box"><h4>Collapsed (120x80)</h4><svg id="prev-collapsed"></svg></div>
+    <div class="preview-box"><h4>Expanded (380x280)</h4><svg id="prev-expanded"></svg></div>
+  </div>
+  <div id="bottom">
+    <button onclick="copyJSON()">Copy JSON</button>
+    <button onclick="saveTemplate()">Save</button>
+    <span id="status"></span>
+  </div>
+</div>
+
+<div id="right">
+  <h3>Shape &amp; Style</h3>
+  <label>Shape</label>
+  <select id="nv-shape" onchange="update()"><option>rect</option><option>round</option><option>circle</option></select>
+  <div class="row">
+    <label>rx <input type="number" id="nv-rx" value="4" min="0" onchange="update()"></label>
+    <label>strokeWidth <input type="number" id="nv-sw" value="1" step="0.5" onchange="update()"></label>
+  </div>
+  <label>Stroke <input type="text" id="nv-stroke" value="#fff6" onchange="update()"></label>
+  <label>fontSize <input type="number" id="nv-fs" value="12" min="8" max="24" onchange="update()"></label>
+
+  <h3>Title</h3>
+  <div class="row">
+    <label>titleY <select id="nv-ty" onchange="update()"><option>center</option><option>top</option></select></label>
+    <label>titleWrap <input type="checkbox" id="nv-tw" onchange="update()"></label>
+  </div>
+  <div class="row">
+    <label>titlePadX <input type="number" id="nv-tpx" value="10" min="0" onchange="update()"></label>
+    <label>titlePadY <input type="number" id="nv-tpy" value="10" min="0" onchange="update()"></label>
+  </div>
+
+  <h3>Opacity</h3>
+  <div class="row">
+    <label>collapsed <input type="range" id="nv-cfop" value="1" min="0" max="1" step="0.05" onchange="update()"></label>
+    <label>expanded <input type="range" id="nv-efop" value="1" min="0" max="1" step="0.05" onchange="update()"></label>
+  </div>
+  <label>Background opacity <input type="range" id="nv-bgop" value="0.15" min="0" max="1" step="0.05" onchange="update()"></label>
+  <label>Background image <input type="text" id="nv-bg" placeholder="char_bg.png" onchange="update()"></label>
+
+  <h3>Expand Size</h3>
+  <div class="row">
+    <label>minW <input type="number" id="nv-ew" value="300" onchange="update()"></label>
+    <label>minH <input type="number" id="nv-eh" value="200" onchange="update()"></label>
+  </div>
+
+  <h3>Content Padding</h3>
+  <div class="row">
+    <label>padX <input type="number" id="nv-cpx" value="10" min="0" onchange="update()"></label>
+    <label>padY <input type="number" id="nv-cpy" value="10" min="0" onchange="update()"></label>
+  </div>
+  <label>Body Y <input type="number" id="nv-bdy" value="0" placeholder="0 (auto)" onchange="update()"></label>
+
+  <h3>Icon</h3>
+  <div class="row">
+    <label>anchorX <select id="nv-iax" onchange="update()"><option>center</option><option>left</option><option>right</option></select></label>
+    <label>anchorY <select id="nv-iay" onchange="update()"><option>center</option><option>top</option><option>bottom</option></select></label>
+  </div>
+  <div class="row">
+    <label>padX <input type="number" id="nv-ipx" value="0" onchange="update()"></label>
+    <label>padY <input type="number" id="nv-ipy" value="0" onchange="update()"></label>
+  </div>
+
+  <h3>Properties</h3>
+  <div id="props-editor"></div>
+  <button onclick="addProp()" style="margin-top:4px;background:#533483">+ Add Property</button>
+
+  <h3>JSON Output</h3>
+  <textarea id="json-output" readonly></textarea>
+</div>
+<script src="/editor.js"></script>
+</body>
+</html>
