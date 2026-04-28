@@ -3,30 +3,355 @@
     {
       "id": "主人公",
       "type": "file",
-      "file": "主人公.md",
+      "file": "character\\主人公.md",
       "x": 0,
       "y": 0,
       "width": 300,
       "height": 200
     },
     {
-      "id": "賢者",
+      "id": "四天王A",
       "type": "file",
-      "file": "賢者.md",
+      "file": "character\\四天王A.md",
       "x": 350,
       "y": 0,
       "width": 300,
       "height": 200
     },
     {
-      "id": "魔王",
+      "id": "王女",
       "type": "file",
-      "file": "魔王.md",
+      "file": "character\\王女.md",
       "x": 700,
       "y": 0,
       "width": 300,
       "height": 200
+    },
+    {
+      "id": "騎士団長",
+      "type": "file",
+      "file": "character\\騎士団長.md",
+      "x": 1050,
+      "y": 0,
+      "width": 300,
+      "height": 200
+    },
+    {
+      "id": "予言者",
+      "type": "file",
+      "file": "character\\予言者.md",
+      "x": 0,
+      "y": 250,
+      "width": 300,
+      "height": 200
+    },
+    {
+      "id": "四天王B",
+      "type": "file",
+      "file": "character\\四天王B.md",
+      "x": 350,
+      "y": 250,
+      "width": 300,
+      "height": 200
+    },
+    {
+      "id": "盗賊",
+      "type": "file",
+      "file": "character\\盗賊.md",
+      "x": 700,
+      "y": 250,
+      "width": 300,
+      "height": 200
+    },
+    {
+      "id": "魔王",
+      "type": "file",
+      "file": "character\\魔王.md",
+      "x": 1050,
+      "y": 250,
+      "width": 300,
+      "height": 200
+    },
+    {
+      "id": "元魔王",
+      "type": "file",
+      "file": "character\\元魔王.md",
+      "x": 0,
+      "y": 500,
+      "width": 300,
+      "height": 200
+    },
+    {
+      "id": "幼なじみ",
+      "type": "file",
+      "file": "character\\幼なじみ.md",
+      "x": 350,
+      "y": 500,
+      "width": 300,
+      "height": 200
+    },
+    {
+      "id": "賢者",
+      "type": "file",
+      "file": "character\\賢者.md",
+      "x": 700,
+      "y": 500,
+      "width": 300,
+      "height": 200
     }
   ],
-  "edges": []
+  "edges": [
+    {
+      "id": "31a83691-ca3c-4ffc-bfbc-e5fbbfc5bf1e",
+      "fromNode": "主人公",
+      "toNode": "騎士団長",
+      "label": "味方"
+    },
+    {
+      "id": "80f5f89c-cf0e-41ff-be5a-1fffda097452",
+      "fromNode": "主人公",
+      "toNode": "幼なじみ",
+      "label": "味方"
+    },
+    {
+      "id": "81f15fda-7674-48b9-a62d-d99aae42a84c",
+      "fromNode": "主人公",
+      "toNode": "盗賊",
+      "label": "味方"
+    },
+    {
+      "id": "1b949c02-95aa-4be6-9bea-fa814ec540ce",
+      "fromNode": "主人公",
+      "toNode": "賢者",
+      "label": "師弟"
+    },
+    {
+      "id": "4e988699-e9ae-435c-9c41-fcc71b9f5652",
+      "fromNode": "主人公",
+      "toNode": "騎士団長",
+      "label": "師弟"
+    },
+    {
+      "id": "339345b8-70f2-4e65-8abd-50b8720f5570",
+      "fromNode": "主人公",
+      "toNode": "四天王A",
+      "label": "敵対"
+    },
+    {
+      "id": "5103bce1-958a-40e4-aee3-7514421e981e",
+      "fromNode": "主人公",
+      "toNode": "四天王B",
+      "label": "嫌悪"
+    },
+    {
+      "id": "a7970cfd-5bf5-4d6e-8e35-c27d5cde10d2",
+      "fromNode": "主人公",
+      "toNode": "幼なじみ",
+      "label": "好意"
+    },
+    {
+      "id": "c2f8c7d4-322d-46a1-ab44-1143bd27fbbb",
+      "fromNode": "主人公",
+      "toNode": "王女",
+      "label": "好意"
+    },
+    {
+      "id": "a67a04ba-cf9c-4b4a-940d-b00d000c6b6e",
+      "fromNode": "予言者",
+      "toNode": "賢者",
+      "label": "好意"
+    },
+    {
+      "id": "d37ae024-48d0-444b-8b18-c6f98da280e5",
+      "fromNode": "予言者",
+      "toNode": "王女",
+      "label": "師弟"
+    },
+    {
+      "id": "a3428225-2895-4f87-b40c-ab6bb49568ae",
+      "fromNode": "予言者",
+      "toNode": "元魔王",
+      "label": "嫌悪"
+    },
+    {
+      "id": "93917fb0-315f-4390-81c8-7df180a2a9ed",
+      "fromNode": "元魔王",
+      "toNode": "魔王",
+      "label": "家族"
+    },
+    {
+      "id": "89b83830-8b5a-49ac-b0c9-9dedfc44ac93",
+      "fromNode": "元魔王",
+      "toNode": "賢者",
+      "label": "敵対"
+    },
+    {
+      "id": "182be636-cd99-4d9d-91bd-5588a48fde40",
+      "fromNode": "元魔王",
+      "toNode": "予言者",
+      "label": "嫌悪"
+    },
+    {
+      "id": "c232c6cf-ba20-4264-adbe-bc347b09ccbb",
+      "fromNode": "四天王A",
+      "toNode": "主人公",
+      "label": "敵対"
+    },
+    {
+      "id": "c1cbb7d2-cd8d-4646-8cca-b61be8c71cf2",
+      "fromNode": "四天王A",
+      "toNode": "魔王",
+      "label": "嫌悪"
+    },
+    {
+      "id": "2011e4df-d990-46d2-a936-b92fefd80d47",
+      "fromNode": "四天王A",
+      "toNode": "四天王B",
+      "label": "味方"
+    },
+    {
+      "id": "04a08a42-3dc0-4a21-874c-79219d4fa033",
+      "fromNode": "四天王B",
+      "toNode": "魔王",
+      "label": "味方"
+    },
+    {
+      "id": "070e94a5-b06e-416e-a55b-e6d9619b084a",
+      "fromNode": "四天王B",
+      "toNode": "四天王A",
+      "label": "味方"
+    },
+    {
+      "id": "3e11eb77-331f-41b4-868b-baf2b833ac5b",
+      "fromNode": "四天王B",
+      "toNode": "予言者",
+      "label": "嫌悪"
+    },
+    {
+      "id": "eb08d449-f8c0-4ed3-bcfe-6874d064f1e5",
+      "fromNode": "幼なじみ",
+      "toNode": "主人公",
+      "label": "好意"
+    },
+    {
+      "id": "85b80031-df6e-4c0d-b195-65a352a1389d",
+      "fromNode": "幼なじみ",
+      "toNode": "主人公",
+      "label": "味方"
+    },
+    {
+      "id": "6915d5df-4730-480a-b41f-c1fd3b3f8fe9",
+      "fromNode": "幼なじみ",
+      "toNode": "盗賊",
+      "label": "家族"
+    },
+    {
+      "id": "d23018cf-8ed3-47f6-9142-ebeb7fd1aeec",
+      "fromNode": "王女",
+      "toNode": "主人公",
+      "label": "好意"
+    },
+    {
+      "id": "5dda0c5a-0862-4384-a79e-a55892881a45",
+      "fromNode": "王女",
+      "toNode": "騎士団長",
+      "label": "味方"
+    },
+    {
+      "id": "aa5010ed-98d4-4236-861c-fcd48c01aebd",
+      "fromNode": "王女",
+      "toNode": "予言者",
+      "label": "師弟"
+    },
+    {
+      "id": "9f904210-6897-4036-88cf-966bc6f3ffe4",
+      "fromNode": "盗賊",
+      "toNode": "幼なじみ",
+      "label": "家族"
+    },
+    {
+      "id": "d523b481-8f43-4bdf-a263-d093502eb937",
+      "fromNode": "盗賊",
+      "toNode": "主人公",
+      "label": "味方"
+    },
+    {
+      "id": "212ae1c0-096c-4bd2-a341-9614aaba8afd",
+      "fromNode": "盗賊",
+      "toNode": "四天王A",
+      "label": "敵対"
+    },
+    {
+      "id": "602ec2e1-677d-46bd-9be2-ce649fa162af",
+      "fromNode": "賢者",
+      "toNode": "主人公",
+      "label": "味方"
+    },
+    {
+      "id": "b2cce0a4-fda9-4ce1-843e-2c5552737600",
+      "fromNode": "賢者",
+      "toNode": "主人公",
+      "label": "師弟"
+    },
+    {
+      "id": "88c2719b-40d7-422e-85a0-c7965b7c3573",
+      "fromNode": "賢者",
+      "toNode": "予言者",
+      "label": "好意"
+    },
+    {
+      "id": "75231564-87f8-4c34-b6c3-dbc4c8a288fa",
+      "fromNode": "賢者",
+      "toNode": "元魔王",
+      "label": "敵対"
+    },
+    {
+      "id": "5b1e2ea3-a9f1-443c-95a8-e4804d75ff5c",
+      "fromNode": "騎士団長",
+      "toNode": "主人公",
+      "label": "味方"
+    },
+    {
+      "id": "c3e675a0-1ad8-4e00-944e-9ace0ecd4897",
+      "fromNode": "騎士団長",
+      "toNode": "主人公",
+      "label": "師弟"
+    },
+    {
+      "id": "a880f224-b57c-4882-99e7-45f5e16fcf9d",
+      "fromNode": "騎士団長",
+      "toNode": "魔王",
+      "label": "敵対"
+    },
+    {
+      "id": "7fb12bd4-e659-4ffe-b773-28e6f035ab8b",
+      "fromNode": "騎士団長",
+      "toNode": "王女",
+      "label": "好意"
+    },
+    {
+      "id": "715a61d1-64f9-49b3-8f13-d154b132ce40",
+      "fromNode": "魔王",
+      "toNode": "四天王B",
+      "label": "味方"
+    },
+    {
+      "id": "4b8677a5-6d84-4629-b4ec-fafb7f2b987b",
+      "fromNode": "魔王",
+      "toNode": "騎士団長",
+      "label": "敵対"
+    },
+    {
+      "id": "3fb4dc2a-6d1f-48f0-b89d-b4631492b4bf",
+      "fromNode": "魔王",
+      "toNode": "元魔王",
+      "label": "家族"
+    },
+    {
+      "id": "54b72a71-7988-49aa-9cb4-d5da7c381f55",
+      "fromNode": "魔王",
+      "toNode": "四天王A",
+      "label": "嫌悪"
+    }
+  ]
 }

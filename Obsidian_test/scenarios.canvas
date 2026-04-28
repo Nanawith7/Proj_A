@@ -3,7 +3,7 @@
     {
       "id": "冒険の始まり",
       "type": "file",
-      "file": "冒険の始まり.md",
+      "file": "scenario\\冒険の始まり.md",
       "x": 0,
       "y": 0,
       "width": 300,
@@ -12,7 +12,7 @@
     {
       "id": "賢者との出会い",
       "type": "file",
-      "file": "賢者との出会い.md",
+      "file": "scenario\\賢者との出会い.md",
       "x": 350,
       "y": 0,
       "width": 300,
@@ -21,7 +21,7 @@
     {
       "id": "最終決戦",
       "type": "file",
-      "file": "最終決戦.md",
+      "file": "scenario\\最終決戦.md",
       "x": 700,
       "y": 0,
       "width": 300,

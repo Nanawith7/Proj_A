@@ -119,6 +119,8 @@ tags: "タグ"
 
 Canvas上のレイアウト規則（サブ行分割、センタリングなど）は、ノート自身ではなく、**type定義ファイル**によって動的に与えられる。このファイルはVault内の特定の場所（デフォルト：`_types/type_definitions.yml`）に配置され、各type名をキーとして、そのtypeに属する全ノートに適用される描画パラメータを保持する。
 
+`lining` はそのtypeに割り当てられる**横列（サブ行）の数**を指定する。ノードは column-major 方式で各サブ行に振り分けられる。すなわち、全ノードをソート順に並べたとき、1番目はサブ行0、2番目はサブ行1、…、L番目はサブ行 L-1、L+1番目は再びサブ行0、という具合に巡回配置される。
+
 ```yaml
 # _types/type_definitions.yml
 character:
@@ -162,15 +164,15 @@ Obsidian外部のスクリプト（Python、Node.js）を用いる場合、Vault
 ノードのtypeに応じた `lining` および `centering` の値は、type定義ファイル（2.5節）から取得される。あるtypeが定義ファイルに存在しない場合は、デフォルト値（`lining: 1`, `centering: false`）が用いられる。
 
 `x_axis_key`が指定されていない場合、ノードは単一のグリッドに配置され、type定義の`centering`に従って水平方向のセンタリングが行われる。`x_axis_key`が指定された場合、レイアウトは以下の層で決定される。
-1.  **コンテナの生成**: 全ノードから`x_axis_key`の一意な値を収集し、昇順にソートして順序を確定する。この順序に従い、X軸上に各コンテナの始点を設定する。
-2.  **コンテナ幅の決定**: 各コンテナの最終的な幅は、そのコンテナに属する全typeの中で最大の実ノード数（type定義の`lining`を加味したサブ行分割後）によって決定される。コンテナ内に1つもノードを持たないtype行は幅の計算から除外される。
-3.  **ノードの配置**: コンテナ内部では、ノードは左端から順に等間隔で配置される。type定義に`lining`が指定されている場合、ノードはまずサブ行に順次振り分けられ、各サブ行内で左端から配置される。
+1.  **コンテナの生成**: 全ノードから`x_axis_key`の一意な値を収集し、数値優先の昇順ソートで順序を確定する。この順序に従い、X軸上に各コンテナの始点を設定する。
+2.  **コンテナ幅の決定**: 各コンテナの最終的な幅は、そのコンテナに属する全typeの中で最大の「サブ行あたりノード数」（= `ceil(そのtypeのノード数 / lining)`）によって決定される。コンテナ内に1つもノードを持たないtype行は幅の計算から除外される。
+3.  **ノードの配置**: ノードは column-major 方式でサブ行に振り分けられる。すなわち `lining=3` の場合、ソート順1番目→サブ行0、2番目→サブ行1、3番目→サブ行2、4番目→サブ行0 …という巡回配置となる。各サブ行内では左端から順に等間隔で配置される。typeのY方向の占有高さは `lining × row_height` で固定される。
 
 `x_axis_key`が指定されている場合、各コンテナの幅がデータ駆動で決定されるため、type定義の`centering`は無視される（コンテナ内では常に左詰め）。
 
 - **X座標**: 各コンテナの始点X座標に、ノードのコンテナ内インデックスと`column_width`を乗じた値を加えたもの。コンテナの始点は、その前方にある全コンテナの幅の合計で決定される。
 
-- **Y座標（type行の位置）**: 各ノードの`type`に基づき割り当てられる行のインデックスに`row_height`を乗じたもの。type定義の`lining`が指定されている場合は、サブ行のインデックスも加味される。
+- **Y座標（type行の位置）**: 各ノードの`type`に基づき割り当てられる行のインデックスに`row_height`を乗じたもの。type定義の`lining`の値がそのままサブ行数となり、ノードは column-major で各サブ行に巡回配置される。typeのY方向占有高さは `lining × row_height` で固定され、ノード数に依存しない。
 
 - **未分類領域**: `x_axis_key`の値を持たないノードはコンテナに属さないため、全コンテナの右方かつ下方に別途グリッド配置される（2.2節参照）。この領域では独自にtype行が構成され、コンテナ行とのY座標重複は生じない。
 
@@ -323,39 +325,48 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
                     }
     edges = list(edge_dict.values())
     
-    # 5. レイアウト計算 (type定義を参照)
-    def get_lining(node):
-        return type_defs.get(node.type, {}).get("lining", 1)
-    def get_centering(node):
-        return type_defs.get(node.type, {}).get("centering", False)
+    # 5. レイアウト計算 (type定義を参照, column-major分配)
+    def get_lining(node_type):
+        return type_defs.get(node_type, {}).get("lining", 1)
+    def get_centering(node_type):
+        return type_defs.get(node_type, {}).get("centering", False)
     
     if x_axis_key:
         containers = build_containers(nodes, x_axis_key, get_lining)
+        # Yオフセット: typeのlining値で固定高さを割当て
+        type_y = assign_y_offsets_by_lining(node_types, row_height, get_lining)
         all_canvas_nodes = []
         for container in containers:
-            type_rows = assign_y_coordinates(container.nodes, row_height, get_lining)
-            for type_name, row_nodes in type_rows.items():
-                subrow_assignments = assign_subrows(row_nodes, get_lining(row_nodes[0]))
-                for subrow in subrow_assignments:
+            for type_name, type_nodes in container.nodes_by_type.items():
+                lining = get_lining(type_name)
+                y_base = type_y[type_name]
+                for sub_row in range(lining):
+                    # column-major: サブ行に等間隔でノードを巡回配置
+                    sub_nodes = type_nodes[sub_row::lining]
+                    sub_y = y_base + sub_row * row_height
                     node_x = container.start_x
-                    for node in subrow.nodes:
+                    for node in sub_nodes:
                         node.x = node_x
-                        node.y = subrow.y
+                        node.y = sub_y
                         node_x += column_width
                         all_canvas_nodes.append(node)
     else:
         all_canvas_nodes = []
-        type_rows = assign_y_coordinates(nodes, row_height, get_lining)
-        max_cols = max([len(nodes) for nodes in type_rows.values()]) if type_rows else 0
-        for type_name, row_nodes in type_rows.items():
-            subrow_assignments = assign_subrows(row_nodes, get_lining(row_nodes[0]))
-            for subrow in subrow_assignments:
-                if get_centering(subrow.nodes[0]):
-                    x_pos = (max_cols - len(subrow.nodes)) * column_width / 2
+        type_y = assign_y_offsets_by_lining(node_types, row_height, get_lining)
+        for type_name, type_nodes in nodes_by_type.items():
+            lining = get_lining(type_name)
+            y_base = type_y[type_name]
+            max_cols = math.ceil(len(type_nodes) / lining)
+            for sub_row in range(lining):
+                sub_nodes = type_nodes[sub_row::lining]
+                if not sub_nodes:
+                    continue
+                sub_y = y_base + sub_row * row_height
+                if get_centering(type_name):
+                    x_pos = (max_cols - len(sub_nodes)) * column_width / 2
                 else:
                     x_pos = 0
-                sub_y = subrow.y
-                for node in subrow.nodes:
+                for node in sub_nodes:
                     node.x = x_pos
                     node.y = sub_y
                     x_pos += column_width

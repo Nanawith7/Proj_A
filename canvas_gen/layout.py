@@ -9,18 +9,18 @@ Supports two modes:
 2. Grid layout (no x_axis_key):
    Nodes are arranged in type-based rows with optional centering.
 
-Lining semantics:
+Lining semantics (column-major distribution):
   - lining = 1 (default): all nodes of a type occupy a single row.
-    No subrow splitting occurs. Container width = node count.
-  - lining >= 2: nodes are split into subrows of at most <lining>
-    nodes each (row-major). Container width = min(lining, node_count).
+  - lining >= 2: exactly <lining> subrows.  Nodes are distributed
+    column-major: subrow 0 gets node[0], node[L], node[2L], ...
+    subrow 1 gets node[1], node[1+L], ... and so on.
+  - Container width contribution per type = ceil(node_count / lining).
 """
 
 from __future__ import annotations
 
 import math
 from collections import OrderedDict
-from typing import Any
 
 from .models import (
     Container,
@@ -73,35 +73,35 @@ def _get_centering(type_name: str, type_defs: dict[str, TypeDefinition]) -> bool
     return td.centering if td else False
 
 
-def _effective_width(nodes_count: int, lining: int) -> int:
+def _effective_width(node_count: int, lining: int) -> int:
     """Compute the column width a type contributes to a container.
 
-    lining=1: all nodes in one row → width = node_count.
-    lining>=2: nodes split across subrows → width = min(lining, node_count).
+    With column-major distribution across <lining> subrows,
+    the widest subrow holds ceil(node_count / lining) nodes.
     """
-    if lining <= 1:
-        return nodes_count
-    return min(lining, nodes_count)
-
-
-def _placement_step(node_count: int, lining: int) -> int:
-    """Return the step size for iteration over subrows.
-
-    lining=1: single step spanning all nodes.
-    lining>=2: step = lining nodes per subrow.
-    """
-    if lining <= 1:
-        return max(1, node_count)  # all nodes in one subrow
-    return lining
+    if not node_count:
+        return 0
+    return math.ceil(node_count / max(1, lining))
 
 
 def _subrow_count(node_count: int, lining: int) -> int:
-    """Return the number of subrows needed for a given node count."""
+    """Return the number of subrows for a given node count.
+
+    lining defines the exact number of subrows (column-major distribution).
+    An empty type occupies 0 subrows.
+    """
     if not node_count:
         return 0
-    if lining <= 1:
-        return 1
-    return math.ceil(node_count / lining)
+    return max(1, lining)
+
+
+def _column_major_slice(nodes: list[NoteNode], sub_row: int, lining: int) -> list[NoteNode]:
+    """Slice a node list for a given subrow using column-major ordering.
+
+    sub_row=0 → nodes[0], nodes[L], nodes[2L], ...
+    sub_row=1 → nodes[1], nodes[1+L], ...
+    """
+    return nodes[sub_row::lining]
 
 
 # ---------------------------------------------------------------------------
@@ -129,7 +129,6 @@ def _collect_container_keys(
 
     keys = list(seen)
 
-    # Attempt numeric sort
     def _sort_key(k: str):
         try:
             if "." in k:
@@ -204,11 +203,14 @@ def _compute_container_start_positions(
 
 def _assign_y_offsets(
     nodes: list[NoteNode],
-    containers: list[Container],
     type_defs: dict[str, TypeDefinition],
     row_height: float,
 ) -> tuple[dict[str, float], float]:
     """Determine the Y base offset for each type row.
+
+    Y space is determined solely by the type's lining value
+    (number of subrows), not by per-container node counts.
+    This ensures consistent row spans across all containers.
 
     Returns a tuple of (type_name -> y_base dict, total_y_height).
     """
@@ -222,15 +224,7 @@ def _assign_y_offsets(
     for type_name in type_order:
         type_y[type_name] = y_cursor
         lining = _get_lining(type_name, type_defs)
-        max_subrows = 0
-        for c in containers:
-            type_nodes = c.nodes_by_type.get(type_name, [])
-            if not type_nodes:
-                continue
-            subrows_needed = _subrow_count(len(type_nodes), lining)
-            if subrows_needed > max_subrows:
-                max_subrows = subrows_needed
-        y_cursor += max(1, max_subrows) * row_height
+        y_cursor += max(1, lining) * row_height
 
     return type_y, y_cursor
 
@@ -250,13 +244,7 @@ def _compute_container_layout(
     node_width: float,
     node_height: float,
 ) -> list[PositionedNode]:
-    """Container-based layout.
-
-    Nodes WITH the x_axis_key value are placed into X-axis containers.
-    Nodes WITHOUT the value are placed in a trailing 'uncategorized'
-    region using grid layout, shifted right to follow all containers.
-    """
-    # Split nodes
+    """Container-based layout with column-major subrow distribution."""
     container_nodes = [n for n in nodes if _has_x_axis_value(n, x_axis_key)]
     fallback_nodes = [n for n in nodes if not _has_x_axis_value(n, x_axis_key)]
 
@@ -268,7 +256,7 @@ def _compute_container_layout(
         _compute_container_widths(containers, type_defs)
         _compute_container_start_positions(containers, column_width)
         type_y_offsets, total_container_y = _assign_y_offsets(
-            container_nodes, containers, type_defs, row_height
+            container_nodes, type_defs, row_height
         )
 
         for c in containers:
@@ -279,13 +267,12 @@ def _compute_container_layout(
                     continue
                 lining = _get_lining(type_name, type_defs)
                 y_base = type_y_offsets[type_name]
-                step = _placement_step(len(type_nodes), lining)
 
-                for sub_idx in range(0, len(type_nodes), step):
-                    sub_nodes = type_nodes[sub_idx: sub_idx + step]
-                    sub_row = sub_idx // step
+                for sub_row in range(max(1, lining)):
+                    sub_nodes = _column_major_slice(type_nodes, sub_row, lining)
+                    if not sub_nodes:
+                        continue
                     sub_y = y_base + sub_row * row_height
-
                     for col, node in enumerate(sub_nodes):
                         pos_x = c.start_x + col * column_width
                         result.append(PositionedNode(
@@ -300,15 +287,13 @@ def _compute_container_layout(
                             height=node_height,
                         ))
 
-        # Compute the X offset for fallback region
         total_container_width = sum(c.width_columns for c in containers) * column_width
-        fallback_x_offset = total_container_width + column_width  # gap after containers
-        fallback_y_offset = total_container_y + row_height  # gap below container rows
+        fallback_x_offset = total_container_width + column_width
+        fallback_y_offset = total_container_y + row_height
     else:
         fallback_x_offset = 0.0
         fallback_y_offset = 0.0
 
-    # Place fallback nodes using grid layout, shifted to the right/bottom
     if fallback_nodes:
         if container_nodes:
             print(f"[WARN] {len(fallback_nodes)} node(s) lack '{x_axis_key}' -- placed in uncategorized area.")
@@ -337,7 +322,7 @@ def _compute_grid_layout(
     node_height: float,
     y_base: float = 0.0,
 ) -> list[PositionedNode]:
-    """Simple grid layout grouped by type, with lining and centering.
+    """Grid layout grouped by type, with column-major lining and centering.
 
     Args:
         y_base: Base Y offset (used when embedding grid below a container region).
@@ -360,12 +345,13 @@ def _compute_grid_layout(
 
         centering = _get_centering(type_name, type_defs)
         lining = _get_lining(type_name, type_defs)
-        step = _placement_step(len(type_nodes), lining)
+        subrows = max(1, lining)
         max_subrow_width = _effective_width(len(type_nodes), lining)
 
-        for sub_idx in range(0, len(type_nodes), step):
-            sub_nodes = type_nodes[sub_idx: sub_idx + step]
-            sub_row = sub_idx // step
+        for sub_row in range(subrows):
+            sub_nodes = _column_major_slice(type_nodes, sub_row, lining)
+            if not sub_nodes:
+                continue
             sub_y = y_cursor + sub_row * row_height
 
             if centering and max_subrow_width > 0:
@@ -386,6 +372,6 @@ def _compute_grid_layout(
                     height=node_height,
                 ))
 
-        y_cursor += _subrow_count(len(type_nodes), lining) * row_height
+        y_cursor += subrows * row_height
 
     return result

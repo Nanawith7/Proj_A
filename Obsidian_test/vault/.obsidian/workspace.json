@@ -4,24 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "d434fc161718d223",
+        "id": "6c86c6abfe6ea1b6",
         "type": "tabs",
         "children": [
           {
-            "id": "c3c21874098ab501",
+            "id": "5de152c9fde8f149",
             "type": "leaf",
             "state": {
-              "type": "canvas",
-              "state": {
-                "file": "timeline.canvas",
-                "viewState": {
-                  "x": 1729.172539538652,
-                  "y": 867.786584456303,
-                  "zoom": 1.1102230246251565e-16
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "timeline"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "グラフビュー"
             }
           }
         ]
@@ -183,16 +176,41 @@
       "bases:新規ベースを作成": false
     }
   },
-  "active": "c3c21874098ab501",
+  "active": "5de152c9fde8f149",
   "lastOpenFiles": [
-    "events.canvas",
-    "scenarios.canvas",
+    "organization/魔族連合.md",
+    "organization/王国.md",
+    "event/平和条約締結.md",
+    "event/大戦争勃発.md",
+    "event/王国建国.md",
+    "scenario/最終決戦.md",
+    "scenario/賢者との出会い.md",
+    "scenario/冒険の始まり.md",
+    "character/元魔王.md",
+    "character/予言者.md",
+    "character/盗賊.md",
+    "character/王女.md",
+    "character/四天王B.md",
+    "character/四天王A.md",
+    "character/幼なじみ.md",
+    "character/騎士団長.md",
+    "character/魔王.md",
+    "character/賢者.md",
+    "character/主人公.md",
+    "organization",
+    "event",
+    "scenario",
+    "character",
     "timeline.canvas",
     "characters.canvas",
-    "冒険の始まり.md",
-    "賢者.md",
-    "主人公.md",
-    "王国建国.md",
-    "王国.md"
+    "元魔王.md",
+    "予言者.md",
+    "盗賊.md",
+    "王女.md",
+    "四天王B.md",
+    "四天王A.md",
+    "幼なじみ.md",
+    "events.canvas",
+    "scenarios.canvas"
   ]
 }

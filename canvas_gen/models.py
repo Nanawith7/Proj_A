@@ -56,15 +56,14 @@ class Container:
     def effective_width(self, type_name: str, lining: int) -> int:
         """Return the effective column width for a type within this container.
 
-        lining=1: all nodes in one row → width = node_count.
-        lining>=2: nodes split across subrows → width = min(lining, node_count).
+        Column-major distribution across <lining> subrows:
+        width = ceil(node_count / lining).
         """
+        import math
         nodes = self.nodes_by_type.get(type_name, [])
         if not nodes:
             return 0
-        if lining <= 1:
-            return len(nodes)
-        return min(lining, len(nodes))
+        return math.ceil(len(nodes) / max(1, lining))
 
 
 @dataclass
