@@ -82,6 +82,7 @@ function applyToForm(nv){
     propRows.push({key:k,style:v.style||'text',shape:v.shape||'round',bg:v.bg||'#fff2',textColor:v.textColor||'#eee',px:v.position?.x||'',py:v.position?.y||''});
   });
   renderProps();
+  renderProps();
 }
 
 function setVal(id,val){
@@ -99,7 +100,12 @@ function renderProps(){
   div.innerHTML='';
   propRows.forEach((pr,i)=>{
     const row=document.createElement('div');row.className='prop-row';
-    row.innerHTML=`<span>${i+1}</span><input value="${pr.key}" placeholder="key" onchange="propRows[${i}].key=this.value;update()"><select onchange="propRows[${i}].style=this.value;update()"><option ${pr.style==='pill'?'selected':''}>pill</option><option ${pr.style==='text'?'selected':''}>text</option></select><input value="${pr.px}" placeholder="x" style="width:40px" onchange="propRows[${i}].px=this.value;update()"><input value="${pr.py}" placeholder="y" style="width:40px" onchange="propRows[${i}].py=this.value;update()"><button onclick="propRows.splice(${i},1);renderProps();update()" style="background:#533483;padding:2px 6px;font-size:10px">x</button>`;
+    const isPill=pr.style==='pill';
+    let extraHTML='';
+    if(isPill){
+      extraHTML=`<select onchange="propRows[${i}].shape=this.value;update()" style="width:60px"><option ${pr.shape==='round'?'selected':''}>round</option><option ${pr.shape==='diamond'?'selected':''}>diamond</option><option ${pr.shape==='rect'?'selected':''}>rect</option></select><input value="${pr.bg}" placeholder="bg" style="width:60px" onchange="propRows[${i}].bg=this.value;update()"><input value="${pr.textColor}" placeholder="fg" style="width:60px" onchange="propRows[${i}].textColor=this.value;update()">`;
+    }
+    row.innerHTML=`<span>${i+1}</span><input value="${pr.key}" placeholder="key" onchange="propRows[${i}].key=this.value;update()"><select onchange="propRows[${i}].style=this.value;renderProps();update()"><option ${pr.style==='pill'?'selected':''}>pill</option><option ${pr.style==='text'?'selected':''}>text</option></select>${extraHTML}<input value="${pr.px}" placeholder="x" style="width:40px" onchange="propRows[${i}].px=this.value;update()"><input value="${pr.py}" placeholder="y" style="width:40px" onchange="propRows[${i}].py=this.value;update()"><button onclick="propRows.splice(${i},1);renderProps();update()" style="background:#533483;padding:2px 6px;font-size:10px">x</button>`;
     div.appendChild(row);
   });
 }
