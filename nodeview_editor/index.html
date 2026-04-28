@@ -53,6 +53,8 @@
   </div>
   <label>Background opacity <input type="range" id="nv-bgop" value="0.15" min="0" max="1" step="0.05" onchange="update()"></label>
   <label>Background image <input type="text" id="nv-bg" placeholder="char_bg.png" onchange="update()"></label>
+  <label>Load preview BG <input type="file" id="bg-file" accept="image/*" onchange="loadBGFile(this)"></label>
+  <input type="text" id="bg-url" placeholder="or paste image URL" onchange="loadBGURL(this.value)" style="margin-top:2px;font-size:10px">
 
   <h3>Expand Size</h3>
   <div class="row">

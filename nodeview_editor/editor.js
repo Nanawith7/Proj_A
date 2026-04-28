@@ -2,6 +2,7 @@
 let templates={};
 let currentName='';
 let propRows=[];
+let previewBG=null; // loaded background image for preview
 
 const SVGNS='http://www.w3.org/2000/svg';
 
@@ -179,11 +180,20 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
   const g=document.createElementNS(SVGNS,'g');
 
   // Background
-  if(expanded&&nv.background){
-    const bg=document.createElementNS(SVGNS,'rect');
-    bg.setAttribute('width',w);bg.setAttribute('height',h);
-    bg.setAttribute('fill','#9C27B0');bg.setAttribute('opacity',(nv.layout?.backgroundOpacity??0.15));
-    g.appendChild(bg);
+  if(expanded){
+    if(previewBG){
+      const bgImg=document.createElementNS(SVGNS,'image');
+      bgImg.setAttribute('href',previewBG);
+      bgImg.setAttribute('width',w);bgImg.setAttribute('height',h);
+      bgImg.setAttribute('preserveAspectRatio','xMidYMid slice');
+      bgImg.setAttribute('opacity',nv.layout?.backgroundOpacity??1);
+      g.appendChild(bgImg);
+    }else if(nv.background){
+      const bg=document.createElementNS(SVGNS,'rect');
+      bg.setAttribute('width',w);bg.setAttribute('height',h);
+      bg.setAttribute('fill','#9C27B0');bg.setAttribute('opacity',(nv.layout?.backgroundOpacity??0.15));
+      g.appendChild(bg);
+    }
   }
 
   // Rect
@@ -212,17 +222,28 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
     g.appendChild(txt);
   }
 
-  // Props (expanded)
+  // Props (expanded) + draggable markers
   if(expanded&&propRows.length){
     const startY=nv.layout?.bodyPosition?.y||(lp.contentY+12);
     propRows.forEach((pr,i)=>{
       if(!pr.key)return;
       const y=pr.py?parseInt(pr.py):startY+i*22;
       const x=pr.px?parseInt(pr.px):8;
+
+      // Draggable marker
+      const marker=document.createElementNS(SVGNS,'rect');
+      marker.setAttribute('x',x-2);marker.setAttribute('y',y-2);
+      marker.setAttribute('width',8);marker.setAttribute('height',8);
+      marker.setAttribute('fill','#e94560');marker.setAttribute('rx','2');
+      marker.setAttribute('cursor','grab');marker.setAttribute('data-pi',i);
+      marker.onmousedown=e=>startDragProp(e,i,svgId);
+      g.appendChild(marker);
+
       const txt=document.createElementNS(SVGNS,'text');
-      txt.setAttribute('x',x);txt.setAttribute('y',y+14);
-      txt.setAttribute('fill','#ddd');txt.setAttribute('font-size','10');
-      txt.textContent=`${pr.key}: ...`;
+      txt.setAttribute('x',x+10);txt.setAttribute('y',y+10);
+      txt.setAttribute('fill','#fff');txt.setAttribute('font-size','10');
+      txt.setAttribute('font-weight','bold');
+      txt.textContent=pr.key;
       g.appendChild(txt);
     });
   }
@@ -253,5 +274,46 @@ async function saveTemplate(){
     document.getElementById('status').textContent='Save failed';
   }
 }
+
+function loadBGFile(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{previewBG=reader.result;update();};
+  reader.readAsDataURL(file);
+}
+
+function loadBGURL(url){
+  if(!url){previewBG=null;update();return;}
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  img.onload=()=>{
+    const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+    c.getContext('2d').drawImage(img,0,0);
+    previewBG=c.toDataURL();
+    update();
+  };
+  img.onerror=()=>{previewBG=null;update();};
+  img.src=url;
+}
+
+// ═══════ Drag property positions in preview ═══════
+let dragPI=-1,dragSvgId='';
+function startDragProp(e,pi,svgId){
+  e.stopPropagation();e.preventDefault();
+  dragPI=pi;dragSvgId=svgId;
+}
+window.addEventListener('mousemove',e=>{
+  if(dragPI<0)return;
+  const svg=document.getElementById(dragSvgId);
+  if(!svg)return;
+  const rect=svg.getBoundingClientRect();
+  const x=Math.round((e.clientX-rect.left)/(rect.width/380));
+  const y=Math.round((e.clientY-rect.top)/(rect.height/280));
+  propRows[dragPI].px=x>0?String(x):'';
+  propRows[dragPI].py=y>0?String(y):'';
+  renderProps();update();
+});
+window.addEventListener('mouseup',()=>{dragPI=-1;});
 
 init();
