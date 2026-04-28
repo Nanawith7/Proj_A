@@ -23,12 +23,14 @@ function layoutParams(nv, nw, nh) {
   if (s === 'circle') {
     const d = Math.min(nw, nh);
     const ox = Math.floor((nw - d) / 2), oy = Math.floor((nh - d) / 2);
+    // Collapsed title uses tight padding; body uses contentPadY
+    const titlePY = nv.layout?.titlePadY ?? cpY;
     return {
       contentX: ox + cpX, contentY: oy + cpY,
       contentW: d - 2 * cpX, contentH: d - 2 * cpY,
       titleAnchor: 'middle', titleVAlign: 'center',
       titleX: nw / 2, titleY: oy + d / 2 + (nv.fontSize || 12) / 3,
-      titlePadX: tpX, titlePadY: tpY,
+      titlePadX: tpX, titlePadY: titlePY,
       titleWrap: nv.titleWrap ?? false,
     };
   }
