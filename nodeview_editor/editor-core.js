@@ -59,11 +59,23 @@ function getNum(id){return parseFloat(document.getElementById(id)?.value)||0;}
 function renderProps(){
   const div=document.getElementById('props-editor');div.innerHTML='';
   propRows.forEach((pr,i)=>{
-    const row=document.createElement('div');row.className='prop-row';const isPill=pr.style==='pill';
-    let extraHTML='';
-    if(isPill)extraHTML=`<select onchange="propRows[${i}].shape=this.value;updatePreview()" style="width:60px"><option ${pr.shape==='round'?'selected':''}>round</option><option ${pr.shape==='diamond'?'selected':''}>diamond</option><option ${pr.shape==='rect'?'selected':''}>rect</option></select><input value="${pr.bg}" placeholder="bg" style="width:60px" oninput="propRows[${i}].bg=this.value;updatePreview()"><input value="${pr.textColor}" placeholder="fg" style="width:60px" oninput="propRows[${i}].textColor=this.value;updatePreview()">`;
-    row.innerHTML=`<span>${i+1}</span><input value="${pr.key}" placeholder="key" oninput="propRows[${i}].key=this.value;updatePreview()"><select onchange="propRows[${i}].style=this.value;renderProps();updatePreview()"><option ${pr.style==='pill'?'selected':''}>pill</option><option ${pr.style==='text'?'selected':''}>text</option></select>${extraHTML}<input value="${pr.px}" placeholder="x" style="width:40px" oninput="propRows[${i}].px=this.value;updatePreview()"><input value="${pr.py}" placeholder="y" style="width:40px" oninput="propRows[${i}].py=this.value;updatePreview()"><button onclick="propRows.splice(${i},1);renderProps();updatePreview()" style="background:#533483;padding:2px 6px;font-size:10px">x</button>`;
-    div.appendChild(row);
+    const isPill=pr.style==='pill';
+    const wrapper=document.createElement('div');wrapper.style.cssText='margin:4px 0;padding:4px;background:#0f3460;border-radius:3px';
+
+    // Row 1: key + style + delete
+    const r1=document.createElement('div');r1.className='prop-row';
+    r1.innerHTML=`<span>${i+1}</span><input value="${pr.key}" placeholder="key" oninput="propRows[${i}].key=this.value;updatePreview()"><select onchange="propRows[${i}].style=this.value;renderProps();updatePreview()"><option ${pr.style==='pill'?'selected':''}>pill</option><option ${pr.style==='text'?'selected':''}>text</option></select><button onclick="propRows.splice(${i},1);renderProps();updatePreview()" style="background:#533483;padding:2px 6px;font-size:10px">x</button>`;
+    wrapper.appendChild(r1);
+
+    // Row 2: position + optional pill extras
+    const r2=document.createElement('div');r2.className='prop-row';
+    let html2=`<span></span><input value="${pr.px}" placeholder="x" style="width:50px" oninput="propRows[${i}].px=this.value;updatePreview()"><input value="${pr.py}" placeholder="y" style="width:50px" oninput="propRows[${i}].py=this.value;updatePreview()"><span></span>`;
+    if(isPill){
+      html2=`<span></span><select onchange="propRows[${i}].shape=this.value;updatePreview()" style="width:60px"><option ${pr.shape==='round'?'selected':''}>round</option><option ${pr.shape==='diamond'?'selected':''}>diamond</option><option ${pr.shape==='rect'?'selected':''}>rect</option></select><input value="${pr.bg}" placeholder="bg" style="width:55px" oninput="propRows[${i}].bg=this.value;updatePreview()"><input value="${pr.textColor}" placeholder="fg" style="width:55px" oninput="propRows[${i}].textColor=this.value;updatePreview()"><span></span>`;
+    }
+    r2.innerHTML=html2;
+    wrapper.appendChild(r2);
+    div.appendChild(wrapper);
   });
 }
 function addProp(){propRows.push({key:'newKey',style:'text',shape:'round',bg:'#fff2',textColor:'#eee',px:'',py:''});renderProps();updatePreview();}
