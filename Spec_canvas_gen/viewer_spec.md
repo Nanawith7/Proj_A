@@ -429,13 +429,46 @@ nodeviewの各プロパティに `position: {x, y}` を指定することで、�
 
 ### 8.9 アスペクト比維持
 
-展開時、元ノードの縦横比（`width / height`）が維持される。
+展開時、元ノードの縦横比が維持される。全形状で統一されたロジック：
 
-- **circle形状**: 直径 = `max(expW, expH, neededW, neededH)` で正方形を保証
-- **rect/round形状**: 元ノードの縦横比 `ow/oh` に従い、短辺を長辺に合わせて拡張
+- **circle形状**: `expandMinW / expandMinH` の比率に従う（正方形強制は廃止）
+- **rect/round形状**: 元ノードの `width / height` 比率に従う
 - 計算後 `max(neededW/neededH)` で本文収容を保証
 
-### 8.10 editor_spec.md
+### 8.10 テキスト色設定
+
+nodeviewの `layout` で本文のテキスト色を指定できる：
+
+```json
+"layout": {
+  "titleColor": "#e94560",   // タイトル文字色（デフォルト #e94560）
+  "bodyColor": "#ddd",        // 本文文字色（デフォルト #ddd）
+  "quoteColor": "#aaa"        // 引用文字色（デフォルト #aaa）
+}
+```
+
+プロパティごとの色は `properties.{key}.textColor` で指定：
+```json
+"properties": {
+  "Property1": { "textColor": "#ff00ff", "position": {...} }
+}
+```
+
+### 8.11 ビューアGUIのフィルタ機能
+
+HTMLビューアのサイドバーで利用可能な全フィルタパラメータ：
+
+| 項目 | 説明 | 例 |
+|---|---|---|
+| Filter | AND条件 | `type=character` |
+| Exclude | 除外条件 | `tags=human` |
+| Base Node | BFS起点ノード | `魔王` |
+| Depth | ホップ数 | `2` |
+| Include | 追加条件（剪定保護） | `type=era` |
+| Sort | ソートキー | `title` |
+| Prune | 孤立ノード削除 | checkbox |
+
+### 8.12 editor_spec.md
 
 Nodeview Editorの仕様は別途 `Spec_canvas_gen/editor_spec.md` に記載。
 
