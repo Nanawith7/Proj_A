@@ -32,8 +32,9 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
   const op=expanded?(nv.layout?.expandedFillOpacity):(nv.layout?.collapsedFillOpacity);if(op!==undefined)rect.setAttribute('opacity',op);g.appendChild(rect);
   if(!expanded){const fs=nv.fontSize||12,txt=document.createElementNS(SVGNS,'text');txt.setAttribute('x',lp.titleAnchor==='middle'?lp.titleX:lp.titleX+4);txt.setAttribute('y',lp.titleY+fs/2);txt.setAttribute('fill','#fff');txt.setAttribute('font-size',fs);txt.setAttribute('text-anchor',lp.titleAnchor==='middle'?'middle':'start');txt.textContent='Title';g.appendChild(txt);}
   if(expanded){
-    const by=nv.layout?.bodyPosition?.y||(lp.contentY+12),bx=nv.layout?.bodyPosition?.x||lp.contentX;
-    const ty=nv.layout?.titlePosition?.y||by,tx=nv.layout?.titlePosition?.x||bx;
+    const by0=nv.layout?.bodyPosition?.y||(lp.contentY+12),bx0=nv.layout?.bodyPosition?.x||lp.contentX;
+    const ty0=nv.layout?.titlePosition?.y||by0,tx0=nv.layout?.titlePosition?.x||bx0;
+    const by=toPctY(by0,h),bx=toPctX(bx0,w),ty=toPctY(ty0,h),tx=toPctX(tx0,w);
     const t1=document.createElementNS(SVGNS,'text');t1.setAttribute('x',tx+10);t1.setAttribute('y',ty+6);t1.setAttribute('fill','#e94560');t1.setAttribute('font-size','13');t1.setAttribute('font-weight','bold');t1.textContent='Title';g.appendChild(t1);
     const t2=document.createElementNS(SVGNS,'text');t2.setAttribute('x',bx+10);t2.setAttribute('y',by+6);t2.setAttribute('fill','#aaa');t2.setAttribute('font-size','9');t2.textContent='Body text ...';g.appendChild(t2);
     propRows.forEach((pr,i)=>{if(!pr.key||!pr.px||!pr.py)return;const x=toPctX(pr.px,w),y=toPctY(pr.py,h);if(x<0||y<0)return;const t=document.createElementNS(SVGNS,'text');t.setAttribute('x',x+10);t.setAttribute('y',y+6);t.setAttribute('fill','#fff');t.setAttribute('font-size','9');t.textContent=pr.key;g.appendChild(t);});
@@ -57,9 +58,13 @@ window.addEventListener('mousemove',e=>{
   const vb=svg.viewBox.baseVal,r=svg.getBoundingClientRect(),sx=vb.width/r.width,sy=vb.height/r.height;
   const pX=Math.max(0,Math.min(100,(e.clientX-r.left)*sx/vb.width*100)).toFixed(1);
   const pY=Math.max(0,Math.min(100,(e.clientY-r.top)*sy/vb.height*100)).toFixed(1);
-  if(dragMode==='title'){setVal('nv-tdx',pX+'%');setVal('nv-tdy',pY+'%');}
-  else if(dragMode==='body'){setVal('nv-bdx',pX+'%');setVal('nv-bdy',pY+'%');}
-  else if(dragMode==='prop'){const i=parseInt(dragIdx);if(i>=0&&i<propRows.length){propRows[i].px=pX+'%';propRows[i].py=pY+'%';renderProps();}}
+  if(dragMode==='title'){
+    document.getElementById('nv-tdx').value=pX+'%';
+    document.getElementById('nv-tdy').value=pY+'%';
+  }else if(dragMode==='body'){
+    document.getElementById('nv-bdx').value=pX+'%';
+    document.getElementById('nv-bdy').value=pY+'%';
+  }else if(dragMode==='prop'){const i=parseInt(dragIdx);if(i>=0&&i<propRows.length){propRows[i].px=pX+'%';propRows[i].py=pY+'%';renderProps();}}
   document.getElementById('json-output').value=JSON.stringify(buildNV(),null,2);
 });
 window.addEventListener('mouseup',()=>{if(dragMode)updatePreview();dragMode='';dragIdx=null;});
