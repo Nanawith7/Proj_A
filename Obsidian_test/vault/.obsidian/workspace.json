@@ -11,10 +11,17 @@
             "id": "2ec1532ea9941862",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "グラフビュー"
+              "type": "canvas",
+              "state": {
+                "file": "devil_timeline.canvas",
+                "viewState": {
+                  "x": 577.3459122212679,
+                  "y": 1139.9788650453474,
+                  "zoom": -0.16135330422981997
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "devil_timeline"
             }
           }
         ]

@@ -194,6 +194,10 @@ Example:
         "--icon-gap", type=int, default=4,
         help="Gap between icon and file node in pixels (default: 4).",
     )
+    p.add_argument(
+        "--prune-orphans", action="store_true", default=False,
+        help="Remove nodes with zero edges from the final canvas.",
+    )
 
     return p
 
@@ -309,6 +313,18 @@ def main(argv: list[str] | None = None) -> int:
     # --- Generate edges ---
     edges = generate_edges(nodes, vault_index, label_map)
     print(f"[INFO] Generated {len(edges)} edges.")
+
+    # --- Prune orphaned nodes (zero edges) ---
+    if args.prune_orphans:
+        connected_stems: set[str] = set()
+        for edge in edges:
+            connected_stems.add(edge.from_node)
+            connected_stems.add(edge.to_node)
+        before = len(nodes)
+        nodes = [n for n in nodes if n.stem in connected_stems]
+        pruned = before - len(nodes)
+        if pruned:
+            print(f"[INFO] Pruned {pruned} orphaned node(s) with no edges.")
 
     # --- Compute layout ---
     positioned = compute_layout(

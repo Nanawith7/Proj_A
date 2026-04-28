@@ -1,65 +1,449 @@
 {
-	"nodes":[
-		{"id":"大戦争勃発_icon","type":"file","file":"_icons/type_event.png","x":50,"y":-74,"width":50,"height":50},
-		{"id":"大戦争勃発","type":"file","file":"event/大戦争勃発.md","x":50,"y":0,"width":220,"height":140,"color":"#E91E63"},
-		{"id":"最終決戦_icon","type":"file","file":"_icons/type_scenario.png","x":400,"y":426,"width":50,"height":50},
-		{"id":"最終決戦","type":"file","file":"scenario/最終決戦.md","x":400,"y":500,"width":280,"height":160,"color":"#FF9800"},
-		{"id":"平和条約締結_icon","type":"file","file":"_icons/type_event.png","x":750,"y":-74,"width":50,"height":50},
-		{"id":"平和条約締結","type":"file","file":"event/平和条約締結.md","x":750,"y":0,"width":220,"height":140,"color":"#E91E63"},
-		{"id":"ruler","type":"file","file":"tag/ruler.md","x":0,"y":1000,"width":100,"height":80,"color":"#607D8B"},
-		{"id":"ancient","type":"file","file":"tag/ancient.md","x":350,"y":1000,"width":100,"height":80,"color":"#607D8B"},
-		{"id":"general","type":"file","file":"tag/general.md","x":1050,"y":1250,"width":100,"height":80,"color":"#607D8B"},
-		{"id":"元魔王_icon","type":"file","file":"_icons/node_元魔王.png","x":350,"y":1426,"width":65,"height":65},
-		{"id":"元魔王","type":"file","file":"character/元魔王.md","x":350,"y":1500,"width":160,"height":120,"color":"#2196F3"},
-		{"id":"四天王A_icon","type":"file","file":"_icons/node_四天王A.png","x":700,"y":1426,"width":50,"height":50},
-		{"id":"四天王A","type":"file","file":"character/四天王A.md","x":700,"y":1500,"width":160,"height":120,"color":"#2196F3"},
-		{"id":"四天王B_icon","type":"file","file":"_icons/node_四天王B.png","x":525,"y":1676,"width":50,"height":50},
-		{"id":"四天王B","type":"file","file":"character/四天王B.md","x":525,"y":1750,"width":160,"height":120,"color":"#2196F3"},
-		{"id":"魔王_icon","type":"file","file":"_icons/node_魔王.png","x":525,"y":1926,"width":80,"height":70},
-		{"id":"魔王","type":"file","file":"character/魔王.md","x":525,"y":2000,"width":160,"height":120,"color":"#2196F3"},
-		{"id":"魔族連合_icon","type":"file","file":"_icons/type_organization.png","x":350,"y":2176,"width":50,"height":50},
-		{"id":"魔族連合","type":"file","file":"organization/魔族連合.md","x":350,"y":2250,"width":200,"height":120,"color":"#4CAF50"},
-		{"id":"王国_icon","type":"file","file":"_icons/type_organization.png","x":700,"y":2176,"width":50,"height":50},
-		{"id":"王国","type":"file","file":"organization/王国.md","x":700,"y":2250,"width":200,"height":120,"color":"#4CAF50"},
-		{"id":"human","type":"file","file":"tag/human.md","x":920,"y":820,"width":100,"height":80,"color":"#607D8B"},
-		{"id":"villain","type":"file","file":"tag/villain.md","x":700,"y":1250,"width":100,"height":80,"color":"#607D8B"},
-		{"id":"demon","type":"file","file":"tag/demon.md","x":350,"y":1250,"width":100,"height":80,"color":"#607D8B"},
-		{"id":"knight","type":"file","file":"tag/knight.md","x":1180,"y":900,"width":100,"height":80,"color":"#607D8B"},
-		{"id":"leader","type":"file","file":"tag/leader.md","x":-260,"y":1250,"width":100,"height":80,"color":"#607D8B"}
-	],
-	"edges":[
-		{"id":"befdb5d5-4481-4451-87b4-1fb7db8c90f6","fromNode":"大戦争勃発","fromSide":"bottom","toNode":"魔王","toSide":"top","color":"#9E9E9E","label":"関連"},
-		{"id":"18605de0-7c0a-45e7-a23c-1574a3801c59","fromNode":"大戦争勃発","fromSide":"bottom","toNode":"最終決戦","toSide":"top","color":"#9E9E9E","label":"関連"},
-		{"id":"81aebb96-cce7-41d8-97bd-f7f5afbfb99a","fromNode":"最終決戦","fromSide":"bottom","toNode":"魔王","toSide":"top","color":"#2196F3","label":"登場人物"},
-		{"id":"72ccce34-1ba6-4310-9e64-a3a007839e2b","fromNode":"最終決戦","fromSide":"top","toNode":"大戦争勃発","toSide":"bottom","color":"#9E9E9E","label":"関連"},
-		{"id":"f131b45f-0600-4df3-9419-552d91da91f3","fromNode":"最終決戦","fromSide":"bottom","toNode":"王国","toSide":"top","color":"#9E9E9E","label":"関連"},
-		{"id":"4c4c0b02-d6cc-46c3-8408-e9e0030dce39","fromNode":"最終決戦","fromSide":"bottom","toNode":"魔族連合","toSide":"top","color":"#9E9E9E","label":"関連"},
-		{"id":"c7cc1396-da15-496a-b851-25fad29f2d93","fromNode":"平和条約締結","fromSide":"bottom","toNode":"最終決戦","toSide":"top","color":"#9E9E9E","label":"関連"},
-		{"id":"26c72081-89fb-437d-8770-b193a2f70246","fromNode":"平和条約締結","fromSide":"bottom","toNode":"魔王","toSide":"top","color":"#9E9E9E","label":"関連"},
-		{"id":"b2c04a6b-08c5-4e39-aa64-976b92958206","fromNode":"平和条約締結","fromSide":"bottom","toNode":"王国","toSide":"top","color":"#9E9E9E","label":"関連"},
-		{"id":"357b0448-9013-45a0-a71d-05def3db2987","fromNode":"平和条約締結","fromSide":"bottom","toNode":"魔族連合","toSide":"top","color":"#9E9E9E","label":"関連"},
-		{"id":"3a01897f-a825-44db-b600-dc4f5abe3401","fromNode":"元魔王","fromSide":"top","toNode":"demon","toSide":"bottom","label":"タグ"},
-		{"id":"48bb7a27-6607-4300-bca0-ee101d18729e","fromNode":"元魔王","fromSide":"top","toNode":"ancient","toSide":"bottom","label":"タグ"},
-		{"id":"9d8b3fd5-ea80-4b01-b32f-04ca56eb37af","fromNode":"元魔王","fromSide":"bottom","toNode":"魔王","toSide":"top","color":"#00BCD4","label":"家族"},
-		{"id":"8d79f2d3-eaf2-43f8-ab1d-3cdbc357af9b","fromNode":"四天王B","fromSide":"top","toNode":"demon","toSide":"bottom","label":"タグ"},
-		{"id":"8fff0639-4a24-465f-b76c-67bb5687799a","fromNode":"四天王B","fromSide":"top","toNode":"general","toSide":"bottom","label":"タグ"},
-		{"id":"d7f0c4be-455d-44b9-b5eb-3d1b6aac812e","fromNode":"四天王B","fromSide":"bottom","toNode":"魔族連合","toSide":"top","color":"#4CAF50","label":"所属"},
-		{"id":"cf8c42e6-cc69-4c85-8c9f-ff72ccbdc525","fromNode":"四天王B","fromSide":"bottom","toNode":"魔王","toSide":"top","color":"#4CAF50","label":"味方"},
-		{"id":"ecc2a32b-b4d9-4dc4-8386-0c98046edc26","fromNode":"四天王B","fromSide":"top","toNode":"四天王A","toSide":"bottom","color":"#4CAF50","label":"味方"},
-		{"id":"c2865fc0-c9b0-4d62-9d0b-521338d1d95b","fromNode":"魔王","fromSide":"top","toNode":"villain","toSide":"bottom","label":"タグ"},
-		{"id":"2f10c6d6-640c-4168-9af7-d01b348f9e9d","fromNode":"魔王","fromSide":"top","toNode":"demon","toSide":"bottom","label":"タグ"},
-		{"id":"55f52cc3-6ebf-4feb-83a9-b82fc89c5c9d","fromNode":"魔王","fromSide":"top","toNode":"ruler","toSide":"bottom","label":"タグ"},
-		{"id":"ff669135-dd77-407e-8588-d1aa55d19566","fromNode":"魔王","fromSide":"bottom","toNode":"魔族連合","toSide":"top","color":"#4CAF50","label":"所属"},
-		{"id":"c3c6a087-a11a-4a49-880b-20fb4eb8fa2a","fromNode":"魔王","fromSide":"top","toNode":"四天王B","toSide":"bottom","color":"#4CAF50","label":"味方"},
-		{"id":"5a065c21-4254-4aa9-ae91-7fa6cf64f735","fromNode":"魔王","fromSide":"top","toNode":"元魔王","toSide":"bottom","color":"#00BCD4","label":"家族"},
-		{"id":"e9b7d382-f696-4c3d-8a5a-115ded554c11","fromNode":"魔王","fromSide":"top","toNode":"四天王A","toSide":"bottom","color":"#9C27B0","label":"嫌悪"},
-		{"id":"ad5b29f8-334b-41f6-8ce6-d3b0245e7995","fromNode":"魔王","fromSide":"top","toNode":"大戦争勃発","toSide":"bottom","color":"#9E9E9E","label":"関連"},
-		{"id":"f9167b21-18f8-4709-a8cb-37ac55a928cc","fromNode":"魔王","fromSide":"top","toNode":"最終決戦","toSide":"bottom","color":"#9E9E9E","label":"関連"},
-		{"id":"a5582679-5b06-49b0-a23c-eb4e110240f4","fromNode":"魔王","fromSide":"top","toNode":"平和条約締結","toSide":"bottom","color":"#9E9E9E","label":"関連"},
-		{"id":"8fbe9876-b2eb-4801-93b7-eaffcb5e9c16","fromNode":"四天王A","fromSide":"left","toNode":"demon","toSide":"right","label":"タグ"},
-		{"id":"1994f8d8-7fb3-4b07-8955-c3ebbc7d21c8","fromNode":"四天王A","fromSide":"top","toNode":"general","toSide":"bottom","label":"タグ"},
-		{"id":"e40740e3-eabc-4b04-b069-bf706a4cdade","fromNode":"四天王A","fromSide":"bottom","toNode":"魔族連合","toSide":"top","color":"#4CAF50","label":"所属"},
-		{"id":"98206b69-2d06-4c72-aadd-e5659f5361d1","fromNode":"四天王A","fromSide":"bottom","toNode":"魔王","toSide":"top","color":"#9C27B0","label":"嫌悪"},
-		{"id":"c95ca376-3c33-49c6-a1df-9a6ab9811ed6","fromNode":"四天王A","fromSide":"bottom","toNode":"四天王B","toSide":"top","color":"#4CAF50","label":"味方"}
-	]
+  "nodes": [
+    {
+      "id": "大戦争勃発_icon",
+      "type": "file",
+      "file": "_icons/type_event.png",
+      "x": 0,
+      "y": -74,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "大戦争勃発",
+      "type": "file",
+      "file": "event/大戦争勃発.md",
+      "x": 0,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "最終決戦_icon",
+      "type": "file",
+      "file": "_icons/type_scenario.png",
+      "x": 350,
+      "y": 426,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "最終決戦",
+      "type": "file",
+      "file": "scenario/最終決戦.md",
+      "x": 350,
+      "y": 500,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "平和条約締結_icon",
+      "type": "file",
+      "file": "_icons/type_event.png",
+      "x": 700,
+      "y": -74,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "平和条約締結",
+      "type": "file",
+      "file": "event/平和条約締結.md",
+      "x": 700,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "魔族連合_icon",
+      "type": "file",
+      "file": "_icons/type_organization.png",
+      "x": 300,
+      "y": 926,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "魔族連合",
+      "type": "file",
+      "file": "organization/魔族連合.md",
+      "x": 300,
+      "y": 1000,
+      "width": 200,
+      "height": 120,
+      "color": "#4CAF50"
+    },
+    {
+      "id": "王国_icon",
+      "type": "file",
+      "file": "_icons/type_organization.png",
+      "x": 650,
+      "y": 926,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "王国",
+      "type": "file",
+      "file": "organization/王国.md",
+      "x": 650,
+      "y": 1000,
+      "width": 200,
+      "height": 120,
+      "color": "#4CAF50"
+    },
+    {
+      "id": "demon",
+      "type": "file",
+      "file": "tag/demon.md",
+      "x": 125,
+      "y": 1250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "ancient",
+      "type": "file",
+      "file": "tag/ancient.md",
+      "x": 475,
+      "y": 1250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "general",
+      "type": "file",
+      "file": "tag/general.md",
+      "x": 825,
+      "y": 1250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "villain",
+      "type": "file",
+      "file": "tag/villain.md",
+      "x": 300,
+      "y": 1500,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "ruler",
+      "type": "file",
+      "file": "tag/ruler.md",
+      "x": 650,
+      "y": 1500,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "四天王B_icon",
+      "type": "file",
+      "file": "_icons/node_四天王B.png",
+      "x": 300,
+      "y": 1676,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "四天王B",
+      "type": "file",
+      "file": "character/四天王B.md",
+      "x": 300,
+      "y": 1750,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "四天王A_icon",
+      "type": "file",
+      "file": "_icons/node_四天王A.png",
+      "x": 650,
+      "y": 1676,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "四天王A",
+      "type": "file",
+      "file": "character/四天王A.md",
+      "x": 650,
+      "y": 1750,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "魔王_icon",
+      "type": "file",
+      "file": "_icons/node_魔王.png",
+      "x": 475,
+      "y": 1926,
+      "width": 80,
+      "height": 70
+    },
+    {
+      "id": "魔王",
+      "type": "file",
+      "file": "character/魔王.md",
+      "x": 475,
+      "y": 2000,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "元魔王_icon",
+      "type": "file",
+      "file": "_icons/node_元魔王.png",
+      "x": 475,
+      "y": 2176,
+      "width": 65,
+      "height": 65
+    },
+    {
+      "id": "元魔王",
+      "type": "file",
+      "file": "character/元魔王.md",
+      "x": 475,
+      "y": 2250,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    }
+  ],
+  "edges": [
+    {
+      "id": "add839cf-202b-4fbc-9c18-d6e09fc5d49b",
+      "fromNode": "大戦争勃発",
+      "toNode": "魔王",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "88a589a1-910d-4103-8b6b-fb70453d665b",
+      "fromNode": "大戦争勃発",
+      "toNode": "最終決戦",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "874d8548-b34a-4614-b6ff-d4e91c17c06a",
+      "fromNode": "最終決戦",
+      "toNode": "魔王",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "5025937a-dc75-4c38-bb5b-2221c681ed57",
+      "fromNode": "最終決戦",
+      "toNode": "大戦争勃発",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "449d29b9-f450-46e1-91e1-19f4cb602294",
+      "fromNode": "最終決戦",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "1d8c2640-59dc-4f0c-9e49-fc623b35cb9c",
+      "fromNode": "最終決戦",
+      "toNode": "魔族連合",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "c72ebde9-984d-473e-acee-2b42b00936ee",
+      "fromNode": "平和条約締結",
+      "toNode": "最終決戦",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "09fc12cf-1816-47dc-bd60-189629cfe2df",
+      "fromNode": "平和条約締結",
+      "toNode": "魔王",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "a2fa9bbd-720a-4305-a845-f76232c0f610",
+      "fromNode": "平和条約締結",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "f93648d5-4f13-49dc-b8b1-b4b8a3e35daa",
+      "fromNode": "平和条約締結",
+      "toNode": "魔族連合",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "3f3fdffa-28fd-4d8d-b309-92bd39b3763e",
+      "fromNode": "四天王B",
+      "toNode": "demon",
+      "label": "タグ"
+    },
+    {
+      "id": "c146f232-0154-409d-9e2d-bba6f3136346",
+      "fromNode": "四天王B",
+      "toNode": "general",
+      "label": "タグ"
+    },
+    {
+      "id": "e6b8fe3d-6edb-45ff-91c9-9a96b7dc99b3",
+      "fromNode": "四天王B",
+      "toNode": "魔族連合",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "de2ed7a7-310c-4bb0-93d1-a847f94994a6",
+      "fromNode": "四天王B",
+      "toNode": "魔王",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "fce8e7e0-d2b5-4c74-8f72-f7fe18732c6c",
+      "fromNode": "四天王B",
+      "toNode": "四天王A",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "ed866eff-bd2e-469c-b858-0464b6a59173",
+      "fromNode": "魔王",
+      "toNode": "villain",
+      "label": "タグ"
+    },
+    {
+      "id": "bf19a056-ce69-4021-bff8-3f75956552a3",
+      "fromNode": "魔王",
+      "toNode": "demon",
+      "label": "タグ"
+    },
+    {
+      "id": "87699ca9-da03-4626-a172-69ba476d9a68",
+      "fromNode": "魔王",
+      "toNode": "ruler",
+      "label": "タグ"
+    },
+    {
+      "id": "9cbea383-746d-42ec-96c7-f06f99a3c4f4",
+      "fromNode": "魔王",
+      "toNode": "魔族連合",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "adfe6518-ec5e-4282-b0b0-4d0c7c9b4dd0",
+      "fromNode": "魔王",
+      "toNode": "四天王B",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "d8eadd73-b58d-4917-86aa-cdfb4999bfc2",
+      "fromNode": "魔王",
+      "toNode": "元魔王",
+      "label": "家族",
+      "color": "#00BCD4"
+    },
+    {
+      "id": "bc20c4eb-35dc-4ff6-9b67-56776399b480",
+      "fromNode": "魔王",
+      "toNode": "四天王A",
+      "label": "嫌悪",
+      "color": "#9C27B0"
+    },
+    {
+      "id": "c50bcdd6-e27b-4b39-9176-8d9587360c3a",
+      "fromNode": "魔王",
+      "toNode": "大戦争勃発",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "ddf90494-42e2-4a5b-8ff4-c11d004b5483",
+      "fromNode": "魔王",
+      "toNode": "最終決戦",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "97828b8c-18cc-4085-b599-d041e3687eaa",
+      "fromNode": "魔王",
+      "toNode": "平和条約締結",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "549dd804-c721-46b0-94ff-7e5c5e98a666",
+      "fromNode": "元魔王",
+      "toNode": "demon",
+      "label": "タグ"
+    },
+    {
+      "id": "58af78d7-d73d-48b1-94b3-4467f74511ac",
+      "fromNode": "元魔王",
+      "toNode": "ancient",
+      "label": "タグ"
+    },
+    {
+      "id": "265bd397-03d7-463f-ba1d-5cc516843336",
+      "fromNode": "元魔王",
+      "toNode": "魔王",
+      "label": "家族",
+      "color": "#00BCD4"
+    },
+    {
+      "id": "2c572a00-fcbb-4f9e-997d-d669160128fa",
+      "fromNode": "四天王A",
+      "toNode": "demon",
+      "label": "タグ"
+    },
+    {
+      "id": "8085bf8e-e400-4fa2-9e89-26998e6fbd6b",
+      "fromNode": "四天王A",
+      "toNode": "general",
+      "label": "タグ"
+    },
+    {
+      "id": "96b824ef-92c4-44cc-8d39-6a406374fd01",
+      "fromNode": "四天王A",
+      "toNode": "魔族連合",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "5af26b58-7491-4126-b2d7-6850f06196dc",
+      "fromNode": "四天王A",
+      "toNode": "魔王",
+      "label": "嫌悪",
+      "color": "#9C27B0"
+    },
+    {
+      "id": "32c69ab4-0e02-4d9c-bd19-7df0113d41dc",
+      "fromNode": "四天王A",
+      "toNode": "四天王B",
+      "label": "味方",
+      "color": "#4CAF50"
+    }
+  ]
 }
