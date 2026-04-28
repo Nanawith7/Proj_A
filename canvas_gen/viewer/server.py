@@ -176,8 +176,33 @@ def run_filter(params: dict[str, Any]) -> dict[str, Any]:
     nodes = _apply_filter(nodes, filter_cond)
     nodes = _apply_exclude(nodes, exclude_cond)
     nodes = _apply_sort(nodes, sort_key, sort_desc)
+
+    # Include additional nodes
+    include_raw = params.get("include", "")
+    if include_raw:
+        include_cond = _parse_simple(include_raw)
+        stems = {n.get("file", "").replace(".md", "").split("/")[-1] for n in nodes}
+        for n in list(FILE_NODES):
+            stem = n.get("file", "").replace(".md", "").split("/")[-1]
+            if stem not in stems:
+                if all(_match_condition(n, k, v) for k, v in include_cond.items()):
+                    nodes.append(n)
+                    stems.add(stem)
+
     if prune:
-        nodes = _prune_orphans(nodes, edges)
+        # Protect included nodes from pruning
+        protected_ids = set()
+        if include_raw:
+            inc = _parse_simple(include_raw)
+            for n in nodes:
+                if all(_match_condition(n, k, v) for k, v in inc.items()):
+                    protected_ids.add(n.get("id"))
+        connected = set()
+        for e in edges:
+            connected.add(e.get("fromNode", ""))
+            connected.add(e.get("toNode", ""))
+        connected |= protected_ids
+        nodes = [n for n in nodes if n.get("id") in connected]
 
     # Filter edges to remaining nodes
     remaining = {n["id"] for n in nodes}
