@@ -1,0 +1,240 @@
+"""CLI entry point for the bottom-up Canvas generator.
+
+Parses command-line arguments, orchestrates the pipeline:
+  1. Load configuration (type definitions, label mappings)
+  2. Scan vault and index all notes
+  3. Optionally traverse from a base node
+  4. Apply filter, exclude, and sort
+  5. Expand canvas with linked target nodes
+  6. Generate edges
+  7. Compute layout coordinates
+  8. Write JSON Canvas output file
+
+Usage:
+    python -m canvas_gen.main --vault /path/to/vault [options]
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+from .config import (
+    load_label_mappings,
+    load_type_definitions,
+    resolve_label_mapping_path,
+    resolve_type_def_path,
+)
+from .edges import generate_edges
+from .extractor import collect_related_nodes, scan_vault
+from .filter_sort import run_filter_pipeline
+from .layout import compute_layout
+from .models import DEFAULT_LABEL_MAPPING_PATH, DEFAULT_TYPE_DEF_PATH
+from .writer import write_canvas
+
+
+def _parse_sort_by(raw: str) -> Any:
+    """Parse the --sort-by argument.
+
+    Accepts either a plain string (single key, ascending) or a JSON
+    array of {key, order} objects.
+    """
+    if not raw:
+        return None
+    raw = raw.strip()
+    if raw.startswith("["):
+        return json.loads(raw)
+    return raw
+
+
+def _parse_conditions(raw: str) -> dict[str, Any] | None:
+    """Parse a JSON dict string like '{"type":"character"}'."""
+    if not raw:
+        return None
+    return json.loads(raw.strip())
+
+
+def _build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        description="Generate an Obsidian Canvas from vault metadata using bottom-up extraction.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=f"""\
+Configuration files (auto-detected from vault root):
+  Type definitions:    {DEFAULT_TYPE_DEF_PATH}
+  Label mappings:      {DEFAULT_LABEL_MAPPING_PATH}
+
+Example:
+  python -m canvas_gen.main --vault ./my_vault --output timeline.canvas \\
+      --base-node "main_char" --depth 2 --filter '{{"type":"character"}}' \\
+      --sort-by date --x-axis-key year
+""",
+    )
+
+    p.add_argument(
+        "--vault", required=True,
+        help="Path to the Obsidian vault root directory.",
+    )
+    p.add_argument(
+        "--output", default="output.canvas",
+        help="Output .canvas file path (default: output.canvas).",
+    )
+    p.add_argument(
+        "--base-node",
+        help="Starting note stem (filename without .md).",
+    )
+    p.add_argument(
+        "--depth", type=int, default=None,
+        help="BFS traversal depth from the base node (default: full vault scan).",
+    )
+    p.add_argument(
+        "--filter", type=str, default=None,
+        help='JSON dict of AND conditions: \'{"type":"character","tags":"main"}\'.',
+    )
+    p.add_argument(
+        "--exclude", type=str, default=None,
+        help='JSON dict of AND exclusion conditions: \'{"title":"draft"}\'.',
+    )
+    p.add_argument(
+        "--sort-by", type=str, default=None,
+        help='Sort specification: a key name or JSON array [{"key":"date","order":"asc"}].',
+    )
+    p.add_argument(
+        "--x-axis-key",
+        help="Property key used for X-axis container grouping.",
+    )
+    p.add_argument(
+        "--type-def-path",
+        help=f"Path to the type definitions YAML (default: vault/{DEFAULT_TYPE_DEF_PATH}).",
+    )
+    p.add_argument(
+        "--label-mapping-path",
+        help=f"Path to the label mappings YAML (default: vault/{DEFAULT_LABEL_MAPPING_PATH}).",
+    )
+    p.add_argument(
+        "--column-width", type=int, default=350,
+        help="X spacing between adjacent nodes in pixels (default: 350).",
+    )
+    p.add_argument(
+        "--row-height", type=int, default=250,
+        help="Y spacing between rows in pixels (default: 250).",
+    )
+    p.add_argument(
+        "--node-width", type=int, default=300,
+        help="Width of each canvas node element (default: 300).",
+    )
+    p.add_argument(
+        "--node-height", type=int, default=200,
+        help="Height of each canvas node element (default: 200).",
+    )
+
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _build_arg_parser()
+    args = parser.parse_args(argv)
+
+    vault_path = Path(args.vault).resolve()
+    if not vault_path.is_dir():
+        print(f"ERROR: Vault directory not found: {vault_path}", file=sys.stderr)
+        return 1
+
+    # --- Resolve config file paths ---
+    type_def_path = args.type_def_path
+    if not type_def_path:
+        type_def_path = resolve_type_def_path(str(vault_path), None)
+    label_mapping_path = args.label_mapping_path
+    if not label_mapping_path:
+        label_mapping_path = resolve_label_mapping_path(str(vault_path), None)
+
+    # --- Load configurations ---
+    print(f"[INFO] Vault: {vault_path}")
+    print(f"[INFO] Type definitions: {type_def_path or '(defaults)'}")
+    print(f"[INFO] Label mappings: {label_mapping_path or '(raw keys)'}")
+
+    type_defs = load_type_definitions(type_def_path)
+    label_map = load_label_mappings(label_mapping_path)
+
+    # --- Scan vault ---
+    print("[INFO] Scanning vault...")
+    vault_index = scan_vault(str(vault_path))
+    print(f"[INFO] Found {len(vault_index)} notes.")
+
+    # --- Determine candidate nodes ---
+    filter_conditions = _parse_conditions(args.filter) or {}
+    exclude_conditions = _parse_conditions(args.exclude) or {}
+    sort_by = _parse_sort_by(args.sort_by)
+
+    if args.base_node:
+        base_stem = Path(args.base_node).stem
+        if args.depth is not None:
+            if args.depth < 0:
+                print("ERROR: --depth must be >= 0", file=sys.stderr)
+                return 1
+            related_stems = collect_related_nodes(base_stem, vault_index, args.depth)
+            nodes = [vault_index[s] for s in related_stems]
+            print(f"[INFO] BFS from '{base_stem}' (depth={args.depth}): {len(nodes)} nodes.")
+        else:
+            # No depth specified: use all notes but anchored from base context
+            nodes = list(vault_index.values())
+            print(f"[INFO] Full vault scan (base node '{base_stem}' specified without depth).")
+    else:
+        nodes = list(vault_index.values())
+        print("[INFO] No base node specified -- using full vault.")
+
+    # --- Filter / Exclude / Sort ---
+    nodes = run_filter_pipeline(nodes, filter_conditions, exclude_conditions, sort_by)
+    print(f"[INFO] After filter/exclude/sort: {len(nodes)} nodes.")
+
+    if not nodes:
+        print("[WARN] No nodes match the criteria. Writing empty canvas.")
+        # Still write an empty canvas file
+        write_canvas(args.output, [], [])
+        return 0
+
+    # --- Expand with direct link targets ---
+    # Include notes linked FROM canvas nodes so edges have valid endpoints.
+    canvas_stems = {n.stem for n in nodes}
+    extra_nodes: list[Any] = []
+    for node in nodes:
+        for links in node.wikilinks.values():
+            for link in links:
+                target = link.split("|")[0].strip()
+                target_stem = Path(target).stem
+                if target_stem in vault_index and target_stem not in canvas_stems:
+                    canvas_stems.add(target_stem)
+                    extra_nodes.append(vault_index[target_stem])
+    if extra_nodes:
+        nodes = nodes + extra_nodes
+        print(f"[INFO] Added {len(extra_nodes)} linked target nodes to canvas.")
+
+    print(f"[INFO] Canvas node set: {len(nodes)} nodes.")
+
+    # --- Generate edges ---
+    edges = generate_edges(nodes, vault_index, label_map)
+    print(f"[INFO] Generated {len(edges)} edges.")
+
+    # --- Compute layout ---
+    positioned = compute_layout(
+        nodes=nodes,
+        x_axis_key=args.x_axis_key,
+        type_defs=type_defs,
+        column_width=args.column_width,
+        row_height=args.row_height,
+        node_width=args.node_width,
+        node_height=args.node_height,
+    )
+    print(f"[INFO] Layout computed: {len(positioned)} positioned nodes.")
+
+    # --- Write output ---
+    output_path = write_canvas(args.output, positioned, edges)
+    print(f"[INFO] Canvas written to: {output_path}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
