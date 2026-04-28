@@ -29,7 +29,7 @@ from .config import (
 )
 from .edges import generate_edges
 from .extractor import collect_related_nodes, scan_vault
-from .filter_sort import run_filter_pipeline
+from .filter_sort import apply_filter, run_filter_pipeline
 from .icons import generate_type_icons, generate_node_icon
 from .layout import compute_layout
 from .models import DEFAULT_LABEL_MAPPING_PATH, DEFAULT_TYPE_DEF_PATH
@@ -195,8 +195,8 @@ Example:
         help="Gap between icon and file node in pixels (default: 4).",
     )
     p.add_argument(
-        "--prune-orphans", action="store_true", default=False,
-        help="Remove nodes with zero edges from the final canvas.",
+        "--prune-orphans", nargs="?", const="*", default=None,
+        help="Remove zero-edge nodes. No arg = all types. 'type=tag' or 'type=tag|character' for specific.",
     )
 
     return p
@@ -315,16 +315,25 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[INFO] Generated {len(edges)} edges.")
 
     # --- Prune orphaned nodes (zero edges) ---
-    if args.prune_orphans:
+    if args.prune_orphans is not None:
+        prune_conditions = None
+        if args.prune_orphans != "*":
+            prune_conditions = _parse_conditions(args.prune_orphans)
         connected_stems: set[str] = set()
         for edge in edges:
             connected_stems.add(edge.from_node)
             connected_stems.add(edge.to_node)
         before = len(nodes)
-        nodes = [n for n in nodes if n.stem in connected_stems]
+        if prune_conditions:
+            # Only prune orphans matching the type filter
+            orphaned = [n for n in nodes if n.stem not in connected_stems]
+            pruned_stems = {n.stem for n in apply_filter(orphaned, prune_conditions) if n.stem not in connected_stems}
+            nodes = [n for n in nodes if n.stem not in pruned_stems]
+        else:
+            nodes = [n for n in nodes if n.stem in connected_stems]
         pruned = before - len(nodes)
         if pruned:
-            print(f"[INFO] Pruned {pruned} orphaned node(s) with no edges.")
+            print(f"[INFO] Pruned {pruned} orphaned node(s).")
 
     # --- Compute layout ---
     positioned = compute_layout(
