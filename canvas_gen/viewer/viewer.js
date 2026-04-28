@@ -74,12 +74,30 @@ function render() {
     rect.onclick=e=>{e.stopPropagation();toggleExpand(n,g,mainG);};
     applyNodeView(rect,n,false);
     const txt=document.createElementNS(svgNS,'text');txt.setAttribute('class','node-title');
-    const fs=Math.max(10,Math.min(14,nv.fontSize||12));
+    const fs=Math.max(9,Math.min(14,nv.fontSize||12));
     txt.setAttribute('font-size',fs);if(nv.boldTitle)txt.setAttribute('font-weight','bold');
     const ty=nv.titleY||'center',tpad=nv.titlePad||6;
-    txt.setAttribute('y',ty==='top'?ny+tpad+fs:(ny+nh/2+fs/3));
-    txt.setAttribute('x',nx+Math.max(tpad,6));txt.setAttribute('fill','#fff');
-    txt.textContent=title;g.appendChild(rect);g.appendChild(txt);mainG.appendChild(g);
+
+    // Title wrap for small shapes (era circle)
+    if(nv.titleWrap) {
+      const maxW=nw-2*tpad;
+      let pos=0,line=0;
+      while(pos<title.length){
+        let len=1;
+        while(pos+len<=title.length&&measureText(title.slice(pos,pos+len),fs,'sans-serif')<maxW)len++;
+        if(len===1&&pos+1<=title.length)len=2;
+        const t2=document.createElementNS(svgNS,'text');t2.setAttribute('class','node-title');
+        t2.setAttribute('font-size',fs);if(nv.boldTitle)t2.setAttribute('font-weight','bold');
+        t2.setAttribute('x',nx+tpad);t2.setAttribute('y',ny+tpad+fs+line*(fs+2));
+        t2.setAttribute('fill','#fff');t2.textContent=title.slice(pos,pos+len-1);
+        g.appendChild(t2);pos+=len-1;line++;
+      }
+    } else {
+      txt.setAttribute('y',ty==='top'?ny+tpad+fs:(ny+nh/2+fs/3));
+      txt.setAttribute('x',nx+Math.max(tpad,6));txt.setAttribute('fill','#fff');
+      txt.textContent=title;g.appendChild(txt);
+    }
+    g.appendChild(rect);mainG.appendChild(g);
   });
   svg.appendChild(mainG);graph.appendChild(svg);expandedId=null;
   // Pan/zoom
@@ -118,7 +136,8 @@ function toggleExpand(node, g, mainG) {
   const titleEl=g.querySelector('.node-title'); if(titleEl)titleEl.style.opacity='0';
 
   const stem=nodeStem(node),v=VAULT[stem];if(!v)return;
-  const lines=buildBodyLines(v);
+  const type=nodeType(node),td=TYPEDEFS[type]||{},nv=NODEVIEWS[td.nodeview||'plain']||{};
+  const lines=buildBodyLines(v,nv);
 
   let expW=420,expH=340,fontSize=10;
   if(mode==='stretch'){
@@ -162,6 +181,28 @@ function toggleExpand(node, g, mainG) {
     if(ln.t==='br'){cy+=10;return;}
     if(ln.t==='hr'){cy+=4;return;}
     if(ln.t==='code')return;
+    if(ln.t==='pill'){
+      // Render pill badges
+      const fs=9,padX=6,padY=3;
+      let bx=nx+8;
+      ln.items.forEach(item=>{
+        const tw=measureText(item,fs,'sans-serif')+padX*2;
+        if(bx+tw>nx+expW-8){bx=nx+8;cy+=fs+padY*2+4;}
+        const r=document.createElementNS(svgNS,'rect');
+        r.setAttribute('x',bx);r.setAttribute('y',cy-fs-padY);
+        r.setAttribute('width',tw);r.setAttribute('height',fs+padY*2);
+        const rx=ln.shape==='diamond'?4:ln.shape==='round'?10:3;
+        r.setAttribute('rx',rx);r.setAttribute('ry',rx);
+        r.setAttribute('fill',ln.bg||'#fff2');
+        r.setAttribute('stroke',ln.textColor||'#fff');r.setAttribute('stroke-width','0.5');
+        r.setAttribute('class','node-body');g.appendChild(r);
+        const t=document.createElementNS(svgNS,'text');t.setAttribute('x',bx+padX);t.setAttribute('y',cy);
+        t.setAttribute('fill',ln.textColor||'#eee');t.setAttribute('font-size',fs);t.setAttribute('class','node-body');
+        t.textContent=item;g.appendChild(t);
+        bx+=tw+6;
+      });
+      cy+=fs+padY*2+6;return;
+    }
     let fs=ln.t==='h'?14:10,fill=ln.t==='h'?'#e94560':ln.t==='q'?'#aaa':'#ddd';
     if(ln.text){
       let txt=ln.text;
@@ -189,10 +230,24 @@ function addBodyLine(g,ns,x,y,fill,fs,text){
   t.textContent=text;g.appendChild(t);
 }
 
-function buildBodyLines(v){
+function buildBodyLines(v,nv){
   const lines=[];
   if(v.props?.title)lines.push({t:'h',text:v.props.title});
-  if(v.props)Object.entries(v.props).forEach(([k,val])=>{if(k==='title'||k==='type')return;lines.push({t:'p',text:`${k}: ${Array.isArray(val)?val.join(', '):val}`});});
+  if(v.props){
+    const propStyles=nv.properties||{};
+    Object.entries(v.props).forEach(([k,val])=>{
+      if(k==='title'||k==='type')return;
+      const ps=propStyles[k];
+      if(ps&&ps.style==='pill'){
+        const items=Array.isArray(val)?val:[val];
+        // Clean wiki-link brackets for display
+        const cleaned=items.map(it=>typeof it==='string'?it.replace(/^\[\[|\]\]$/g,''):it);
+        lines.push({t:'pill',items:cleaned,shape:ps.shape||'round',bg:ps.bg||'#fff2',textColor:ps.textColor||'#eee',label:k});
+      }else{
+        lines.push({t:'p',text:`${k}: ${Array.isArray(val)?val.join(', '):val}`});
+      }
+    });
+  }
   if(v.body){lines.push({t:'hr'});v.body.split('\n').forEach(l=>{const t=l.trim();if(!t){lines.push({t:'br'});return;}if(t.startsWith('#'))lines.push({t:'h',text:t.replace(/^#+\s*/,'')});else if(t.startsWith('>'))lines.push({t:'q',text:t.slice(1).trim()});else if(t.startsWith('```')){lines.push({t:'code'});return;}else lines.push({t:'p',text:t});});}
   return lines;
 }
