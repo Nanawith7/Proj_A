@@ -229,7 +229,7 @@ def _assign_y_offsets(
 
     Returns a tuple of (type_name -> y_base dict, total_y_height).
     """
-    type_order: list[str] = list(OrderedDict.fromkeys(
+    type_order: list[str] = sorted(OrderedDict.fromkeys(
         n.node_type for n in nodes
     ))
 
@@ -357,7 +357,7 @@ def _compute_grid_layout(
     Args:
         y_base: Base Y offset (used when embedding grid below a container region).
     """
-    type_order: list[str] = list(OrderedDict.fromkeys(
+    type_order: list[str] = sorted(OrderedDict.fromkeys(
         n.node_type for n in nodes
     ))
 
