@@ -316,15 +316,23 @@ window.addEventListener('mousemove',e=>{
   const pctY=Math.max(0,Math.min(100,(e.clientY-r.top)*sy/vb.height*100)).toFixed(1);
   if(dragMode==='title'){
     setVal('nv-tdx',pctX+'%');setVal('nv-tdy',pctY+'%');
+    document.getElementById('json-output').value=JSON.stringify(buildNV(),null,2);
   }else if(dragMode==='body'){
     setVal('nv-bdx',pctX+'%');setVal('nv-bdy',pctY+'%');
+    document.getElementById('json-output').value=JSON.stringify(buildNV(),null,2);
   }else if(dragMode==='prop'&&dragIdx>=0){
     propRows[dragIdx].px=pctX+'%';propRows[dragIdx].py=pctY+'%';
     renderProps();
+    document.getElementById('json-output').value=JSON.stringify(buildNV(),null,2);
   }
-  update();
+  // NOTE: don't call update() during drag - it redraws SVG and kills the drag
 });
-window.addEventListener('mouseup',()=>{dragMode='';dragIdx='';});
+window.addEventListener('mouseup',()=>{
+  if(dragMode){
+    update(); // Redraw preview on release
+  }
+  dragMode='';dragIdx='';
+});
 
 // ═══════ BG image ═══════
 function loadBGFile(input){
