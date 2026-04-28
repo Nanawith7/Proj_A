@@ -348,10 +348,8 @@ function toggleExpand(node, g, mainG) {
   g.querySelectorAll('.node-body').forEach(el=>el.remove());
   const svgNS='http://www.w3.org/2000/svg';
   let cy=ny+bodyPadY+12;
-  // Body position override
   const bodyPos=nv.layout?.bodyPosition;
-  const titlePos=nv.layout?.titlePosition;
-  if(bodyPos)cy=ny+(bodyPos.y||bodyPadY+12);
+  if(bodyPos){const bpy=resolvePos(bodyPos.y,expH);if(bpy>=0)cy=ny+bpy;}
   // Title position override (renders BEFORE body, so we handle in buildBodyLines)
   lines.forEach(ln=>{
     // Absolute/percentage position override: save flow cy, restore after
