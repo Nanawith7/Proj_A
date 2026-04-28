@@ -140,7 +140,11 @@ Example:
     )
     p.add_argument(
         "--export-viewer", type=str, default=None,
-        help="Generate self-contained HTML viewer for a .canvas file. Args: canvas_path[:output_path].",
+        help="Generate self-contained HTML viewer: canvas_path[:output_path].",
+    )
+    p.add_argument(
+        "--serve-viewer", type=str, default=None,
+        help="Start HTTP viewer server: canvas_path[:port].",
     )
     p.add_argument(
         "--sort-by", type=str, default=None,
@@ -223,6 +227,15 @@ def main(argv: list[str] | None = None) -> int:
         from .viewer import export_viewer
         result = export_viewer(str(vault_path), canvas_file, out_file)
         print(f"[INFO] Viewer exported to: {result}")
+        return 0
+
+    # --- Serve viewer (HTTP server) ---
+    if args.serve_viewer:
+        parts = args.serve_viewer.split(":", 1)
+        canvas_file = parts[0]
+        port = int(parts[1]) if len(parts) > 1 else 8765
+        from .viewer.server import serve
+        serve(str(vault_path), canvas_file, port)
         return 0
 
     # --- Generate type icons (always, for fallback) ---
