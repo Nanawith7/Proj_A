@@ -25,6 +25,10 @@ Obsidian Vault内のMarkdownノートに埋め込まれた構造化メタデー�
 - **自己完結エッジ**: Canvasノード群内部でのみエッジ生成。孤立ノード自動剪定（`--prune-orphans`）
 - **時代区分対応**: `era` プロパティで年表を時代別にグルーピング。`year` と `era` の二軸年表が可能
 - **自動スケーリング**: icon/nodeサイズの最大値から `row_height` / `column_width` を自動計算
+- **双方向BFS**: 起点ノードからのoutgoingリンクに加えincomingリンクも追跡
+- **`--include-types`**: フィルタ結果に依らず常時描画するノードを条件指定（剪定保護付き）
+- **`--prune-orphans`**: エッジ0本の孤立ノードを自動除去。type指定で適用対象を限定可能
+- **パイプライン分離**: フィルタ・レイアウト・アイコン・エッジ・剪定が各モジュールに責務分離
 
 ```mermaid
 flowchart TD

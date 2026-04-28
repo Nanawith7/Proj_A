@@ -91,7 +91,11 @@ era: "era_080_120"           # 時代区分子測
 | `--column-width` | 列間隔 (default: 350) |
 | `--row-height` | 行間隔 (default: 250) |
 | `--icon-size` | アイコン寸法 (0で無効, default: 50) |
+| `--icon-gap` | アイコン-ノード間隔 (default: 4) |
+| `--include-types` | 常時描画するノード条件（剪定保護） |
 | `--prune-orphans` | 孤立ノード剪定 (type指定可) |
+| `--node-width` | デフォルトノード幅 (default: 300) |
+| `--node-height` | デフォルトノード高 (default: 200) |
 
 **フィルタ構文**:
 ```bash
@@ -105,25 +109,38 @@ era: "era_080_120"           # 時代区分子測
 
 ```
 canvas_gen/
+├── main.py         # CLIエントリポイント
+├── pipeline.py     # 7ステップ統括（include→sort→layout→icons→edges→prune→write）
 ├── models.py       # データクラス
 ├── config.py       # YAML設定読込
-├── extractor.py    # Vault走査・YAML解析
-├── filter_sort.py  # フィルタ/ソート ($or対応)
-├── edges.py        # エッジ生成
-├── layout.py       # レイアウト計算
+├── extractor.py    # Vault走査・YAML解析・双方向BFS
+├── filter_sort.py  # フィルタ/ソート/include（$or/|/wiki-link正規化）
+├── edges.py        # エッジ生成・孤立剪定
+├── layout.py       # レイアウト計算・パラメータ自動算定
 ├── writer.py       # JSON Canvas出力
-├── icons.py        # アイコン画像生成
-└── main.py         # CLIエントリポイント
+└── icons.py        # アイコン画像生成・per-node解決
 ```
 
 ## レイアウトアルゴリズム
 
 - **column-major分配**: `lining=N` → N行に巡回配置 (0,N,2N... / 1,N+1... / ...)
-- **コンテナ**: `x_axis_key`値でX軸分割。数値優先ソート
+- **コンテナ**: `x_axis_key`値でX軸分割。数値優先ソート。`era`で時代別年表も可能
 - **未分類領域**: x_axis_key値なしのノードをコンテナ下方に配置
 - **グローバルセンタリング**: 全type行が共通の最大列幅内で独立センタリング
 - **相互センタリング**: コンテナと未分類領域が共通中心軸を共有
 - **自動スケーリング**: 最大icon/node寸法からrow_height/column_widthを計算
+- **双方向BFS**: outgoing + incoming wikiリンクを両方向追跡
+- **構造ノード**: `--include-types` で常時描画ノード指定・剪定保護
+
+## パイプライン処理順
+
+1. include-types（条件指定ノードの強制追加）
+2. filter → exclude → sort
+3. layout params計算（icon/nodeサイズからrow/col自動算定）
+4. per-node icon解決
+5. edge生成（canvas内ノード間のみ）
+6. prune-orphans（孤立ノード剪定、include-types保護）
+7. layout計算・JSON出力
 
 ## テストVault
 
