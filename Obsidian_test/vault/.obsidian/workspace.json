@@ -15,9 +15,9 @@
               "state": {
                 "file": "devil_timeline.canvas",
                 "viewState": {
-                  "x": 1093.4565809859473,
-                  "y": 1347.5029390940217,
-                  "zoom": -1.1613533042298199
+                  "x": 808.8964360587004,
+                  "y": 1398.8046121593293,
+                  "zoom": -1.4946866375631531
                 }
               },
               "icon": "lucide-layout-dashboard",
@@ -185,10 +185,10 @@
   },
   "active": "2ec1532ea9941862",
   "lastOpenFiles": [
-    "character/主人公.md",
-    "devil_timeline.canvas",
-    "characters.canvas",
     "timeline.canvas",
+    "devil_timeline.canvas",
+    "character/主人公.md",
+    "characters.canvas",
     "tag/demon.md",
     "characters_tags.canvas",
     "tag/royalty.md",
@@ -226,7 +226,6 @@
     "event/王国建国.md",
     "scenario/最終決戦.md",
     "scenario/賢者との出会い.md",
-    "scenario/冒険の始まり.md",
     "organization",
     "event",
     "scenario",

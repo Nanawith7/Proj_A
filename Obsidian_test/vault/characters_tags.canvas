@@ -154,7 +154,7 @@
       "id": "主人公_icon",
       "type": "file",
       "file": "_icons/node_主人公.png",
-      "x": 0,
+      "x": 700,
       "y": 426,
       "width": 80,
       "height": 60
@@ -163,7 +163,7 @@
       "id": "主人公",
       "type": "file",
       "file": "character/主人公.md",
-      "x": 0,
+      "x": 700,
       "y": 500,
       "width": 160,
       "height": 120,
@@ -173,7 +173,7 @@
       "id": "四天王A_icon",
       "type": "file",
       "file": "_icons/node_四天王A.png",
-      "x": 350,
+      "x": 1050,
       "y": 426,
       "width": 50,
       "height": 50
@@ -182,7 +182,7 @@
       "id": "四天王A",
       "type": "file",
       "file": "character/四天王A.md",
-      "x": 350,
+      "x": 1050,
       "y": 500,
       "width": 160,
       "height": 120,
@@ -192,7 +192,7 @@
       "id": "王女_icon",
       "type": "file",
       "file": "_icons/node_王女.png",
-      "x": 700,
+      "x": 1400,
       "y": 426,
       "width": 55,
       "height": 55
@@ -201,7 +201,7 @@
       "id": "王女",
       "type": "file",
       "file": "character/王女.md",
-      "x": 700,
+      "x": 1400,
       "y": 500,
       "width": 160,
       "height": 120,
@@ -211,7 +211,7 @@
       "id": "騎士団長_icon",
       "type": "file",
       "file": "_icons/node_騎士団長.png",
-      "x": 1050,
+      "x": 1750,
       "y": 426,
       "width": 60,
       "height": 50
@@ -220,7 +220,7 @@
       "id": "騎士団長",
       "type": "file",
       "file": "character/騎士団長.md",
-      "x": 1050,
+      "x": 1750,
       "y": 500,
       "width": 160,
       "height": 120,
@@ -230,7 +230,7 @@
       "id": "予言者_icon",
       "type": "file",
       "file": "_icons/node_予言者.png",
-      "x": 0,
+      "x": 700,
       "y": 676,
       "width": 50,
       "height": 50
@@ -239,7 +239,7 @@
       "id": "予言者",
       "type": "file",
       "file": "character/予言者.md",
-      "x": 0,
+      "x": 700,
       "y": 750,
       "width": 160,
       "height": 120,
@@ -249,7 +249,7 @@
       "id": "四天王B_icon",
       "type": "file",
       "file": "_icons/node_四天王B.png",
-      "x": 350,
+      "x": 1050,
       "y": 676,
       "width": 50,
       "height": 50
@@ -258,7 +258,7 @@
       "id": "四天王B",
       "type": "file",
       "file": "character/四天王B.md",
-      "x": 350,
+      "x": 1050,
       "y": 750,
       "width": 160,
       "height": 120,
@@ -268,7 +268,7 @@
       "id": "盗賊_icon",
       "type": "file",
       "file": "_icons/node_盗賊.png",
-      "x": 700,
+      "x": 1400,
       "y": 676,
       "width": 45,
       "height": 50
@@ -277,7 +277,7 @@
       "id": "盗賊",
       "type": "file",
       "file": "character/盗賊.md",
-      "x": 700,
+      "x": 1400,
       "y": 750,
       "width": 160,
       "height": 120,
@@ -287,7 +287,7 @@
       "id": "魔王_icon",
       "type": "file",
       "file": "_icons/node_魔王.png",
-      "x": 1050,
+      "x": 1750,
       "y": 676,
       "width": 80,
       "height": 70
@@ -296,7 +296,7 @@
       "id": "魔王",
       "type": "file",
       "file": "character/魔王.md",
-      "x": 1050,
+      "x": 1750,
       "y": 750,
       "width": 160,
       "height": 120,
@@ -306,7 +306,7 @@
       "id": "元魔王_icon",
       "type": "file",
       "file": "_icons/node_元魔王.png",
-      "x": 175,
+      "x": 875,
       "y": 926,
       "width": 65,
       "height": 65
@@ -315,7 +315,7 @@
       "id": "元魔王",
       "type": "file",
       "file": "character/元魔王.md",
-      "x": 175,
+      "x": 875,
       "y": 1000,
       "width": 160,
       "height": 120,
@@ -325,7 +325,7 @@
       "id": "幼なじみ_icon",
       "type": "file",
       "file": "_icons/node_幼なじみ.png",
-      "x": 525,
+      "x": 1225,
       "y": 926,
       "width": 40,
       "height": 40
@@ -334,7 +334,7 @@
       "id": "幼なじみ",
       "type": "file",
       "file": "character/幼なじみ.md",
-      "x": 525,
+      "x": 1225,
       "y": 1000,
       "width": 160,
       "height": 120,
@@ -344,7 +344,7 @@
       "id": "賢者_icon",
       "type": "file",
       "file": "_icons/node_賢者.png",
-      "x": 875,
+      "x": 1575,
       "y": 926,
       "width": 60,
       "height": 60
@@ -353,7 +353,7 @@
       "id": "賢者",
       "type": "file",
       "file": "character/賢者.md",
-      "x": 875,
+      "x": 1575,
       "y": 1000,
       "width": 160,
       "height": 120,
@@ -362,450 +362,450 @@
   ],
   "edges": [
     {
-      "id": "c0b3e53c-0ff8-4911-bd18-a436af4233d2",
+      "id": "d0587f23-9437-4bcd-bc54-1d6c795c188b",
       "fromNode": "主人公",
       "toNode": "main",
       "label": "タグ"
     },
     {
-      "id": "8d178c3a-bcc0-4c86-8159-436a7bf4465d",
+      "id": "898b43ed-8420-4052-87bb-bfe39d2a51e2",
       "fromNode": "主人公",
       "toNode": "human",
       "label": "タグ"
     },
     {
-      "id": "c283ca70-10e0-4c76-8222-9c000170252f",
+      "id": "cdbd172e-d28b-4769-9743-a4ecc63200e0",
       "fromNode": "主人公",
       "toNode": "knight",
       "label": "タグ"
     },
     {
-      "id": "6d80dc25-73b3-41ea-86a2-58b588037290",
+      "id": "d425dbbb-5396-4add-91bf-9cadec662bd7",
       "fromNode": "主人公",
       "toNode": "騎士団長",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "12ab061a-b287-4c35-8d64-7bbece05fb6b",
+      "id": "57b81bf0-249f-49b0-96de-c957c3247905",
       "fromNode": "主人公",
       "toNode": "幼なじみ",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "f4ac65de-93fd-42e9-8f45-793b8bf0f831",
+      "id": "275a8c98-4fa5-42ed-a865-38fcb6ebe598",
       "fromNode": "主人公",
       "toNode": "盗賊",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "0a667274-1686-4b81-bffe-b14e428c1516",
+      "id": "4f8d52d2-fec7-4e04-9e82-52e8ea0974b5",
       "fromNode": "主人公",
       "toNode": "賢者",
       "label": "師弟",
       "color": "#FF9800"
     },
     {
-      "id": "7d236fa1-c834-46f1-b05c-866f0d1ff7ce",
+      "id": "b96e12eb-0eb6-4356-b5ba-2cd4af595614",
       "fromNode": "主人公",
       "toNode": "騎士団長",
       "label": "師弟",
       "color": "#FF9800"
     },
     {
-      "id": "daf745ea-bd09-42f1-bd83-e4797a46b0fd",
+      "id": "d0a3788b-3bbf-4663-965b-12d88e010927",
       "fromNode": "主人公",
       "toNode": "四天王A",
       "label": "敵対",
       "color": "#F44336"
     },
     {
-      "id": "56028d53-a019-471d-88dc-6ba44f48a3b4",
+      "id": "a10a65ee-4c4c-437c-a4b3-06a6f076703d",
       "fromNode": "主人公",
       "toNode": "四天王B",
       "label": "嫌悪",
       "color": "#9C27B0"
     },
     {
-      "id": "d2bd0411-4982-47ac-819a-448dd29e34a6",
+      "id": "ea29a0a1-9b48-4962-8638-a26a8e13c66b",
       "fromNode": "主人公",
       "toNode": "幼なじみ",
       "label": "好意",
       "color": "#E91E63"
     },
     {
-      "id": "cae214dc-08fe-43da-8112-6ac89bca7152",
+      "id": "f1e83059-32e3-409a-9f3d-26b6eb0c2fa5",
       "fromNode": "主人公",
       "toNode": "王女",
       "label": "好意",
       "color": "#E91E63"
     },
     {
-      "id": "5cedd4d2-32d0-432d-bbc7-18d6e2422fce",
+      "id": "4d9ea5aa-fa61-4b82-b2eb-8191fe1cd25f",
       "fromNode": "予言者",
       "toNode": "human",
       "label": "タグ"
     },
     {
-      "id": "35ff3930-c9ee-4474-8c79-3e908ba51436",
+      "id": "60dae2e2-a07c-442f-b6aa-d962b3cfa307",
       "fromNode": "予言者",
       "toNode": "mystic",
       "label": "タグ"
     },
     {
-      "id": "7b8d3e94-98dc-4385-9176-4488ce7c12e5",
+      "id": "6502076b-1494-4e6b-ab2a-b777caefd2f6",
       "fromNode": "予言者",
       "toNode": "賢者",
       "label": "好意",
       "color": "#E91E63"
     },
     {
-      "id": "57a56ff7-c675-4aa1-83a7-0805927cb1a5",
+      "id": "9e53c61f-07e3-4e81-9e8c-731e88697151",
       "fromNode": "予言者",
       "toNode": "王女",
       "label": "師弟",
       "color": "#FF9800"
     },
     {
-      "id": "995b0c36-7b4a-40cf-8cc9-b0361675d804",
+      "id": "556bec17-0139-4bc0-8be4-01aafffdbdef",
       "fromNode": "予言者",
       "toNode": "元魔王",
       "label": "嫌悪",
       "color": "#9C27B0"
     },
     {
-      "id": "4029bc05-7ec1-4da9-8dfd-a78770dd6e12",
+      "id": "3d06e209-10d2-4dff-bacf-d0285541883b",
       "fromNode": "元魔王",
       "toNode": "demon",
       "label": "タグ"
     },
     {
-      "id": "a6966032-c9a4-4d56-93ab-af51b54c22a7",
+      "id": "0f2ff0c3-ece4-4067-a2ba-68efe961bf26",
       "fromNode": "元魔王",
       "toNode": "ancient",
       "label": "タグ"
     },
     {
-      "id": "e82277a1-a8c7-4211-85ec-9367f90dade9",
+      "id": "462f8f25-8e03-487c-9ce5-6a1b3140613f",
       "fromNode": "元魔王",
       "toNode": "魔王",
       "label": "家族",
       "color": "#00BCD4"
     },
     {
-      "id": "9623f306-5c80-4c36-a2b8-999e61501816",
+      "id": "0c288965-eea8-426a-ade0-19759f94c5cd",
       "fromNode": "元魔王",
       "toNode": "賢者",
       "label": "敵対",
       "color": "#F44336"
     },
     {
-      "id": "c9f83785-7e66-48da-b0a2-bf2e88c25a4a",
+      "id": "03c445a3-60b3-4241-a16b-b163dab8409c",
       "fromNode": "元魔王",
       "toNode": "予言者",
       "label": "嫌悪",
       "color": "#9C27B0"
     },
     {
-      "id": "d7f95a14-8cae-4f16-96d2-e28e5b4b4732",
+      "id": "c68e6cb7-9445-4d98-89f8-dc6aa30db405",
       "fromNode": "四天王A",
       "toNode": "demon",
       "label": "タグ"
     },
     {
-      "id": "4089d1c4-b9f2-4a1f-b3ab-1c494275ad70",
+      "id": "0b74a688-43fe-4567-99b3-dc9197e3b5cf",
       "fromNode": "四天王A",
       "toNode": "general",
       "label": "タグ"
     },
     {
-      "id": "6511adff-40f7-40dd-88ed-30899c02dbf1",
+      "id": "67966a3a-36cb-4ee1-b6a0-409f84c3f468",
       "fromNode": "四天王A",
       "toNode": "主人公",
       "label": "敵対",
       "color": "#F44336"
     },
     {
-      "id": "a5957bf3-badf-4751-8eb2-11918f38a08e",
+      "id": "39ce2843-21ee-4ba0-956d-e2606dd1166d",
       "fromNode": "四天王A",
       "toNode": "魔王",
       "label": "嫌悪",
       "color": "#9C27B0"
     },
     {
-      "id": "15047569-cb37-4a1e-9dec-14d419bd75a3",
+      "id": "7d00ed18-f8fa-4707-a816-7fb8ae269cc8",
       "fromNode": "四天王A",
       "toNode": "四天王B",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "c1374c2f-f914-4879-9064-b1f9473a3412",
+      "id": "922861a2-dc8e-46b1-bd2f-99a2b70123ce",
       "fromNode": "四天王B",
       "toNode": "demon",
       "label": "タグ"
     },
     {
-      "id": "57c488fa-50a3-4079-af5e-861a2de7bf98",
+      "id": "516d3613-72f4-40d8-9e05-e86ae1fc7de9",
       "fromNode": "四天王B",
       "toNode": "general",
       "label": "タグ"
     },
     {
-      "id": "c2760170-b53f-42dd-86f4-d0a11624150c",
+      "id": "92190fe1-0f11-45fa-a7a8-0385885163e6",
       "fromNode": "四天王B",
       "toNode": "魔王",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "e8b97fb1-b5f7-49bb-9531-4cb4e1549503",
+      "id": "8df56eac-e3bc-45ec-83ca-23bb54cd8f06",
       "fromNode": "四天王B",
       "toNode": "四天王A",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "7cffee0f-e6f2-47a8-997a-bc071d4c966d",
+      "id": "b2074e56-119f-4e19-8464-786ee3f2a23e",
       "fromNode": "四天王B",
       "toNode": "予言者",
       "label": "嫌悪",
       "color": "#9C27B0"
     },
     {
-      "id": "3523e0c5-2681-4844-8fa3-89c09046a01b",
+      "id": "b0c2883d-4255-4f0f-ae93-f147adb37449",
       "fromNode": "幼なじみ",
       "toNode": "human",
       "label": "タグ"
     },
     {
-      "id": "1522ffc9-c612-43fe-8731-8e5602dd6cac",
+      "id": "5ab70e02-7a15-471e-b90c-97bc07aa195b",
       "fromNode": "幼なじみ",
       "toNode": "civilian",
       "label": "タグ"
     },
     {
-      "id": "29f02dd0-7c49-435f-b99c-9beddd8bd0f7",
+      "id": "e6b9277d-5a8f-4e0f-90a8-6994899393b0",
       "fromNode": "幼なじみ",
       "toNode": "主人公",
       "label": "好意",
       "color": "#E91E63"
     },
     {
-      "id": "e4257bd1-f3ae-43ea-8651-9d832f36e161",
+      "id": "049d935b-5a8a-4140-9cb6-566aa4ed4720",
       "fromNode": "幼なじみ",
       "toNode": "主人公",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "b69587e6-017c-4985-8210-d4d4297ad6cf",
+      "id": "b58ef5f5-4ba4-4466-b55b-9b3b90be9b75",
       "fromNode": "幼なじみ",
       "toNode": "盗賊",
       "label": "家族",
       "color": "#00BCD4"
     },
     {
-      "id": "3ea415ac-af7d-4f7e-a160-8fba3a1dcd4d",
+      "id": "6b554b00-aee6-4764-95ab-433c00e368c9",
       "fromNode": "王女",
       "toNode": "human",
       "label": "タグ"
     },
     {
-      "id": "93de2db0-1491-45f6-b542-549939337b0c",
+      "id": "b54d5f70-0562-4de6-b187-639783270f7f",
       "fromNode": "王女",
       "toNode": "royalty",
       "label": "タグ"
     },
     {
-      "id": "a3c39e40-6122-46fb-b2f8-ef16eaa44df9",
+      "id": "a994efbc-bafd-46e9-8863-3b2c81aac129",
       "fromNode": "王女",
       "toNode": "主人公",
       "label": "好意",
       "color": "#E91E63"
     },
     {
-      "id": "0e71a64e-62c8-4ee4-b9a8-6483981b30af",
+      "id": "36c8533d-138a-42a4-afdc-908e92f53e22",
       "fromNode": "王女",
       "toNode": "騎士団長",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "43912dee-c295-4b69-ad88-4edcca2a9ab3",
+      "id": "7bbdb691-d335-4b9d-a9a5-34cd7eb7ef06",
       "fromNode": "王女",
       "toNode": "予言者",
       "label": "師弟",
       "color": "#FF9800"
     },
     {
-      "id": "d554215a-b797-48db-a14b-268cb725e80f",
+      "id": "cda24158-4214-4f07-9ae8-68910810678c",
       "fromNode": "盗賊",
       "toNode": "human",
       "label": "タグ"
     },
     {
-      "id": "25465206-f9fe-48ed-85a4-972aafdfa361",
+      "id": "999ec8c7-fd66-4aa7-b4bb-2a0f29dbd200",
       "fromNode": "盗賊",
       "toNode": "rogue",
       "label": "タグ"
     },
     {
-      "id": "feb392b3-4c41-4912-9b9d-5709ac81dbc1",
+      "id": "d943a25c-a7a2-4c57-acaa-43552d045813",
       "fromNode": "盗賊",
       "toNode": "幼なじみ",
       "label": "家族",
       "color": "#00BCD4"
     },
     {
-      "id": "a35669cf-3f1b-4913-bad3-4e5fd47bc6e2",
+      "id": "620d0a39-badd-4716-8fcd-90db156505fe",
       "fromNode": "盗賊",
       "toNode": "主人公",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "659fc360-4929-4aae-9732-b74b3cd9b60e",
+      "id": "51760cd4-3fe5-4e2a-8b03-20171bf464ff",
       "fromNode": "盗賊",
       "toNode": "四天王A",
       "label": "敵対",
       "color": "#F44336"
     },
     {
-      "id": "70857841-4e3d-4b41-b843-f349d26e9c41",
+      "id": "f42be108-826a-4492-b5b2-f23e122c82cb",
       "fromNode": "賢者",
       "toNode": "wise",
       "label": "タグ"
     },
     {
-      "id": "39eb1986-a471-4ac5-be5c-e060cb2c2f70",
+      "id": "fb3c9a08-705b-4888-8134-ad648c761122",
       "fromNode": "賢者",
       "toNode": "human",
       "label": "タグ"
     },
     {
-      "id": "82221fb1-016b-4370-840f-0a2973224b61",
+      "id": "e0061b0b-3eed-405c-b95a-4c313b40f12e",
       "fromNode": "賢者",
       "toNode": "mage",
       "label": "タグ"
     },
     {
-      "id": "26183e97-b20f-424a-a6d5-d1f3c07426b1",
+      "id": "44bdbe61-a632-4aa5-8ed8-9b49d3b0ea40",
       "fromNode": "賢者",
       "toNode": "主人公",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "f2726535-7876-473a-82e0-4d05eff6af7a",
+      "id": "472307c9-0434-4c87-8234-2aa822e46d89",
       "fromNode": "賢者",
       "toNode": "主人公",
       "label": "師弟",
       "color": "#FF9800"
     },
     {
-      "id": "bf819892-5302-4125-afeb-a63070926e81",
+      "id": "eb9a8d10-aa9f-401f-9ea3-c557c6c41caf",
       "fromNode": "賢者",
       "toNode": "予言者",
       "label": "好意",
       "color": "#E91E63"
     },
     {
-      "id": "46213cba-3b12-4fbd-96be-e5a8489d9c9e",
+      "id": "854ef751-3b7f-4575-b48c-b36f098a06d1",
       "fromNode": "賢者",
       "toNode": "元魔王",
       "label": "敵対",
       "color": "#F44336"
     },
     {
-      "id": "b377c2d9-7000-4502-a3ca-7962cf64d2b8",
+      "id": "6dcdf147-8095-4e88-820d-1e785a714e05",
       "fromNode": "騎士団長",
       "toNode": "human",
       "label": "タグ"
     },
     {
-      "id": "e95aa1b5-f823-494b-ad72-bd509166c9d8",
+      "id": "1854049b-8e1b-4db7-9613-4646f91076f7",
       "fromNode": "騎士団長",
       "toNode": "knight",
       "label": "タグ"
     },
     {
-      "id": "73003401-066a-4609-888c-5dd4c925e09c",
+      "id": "128aca5a-bf35-484a-b0db-723c241e934c",
       "fromNode": "騎士団長",
       "toNode": "leader",
       "label": "タグ"
     },
     {
-      "id": "2fb12406-671c-4e47-9974-dc96a2d5364e",
+      "id": "42bb88f0-2c70-4051-85f2-35b03b75e2ee",
       "fromNode": "騎士団長",
       "toNode": "主人公",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "8372c78e-a3a9-4d3b-b38e-58784c3aebf3",
+      "id": "932fb344-aeeb-4d05-b1b8-b300c4ea9817",
       "fromNode": "騎士団長",
       "toNode": "主人公",
       "label": "師弟",
       "color": "#FF9800"
     },
     {
-      "id": "7eb77d65-53b7-4dff-89ee-fe97f848fde6",
+      "id": "adce2f30-8050-48cb-9e81-c9b2ccb4e76a",
       "fromNode": "騎士団長",
       "toNode": "魔王",
       "label": "敵対",
       "color": "#F44336"
     },
     {
-      "id": "85c578e7-e498-42d4-8e88-dfd15ca6943d",
+      "id": "61746af9-2e06-49f3-9ea5-3d361f1a9296",
       "fromNode": "騎士団長",
       "toNode": "王女",
       "label": "好意",
       "color": "#E91E63"
     },
     {
-      "id": "b1980e59-c916-456f-a1e9-281eb0c9c5c2",
+      "id": "e54cd096-86a6-4037-babb-b9256e98a07c",
       "fromNode": "魔王",
       "toNode": "villain",
       "label": "タグ"
     },
     {
-      "id": "29a88e14-8d4a-47f0-b8df-533eaaaf79fe",
+      "id": "efa7d6dd-e43b-4ae4-9649-58aaf626df5e",
       "fromNode": "魔王",
       "toNode": "demon",
       "label": "タグ"
     },
     {
-      "id": "35e4765f-29df-4b46-9cd2-3fe4be4b6103",
+      "id": "ef2d8dc0-3cc5-40a8-904b-9af959348e85",
       "fromNode": "魔王",
       "toNode": "ruler",
       "label": "タグ"
     },
     {
-      "id": "fec58eda-dfa7-4b85-a946-5af0bbc07e0b",
+      "id": "4adb7113-b26c-4cdd-bf81-44f99b756a07",
       "fromNode": "魔王",
       "toNode": "四天王B",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "44f8bb95-319c-4cea-a19b-1edbbc33fc9a",
+      "id": "924a4883-ae3d-41f5-929d-ff9cc46ec261",
       "fromNode": "魔王",
       "toNode": "騎士団長",
       "label": "敵対",
       "color": "#F44336"
     },
     {
-      "id": "a6d20e2d-bf7e-42c3-b7ee-961c5070b74b",
+      "id": "bac926f9-4f45-457f-b65c-98276106d9d9",
       "fromNode": "魔王",
       "toNode": "元魔王",
       "label": "家族",
       "color": "#00BCD4"
     },
     {
-      "id": "dbd32b9b-c356-482a-b19b-bf1565d3e73b",
+      "id": "f9d34285-5083-43ad-8554-c54e7fb52e9a",
       "fromNode": "魔王",
       "toNode": "四天王A",
       "label": "嫌悪",

@@ -365,6 +365,14 @@ def _compute_grid_layout(
     for node in nodes:
         nodes_by_type.setdefault(node.node_type, []).append(node)
 
+    # Compute global max subrow width for unified centering grid
+    global_max_width = 0
+    for type_nodes in nodes_by_type.values():
+        lining = _get_lining(type_nodes[0].node_type if type_nodes else "", type_defs)
+        w = _effective_width(len(type_nodes), lining)
+        if w > global_max_width:
+            global_max_width = w
+
     result: list[PositionedNode] = []
     y_cursor = y_base
 
@@ -376,7 +384,6 @@ def _compute_grid_layout(
         centering = _get_centering(type_name, type_defs)
         lining = _get_lining(type_name, type_defs)
         subrows = max(1, lining)
-        max_subrow_width = _effective_width(len(type_nodes), lining)
 
         for sub_row in range(subrows):
             sub_nodes = _column_major_slice(type_nodes, sub_row, lining)
@@ -384,8 +391,8 @@ def _compute_grid_layout(
                 continue
             sub_y = y_cursor + sub_row * row_height
 
-            if centering and max_subrow_width > 0:
-                offset_x = (max_subrow_width - len(sub_nodes)) * column_width / 2.0
+            if centering and global_max_width > 0:
+                offset_x = (global_max_width - len(sub_nodes)) * column_width / 2.0
             else:
                 offset_x = 0.0
 
