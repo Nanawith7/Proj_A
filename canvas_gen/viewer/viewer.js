@@ -352,13 +352,15 @@ function toggleExpand(node, g, mainG) {
   const bodyPos=nv.layout?.bodyPosition;
   if(bodyPos)cy=ny+(bodyPos.y||bodyPadY+12);
   lines.forEach(ln=>{
-    // Absolute/percentage position override
+    // Absolute/percentage position override: save flow cy, restore after
+    const savedCY=cy;
     if(ln.pos){
       const py=resolvePos(ln.pos.y,expH);
-      const px=resolvePos(ln.pos.x,expW);
       if(py>=0)cy=ny+py;
     }
-    if(ln.t==='br'){cy+=10;return;} if(ln.t==='hr'){cy+=4;return;} if(ln.t==='code')return;
+    if(ln.t==='br'){cy=savedCY+10;return;}
+    if(ln.t==='hr'){cy=savedCY+4;return;}
+    if(ln.t==='code')return;
     if(ln.t==='pill'){
       const fs=9,padX=6,padY=3;
       const posX=ln.pos?resolvePos(ln.pos.x,expW):-1;
@@ -376,20 +378,23 @@ function toggleExpand(node, g, mainG) {
         t.setAttribute('fill',ln.textColor||'#eee');t.setAttribute('font-size',fs);t.setAttribute('class','node-body');
         t.textContent=item;g.appendChild(t);bx+=tw+6;
       });
-      cy+=fs+padY*2+6;return;
+      cy+=fs+padY*2+6;
+      if(ln.pos)cy=savedCY; // restore flow after positioned pill
+      return;
     }
-    let fs=ln.t==='h'?14:10,fill=ln.t==='h'?'#e94560':ln.t==='q'?'#aaa':'#ddd';
+    let fs2=ln.t==='h'?14:10,fill=ln.t==='h'?'#e94560':ln.t==='q'?'#aaa':'#ddd';
     if(ln.text){
       let txt=ln.text;
       if(mode==='wrap'){
         let pos=0;
         const lx=ln.pos&&resolvePos(ln.pos.x,expW)>=0?nx+resolvePos(ln.pos.x,expW):nx+bodyPadX;
-        while(pos<txt.length){if(cy>ny+expH-8)return;let len=1;while(pos+len<=txt.length&&measureText(txt.slice(pos,pos+len),fs,'sans-serif')<expW-16)len++;if(len===1&&pos+1<=txt.length)len=2;addBodyLine(g,svgNS,lx,cy,fill,fs,txt.slice(pos,pos+len-1));pos+=len-1;cy+=fs+4;}
+        while(pos<txt.length){if(cy>ny+expH-8)return;let len=1;while(pos+len<=txt.length&&measureText(txt.slice(pos,pos+len),fs2,'sans-serif')<expW-16)len++;if(len===1&&pos+1<=txt.length)len=2;addBodyLine(g,svgNS,lx,cy,fill,fs2,txt.slice(pos,pos+len-1));pos+=len-1;cy+=fs2+4;}
       }else{
         if(cy>ny+expH-8)return;
         const lx2=ln.pos&&resolvePos(ln.pos.x,expW)>=0?nx+resolvePos(ln.pos.x,expW):nx+bodyPadX;
-        addBodyLine(g,svgNS,lx2,cy,fill,fs,txt);cy+=fs+4;
+        addBodyLine(g,svgNS,lx2,cy,fill,fs2,txt);cy+=fs2+4;
       }
+      if(ln.pos)cy=savedCY; // restore flow after positioned text
     }
   });
 }
