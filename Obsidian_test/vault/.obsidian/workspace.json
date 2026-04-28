@@ -13,15 +13,15 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "timeline_bigicons.canvas",
+                "file": "timeline.canvas",
                 "viewState": {
-                  "x": 1960.445379023205,
-                  "y": 2866.5375826780305,
-                  "zoom": -1.6037927227524755
+                  "x": 2981.6848409302456,
+                  "y": 302.9831594764066,
+                  "zoom": -0.9449156334584581
                 }
               },
               "icon": "lucide-layout-dashboard",
-              "title": "timeline_bigicons"
+              "title": "timeline"
             }
           }
         ]
@@ -185,6 +185,12 @@
   },
   "active": "2ec1532ea9941862",
   "lastOpenFiles": [
+    "timeline_no_tags.canvas",
+    "timeline.canvas",
+    "event/竜の目覚め.md",
+    "_icons/type_default.png",
+    "scenario/四天王会戦.md",
+    "timeline_bigicons.canvas",
     "era_timeline.canvas",
     "event/勇者伝説編纂.md",
     "event/復興大祭.md",
@@ -194,13 +200,11 @@
     "event/賢者の塔完成.md",
     "event/魔族侵攻宣言.md",
     "event/王都防衛戦.md",
-    "event/竜の目覚め.md",
     "event/魔法学園創設.md",
     "scenario/後日譚.md",
     "scenario/新たな旅立ち.md",
     "scenario/最後の試練.md",
     "scenario/秘宝争奪戦.md",
-    "scenario/四天王会戦.md",
     "scenario/魔族領潜入.md",
     "scenario/塔の試練.md",
     "scenario/王都魔法大会.md",
@@ -210,10 +214,7 @@
     "era/era_120_150.md",
     "era/era_080_120.md",
     "era",
-    "timeline.canvas",
     "timeline_giant.canvas",
-    "timeline_bigicons.canvas",
-    "timeline_no_tags.canvas",
     "devil_timeline.canvas",
     "character/主人公.md",
     "characters.canvas",
@@ -229,7 +230,6 @@
     "_icons/node_賢者.png",
     "_icons/node_王女.png",
     "_icons/node_幼なじみ.png",
-    "_icons/node_四天王A.png",
     "_icons",
     "organization",
     "event",
