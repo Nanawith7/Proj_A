@@ -133,6 +133,36 @@ def run_filter(params: dict[str, Any]) -> dict[str, Any]:
     nodes = list(FILE_NODES)  # shallow copy
     edges = list(ALL_EDGES)
 
+    base_node = params.get("baseNode", "")
+    depth_str = params.get("depth", "")
+    if base_node and depth_str:
+        try:
+            depth = int(depth_str)
+            from ..extractor import collect_related_nodes
+            # Build temp index from FILE_NODES + VAULT_CONTENT
+            from ..models import NoteNode
+            temp_index = {}
+            for n in nodes:
+                stem = n.get("file", "").replace(".md", "").split("/")[-1]
+                v = VAULT_CONTENT.get(stem, {})
+                wikilinks = {}
+                for k, val in (v.get("props") or {}).items():
+                    if k in ("type", "title", "icon"):
+                        continue
+                    links = _extract_wikilinks(val)
+                    if links:
+                        wikilinks[k] = links
+                temp_index[stem] = NoteNode(
+                    stem=stem, file_path=n.get("file", ""),
+                    title=v.get("props", {}).get("title", stem),
+                    node_type=v.get("props", {}).get("type", "default"),
+                    properties=v.get("props", {}), wikilinks=wikilinks,
+                )
+            related = collect_related_nodes(base_node, temp_index, depth)
+            nodes = [n for n in nodes if n.get("file", "").replace(".md", "").split("/")[-1] in related]
+        except Exception:
+            pass
+
     filter_raw = params.get("filter", "")
     exclude_raw = params.get("exclude", "")
     sort_key = params.get("sortKey", "")
@@ -182,6 +212,21 @@ def _parse_simple(raw: str) -> dict[str, Any]:
         else:
             result[key] = val
     return result
+
+
+def _extract_wikilinks(value: Any) -> list[str]:
+    """Extract wiki link targets from a YAML value."""
+    import re
+    results = []
+    if isinstance(value, str):
+        results.extend(re.findall(r"\[\[([^\]]+)\]\]", value))
+    elif isinstance(value, list):
+        for item in value:
+            results.extend(_extract_wikilinks(item))
+    elif isinstance(value, dict):
+        for v in value.values():
+            results.extend(_extract_wikilinks(v))
+    return results
 
 
 # ═══════════════ HTTP Handler ═══════════════
