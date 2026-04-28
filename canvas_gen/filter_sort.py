@@ -1,8 +1,14 @@
-"""Filtering, exclusion, and sorting logic for candidate node lists."""
+"""Filtering, exclusion, and sorting logic for candidate node lists.
+
+Supports AND/OR logic via a `$or` special key:
+  - Top-level keys are AND-evaluated.
+  - `$or: [...]` takes a list of condition dicts; at least one must match.
+  - Repeated keys in key=value format are OR-evaluated for that key.
+"""
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from .models import NoteNode
 
@@ -10,9 +16,23 @@ from .models import NoteNode
 def _match_condition(node: NoteNode, key: str, expected: Any) -> bool:
     """Check if a node satisfies a single condition.
 
-    For scalar values (str, int), performs exact equality match.
-    For list values (tags, etc.), performs membership check.
+    Special key:
+      $or: expected is a list of {key: value} dicts.
+           Returns True if at least one sub-condition fully matches.
+
+    Regular key:
+      - If node's property is a list, checks expected in list.
+      - If expected is a list, checks actual in expected (OR).
+      - Otherwise, exact equality.
     """
+    if key == "$or":
+        if isinstance(expected, list):
+            return any(
+                all(_match_condition(node, k, v) for k, v in cond.items())
+                for cond in expected
+            )
+        return False
+
     actual = node.properties.get(key)
     if actual is None:
         return False
@@ -30,12 +50,7 @@ def apply_filter(
 ) -> list[NoteNode]:
     """Apply AND-evaluated filter conditions.
 
-    Args:
-        nodes: Candidate node list.
-        conditions: Key-value pairs that must all match (AND).
-
-    Returns:
-        Filtered node list.
+    Keys are ANDed.  `$or` nested conditions are ORed internally.
     """
     if not conditions:
         return nodes
@@ -52,12 +67,7 @@ def apply_exclude(
 ) -> list[NoteNode]:
     """Apply AND-evaluated exclusion conditions.
 
-    Args:
-        nodes: Candidate node list.
-        conditions: Key-value pairs. Nodes matching ALL are removed.
-
-    Returns:
-        Filtered node list with excluded nodes removed.
+    Nodes matching ALL conditions are removed.
     """
     if not conditions:
         return nodes
@@ -69,12 +79,6 @@ def apply_exclude(
 
 
 def _parse_sort_spec(sort_by: Any) -> list[dict[str, Any]]:
-    """Normalize the sort specification into a list of {key, order} dicts.
-
-    Accepts:
-        - A single string: {"key": "date"} (default order "asc")
-        - A list of dicts: [{"key": "date", "order": "asc"}, ...]
-    """
     if isinstance(sort_by, str):
         return [{"key": sort_by, "order": "asc"}]
     if isinstance(sort_by, list):
@@ -83,22 +87,18 @@ def _parse_sort_spec(sort_by: Any) -> list[dict[str, Any]]:
 
 
 def _sort_key_func(specs: list[dict[str, Any]]):
-    """Return a sort key function for multi-key sorting."""
-
     def key_func(node: NoteNode) -> tuple:
         values: list[Any] = []
         for spec in specs:
             key = spec.get("key", "")
             order = spec.get("order", "asc")
             val = node.properties.get(key, "")
-            # Normalize: None/empty sorts last in ascending, first in descending
             if val is None or val == "":
                 val = (1, "") if order == "asc" else (0, "")
             else:
                 val = (0, val) if order == "asc" else (1, val)
             values.append(val)
         return tuple(values)
-
     return key_func
 
 
@@ -106,15 +106,6 @@ def apply_sort(
     nodes: list[NoteNode],
     sort_by: Any,
 ) -> list[NoteNode]:
-    """Sort nodes by the specified key(s).
-
-    Args:
-        nodes: Node list to sort.
-        sort_by: Sort specification (string or list of dicts).
-
-    Returns:
-        Sorted node list (stable sort).
-    """
     if not sort_by:
         return nodes
 
@@ -133,10 +124,7 @@ def run_filter_pipeline(
     exclude_conditions: dict[str, Any],
     sort_by: Any,
 ) -> list[NoteNode]:
-    """Apply filter, exclude, and sort in order.
-
-    Order: filter -> exclude -> sort.
-    """
+    """Apply filter, exclude, and sort in order."""
     result = apply_filter(nodes, filter_conditions)
     result = apply_exclude(result, exclude_conditions)
     result = apply_sort(result, sort_by)

@@ -54,9 +54,11 @@ def _parse_conditions(raw: str) -> dict[str, Any] | None:
     """Parse filter/exclude conditions.
 
     Accepts:
-      1. JSON dict:    '{"type":"character"}' or '{"type":["character","tag"]}'
-      2. Key=value:    'type=character,tags=main'
-         Comma in value → OR list: 'type=character,tag' → {"type": ["character","tag"]}
+      1. JSON dict: '{"type":"character"}' or '{"$or":[{"type":"character"},{"type":"tag"}]}'
+      2. Key=value:  'type=character,tags=main'
+         Comma separates AND-groups.
+         Pipe in value → OR list: 'type=character|tag' → {"type": ["character","tag"]}
+         Repeated key → OR list: 'type=character,type=tag' → {"type": ["character","tag"]}
     """
     if not raw:
         return None
@@ -69,16 +71,26 @@ def _parse_conditions(raw: str) -> dict[str, Any] | None:
         if "=" in pair:
             key, _, val = pair.partition("=")
             key = key.strip()
-            val = val.strip().strip("\"'")
-            # If this key already exists, build a list
-            existing = result.get(key)
-            if existing is not None:
+            val_raw = val.strip().strip("\"'")
+            # Split on | for OR values
+            if "|" in val_raw:
+                val_list = [v.strip() for v in val_raw.split("|")]
+                existing = result.get(key)
                 if isinstance(existing, list):
-                    existing.append(val)
+                    result[key] = existing + val_list
+                elif existing is not None:
+                    result[key] = [existing] + val_list
                 else:
-                    result[key] = [existing, val]
+                    result[key] = val_list if len(val_list) > 1 else val_list[0]
             else:
-                result[key] = val
+                existing = result.get(key)
+                if existing is not None:
+                    if isinstance(existing, list):
+                        existing.append(val_raw)
+                    else:
+                        result[key] = [existing, val_raw]
+                else:
+                    result[key] = val_raw
     return result if result else None
 
 
@@ -136,11 +148,11 @@ Example:
     )
     p.add_argument(
         "--filter", type=str, default=None,
-        help='Filter conditions (JSON or key=value): \'{"type":"character"}\' or \'type=character,tags=main\'.',
+        help='Filter (JSON or key=value). | = OR: type=character|tag. JSON: {"$or":[...]}.',
     )
     p.add_argument(
         "--exclude", type=str, default=None,
-        help='Exclusion conditions (JSON or key=value): \'{"title":"draft"}\' or \'title=draft\'.',
+        help='Exclude (JSON or key=value). Supports | and $or like --filter.',
     )
     p.add_argument(
         "--sort-by", type=str, default=None,
