@@ -13,8 +13,8 @@ function measureText(text, fontSize, fontFamily) {
 // ═══════ NodeView layout params ═══════
 // Fills missing layout params with defaults from nv shape.
 // When expanded=true, always uses rect-style params regardless of shape.
-function layoutParams(nv, nw, nh, expanded) {
-  const s = expanded ? 'rect' : (nv.shape || 'rect');
+function layoutParams(nv, nw, nh) {
+  const s = nv.shape || 'rect';
   const cpX = nv.layout?.contentPadX ?? 8;
   const cpY = nv.layout?.contentPadY ?? 8;
   const tpX = nv.layout?.titlePadX ?? (nv.titlePad ?? 6);
@@ -32,7 +32,7 @@ function layoutParams(nv, nw, nh, expanded) {
       titleWrap: nv.titleWrap ?? false,
     };
   }
-  // rect / round / expanded circle
+  // rect / round
   const tH = nv.titleY === 'top' ? tpY + (nv.fontSize || 12) : 0;
   return {
     contentX: cpX, contentY: tH + cpY,
@@ -168,9 +168,8 @@ function applyNodeView(rect, node, expanded) {
   if(expanded) { nw=expanded.width; nh=expanded.height; }
   rect.setAttribute('x',node.x||0);rect.setAttribute('y',node.y||0);
   rect.setAttribute('width',nw);rect.setAttribute('height',nh);
-  // When expanded, always use rect shape (not circle) for readable content area
-  const shape=expanded?'rect':(nv.shape||'rect');
   const rx=nv.rx||4;
+  const shape=nv.shape||'rect';
   rect.setAttribute('rx',shape==='circle'?Math.min(nw,nh)/2:shape==='round'?18:rx);
   rect.setAttribute('ry',shape==='circle'?Math.min(nw,nh)/2:shape==='round'?18:rx);
   rect.setAttribute('fill',node.color||td.color||'#555');
@@ -196,14 +195,15 @@ function toggleExpand(node, g, mainG) {
   const bodyPadY0=nv.layout?.contentPadY ?? 8;
 
   let expW=420,expH=340;
+  if(nv.shape==='circle'){ expW=expH=380; }
   if(mode==='stretch'){
     let maxW=0,lineCount=0;
     lines.forEach(l=>{if(l.t==='br'){lineCount++;return;} if(l.t==='hr'||l.t==='code')return; const fs=l.t==='h'?14:10; if(l.text){const w=measureText(l.text,fs,'sans-serif');if(w>maxW)maxW=w;lineCount++;}});
-    expW=Math.max(420,maxW+bodyPadX0*2+16);
-    expH=Math.max(340,lineCount*16+bodyPadY0+40);
+    const sz=Math.max(expW,maxW+bodyPadX0*2+16);
+    expW=sz; expH=nv.shape==='circle'?sz:Math.max(expH,lineCount*16+bodyPadY0+40);
   }
 
-  const expLP=layoutParams(nv,expW,expH,true);
+  const expLP=layoutParams(nv,expW,expH);
   const bodyPadX=expLP.contentX;
   const bodyPadY=expLP.contentY;
 
