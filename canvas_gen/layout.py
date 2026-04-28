@@ -310,10 +310,9 @@ def _compute_container_layout(
                         ))
 
         total_container_width = sum(c.width_columns for c in containers) * column_width
-        fallback_x_offset = total_container_width + column_width
         fallback_y_offset = total_container_y + row_height
     else:
-        fallback_x_offset = 0.0
+        total_container_width = 0.0
         fallback_y_offset = 0.0
 
     if fallback_nodes:
@@ -324,6 +323,9 @@ def _compute_container_layout(
             fallback_nodes, type_defs, column_width, row_height,
             node_width, node_height, y_base=fallback_y_offset
         )
+        # Center fallback area under containers
+        fallback_width = max((pn.x + pn.width for pn in fallback_positions), default=0)
+        fallback_x_offset = max(0.0, (total_container_width - fallback_width) / 2)
         for pn in fallback_positions:
             pn.x += fallback_x_offset
             result.append(pn)
