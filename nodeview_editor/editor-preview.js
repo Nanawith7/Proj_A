@@ -32,8 +32,10 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
   const op=expanded?(nv.layout?.expandedFillOpacity):(nv.layout?.collapsedFillOpacity);if(op!==undefined)rect.setAttribute('opacity',op);g.appendChild(rect);
   if(!expanded){const fs=nv.fontSize||12,txt=document.createElementNS(SVGNS,'text');txt.setAttribute('x',lp.titleAnchor==='middle'?lp.titleX:lp.titleX+4);txt.setAttribute('y',lp.titleY+fs/2);txt.setAttribute('fill','#fff');txt.setAttribute('font-size',fs);txt.setAttribute('text-anchor',lp.titleAnchor==='middle'?'middle':'start');txt.textContent='Title';g.appendChild(txt);}
   if(expanded){
-    const by0=nv.layout?.bodyPosition?.y||(lp.contentY+12),bx0=nv.layout?.bodyPosition?.x||lp.contentX;
-    const ty0=nv.layout?.titlePosition?.y||by0,tx0=nv.layout?.titlePosition?.x||bx0;
+    const by0=_bodyPos.y||nv.layout?.bodyPosition?.y||(lp.contentY+12);
+    const bx0=_bodyPos.x||nv.layout?.bodyPosition?.x||lp.contentX;
+    const ty0=_titlePos.y||nv.layout?.titlePosition?.y||by0;
+    const tx0=_titlePos.x||nv.layout?.titlePosition?.x||bx0;
     const by=toPctY(by0,h),bx=toPctX(bx0,w),ty=toPctY(ty0,h),tx=toPctX(tx0,w);
     const t1=document.createElementNS(SVGNS,'text');t1.setAttribute('x',tx+10);t1.setAttribute('y',ty+6);t1.setAttribute('fill','#e94560');t1.setAttribute('font-size','13');t1.setAttribute('font-weight','bold');t1.textContent='Title';g.appendChild(t1);
     const t2=document.createElementNS(SVGNS,'text');t2.setAttribute('x',bx+10);t2.setAttribute('y',by+6);t2.setAttribute('fill','#aaa');t2.setAttribute('font-size','9');t2.textContent='Body text ...';g.appendChild(t2);
@@ -59,11 +61,13 @@ window.addEventListener('mousemove',e=>{
   const pX=Math.max(0,Math.min(100,(e.clientX-r.left)*sx/vb.width*100)).toFixed(1);
   const pY=Math.max(0,Math.min(100,(e.clientY-r.top)*sy/vb.height*100)).toFixed(1);
   if(dragMode==='title'){
-    document.getElementById('nv-tdx').value=pX+'%';
-    document.getElementById('nv-tdy').value=pY+'%';
+    _titlePos.x=pX+'%';_titlePos.y=pY+'%';
+    document.getElementById('nv-tdx').value=_titlePos.x;
+    document.getElementById('nv-tdy').value=_titlePos.y;
   }else if(dragMode==='body'){
-    document.getElementById('nv-bdx').value=pX+'%';
-    document.getElementById('nv-bdy').value=pY+'%';
+    _bodyPos.x=pX+'%';_bodyPos.y=pY+'%';
+    document.getElementById('nv-bdx').value=_bodyPos.x;
+    document.getElementById('nv-bdy').value=_bodyPos.y;
   }else if(dragMode==='prop'){const i=parseInt(dragIdx);if(i>=0&&i<propRows.length){propRows[i].px=pX+'%';propRows[i].py=pY+'%';renderProps();}}
   document.getElementById('json-output').value=JSON.stringify(buildNV(),null,2);
 });

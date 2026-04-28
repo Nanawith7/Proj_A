@@ -26,6 +26,9 @@ async function loadTemplate(name){
 function newTemplate(){currentName='untitled'; applyToForm({shape:'rect',rx:4}); renderTemplateList(); updatePreview();}
 function importJSON(){const raw=prompt('Paste nodeview JSON:');if(!raw)return;try{applyToForm(JSON.parse(raw));updatePreview();}catch(e){alert('Invalid JSON');}}
 
+// Position state (JS-managed, not just DOM inputs)
+let _titlePos={x:'',y:''}, _bodyPos={x:'',y:''};
+
 function applyToForm(nv){
   const l=nv.layout||{};
   setVal('nv-shape',nv.shape||'rect');setVal('nv-rx',nv.rx||4);setVal('nv-sw',nv.strokeWidth||1);
@@ -35,8 +38,11 @@ function applyToForm(nv){
   setVal('nv-bgop',l.backgroundOpacity??0.15);setVal('nv-bg',nv.background||'');
   setVal('nv-ew',l.expandMinW??300);setVal('nv-eh',l.expandMinH??200);
   setVal('nv-cpx',l.contentPadX??10);setVal('nv-cpy',l.contentPadY??10);
-  setVal('nv-bdx',l.bodyPosition?.x??'');setVal('nv-bdy',l.bodyPosition?.y??'');
-  setVal('nv-tdx',l.titlePosition?.x??'');setVal('nv-tdy',l.titlePosition?.y??'');
+  // Title/Body positions (sync to JS state + DOM)
+  _titlePos={x:l.titlePosition?.x??'',y:l.titlePosition?.y??''};
+  _bodyPos={x:l.bodyPosition?.x??'',y:l.bodyPosition?.y??''};
+  setVal('nv-tdx',_titlePos.x);setVal('nv-tdy',_titlePos.y);
+  setVal('nv-bdx',_bodyPos.x);setVal('nv-bdy',_bodyPos.y);
   setVal('nv-iax',l.iconAnchorX||'center');setVal('nv-iay',l.iconAnchorY||'center');
   setVal('nv-ipx',l.iconPadX??0);setVal('nv-ipy',l.iconPadY??0);
   setVal('nv-eiax',l.expandedIconAnchorX||'');setVal('nv-eiay',l.expandedIconAnchorY||'');
