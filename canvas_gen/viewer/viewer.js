@@ -11,38 +11,36 @@ function measureText(text, fontSize, fontFamily) {
 }
 
 // ═══════ NodeView layout params ═══════
-// Fills missing layout params with defaults from nv shape
-function layoutParams(nv, nw, nh) {
-  const s=nv.shape||'rect';
-  if(s==='circle'){
-    const d=Math.min(nw,nh);
-    const ox=Math.floor((nw-d)/2), oy=Math.floor((nh-d)/2);
+// Fills missing layout params with defaults from nv shape.
+// When expanded=true, always uses rect-style params regardless of shape.
+function layoutParams(nv, nw, nh, expanded) {
+  const s = expanded ? 'rect' : (nv.shape || 'rect');
+  const cpX = nv.layout?.contentPadX ?? 8;
+  const cpY = nv.layout?.contentPadY ?? 8;
+  const tpX = nv.layout?.titlePadX ?? (nv.titlePad ?? 6);
+  const tpY = nv.layout?.titlePadY ?? (nv.titlePad ?? 6);
+
+  if (s === 'circle') {
+    const d = Math.min(nw, nh);
+    const ox = Math.floor((nw - d) / 2), oy = Math.floor((nh - d) / 2);
     return {
-      contentX: ox + (nv.layout?.contentPadX ?? 8),
-      contentY: oy + (nv.layout?.contentPadY ?? 8),
-      contentW: d - 2*(nv.layout?.contentPadX ?? 8),
-      contentH: d - 2*(nv.layout?.contentPadY ?? 8),
-      titleAnchor: 'middle',
-      titleVAlign: 'center',
-      titleX: nw/2,
-      titleY: oy + d/2 + (nv.fontSize||12)/3,
-      titlePadX: nv.layout?.titlePadX ?? (nv.titlePad ?? 6),
-      titlePadY: nv.layout?.titlePadY ?? (nv.titlePad ?? 6),
+      contentX: ox + cpX, contentY: oy + cpY,
+      contentW: d - 2 * cpX, contentH: d - 2 * cpY,
+      titleAnchor: 'middle', titleVAlign: 'center',
+      titleX: nw / 2, titleY: oy + d / 2 + (nv.fontSize || 12) / 3,
+      titlePadX: tpX, titlePadY: tpY,
       titleWrap: nv.titleWrap ?? false,
     };
   }
-  // rect / round
+  // rect / round / expanded circle
+  const tH = nv.titleY === 'top' ? tpY + (nv.fontSize || 12) : 0;
   return {
-    contentX: nv.layout?.contentPadX ?? 8,
-    contentY: nv.layout?.contentPadY ?? (nv.titleY==='top' ? (nv.titlePad||6)+14 : 8),
-    contentW: nw - 2*(nv.layout?.contentPadX ?? 8),
-    contentH: nh - 2*(nv.layout?.contentPadY ?? (nv.titleY==='top' ? (nv.titlePad||6)+14 : 8)),
-    titleAnchor: 'start',
-    titleVAlign: nv.titleY || 'center',
-    titleX: nv.layout?.titlePadX ?? Math.max(nv.titlePad||6, 6),
-    titleY: nv.titleY==='top' ? (nv.titlePad||6)+(nv.fontSize||12) : nh/2+(nv.fontSize||12)/3,
-    titlePadX: nv.layout?.titlePadX ?? Math.max(nv.titlePad||6, 6),
-    titlePadY: nv.layout?.titlePadY ?? (nv.titlePad||6),
+    contentX: cpX, contentY: tH + cpY,
+    contentW: nw - 2 * cpX, contentH: nh - tH - 2 * cpY,
+    titleAnchor: 'start', titleVAlign: nv.titleY || 'center',
+    titleX: tpX,
+    titleY: nv.titleY === 'top' ? tpY + (nv.fontSize || 12) : nh / 2 + (nv.fontSize || 12) / 3,
+    titlePadX: tpX, titlePadY: tpY,
     titleWrap: nv.titleWrap ?? false,
   };
 }
@@ -192,8 +190,9 @@ function toggleExpand(node, g, mainG) {
   const stem=nodeStem(node),v=VAULT[stem];if(!v)return;
   const type=nodeType(node),td=TYPEDEFS[type]||{},nv=NODEVIEWS[td.nodeview||'plain']||{shape:'rect',rx:4};
   const lines=buildBodyLines(v,nv);
-  const bodyPadX=nv.layout?.contentPadX ?? 8;
-  const bodyPadY=nv.layout?.contentPadY ?? 14;
+  const expLP=layoutParams(nv,expW,expH,true);
+  const bodyPadX=expLP.contentX;
+  const bodyPadY=expLP.contentY;
 
   let expW=420,expH=340,fontSize=10;
   const minH=bodyPadY+12+60;
