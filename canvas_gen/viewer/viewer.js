@@ -276,14 +276,25 @@ function toggleExpand(node, g, mainG) {
 
   const nx=node.x||0,ny=node.y||0;
 
-  // Expanded icon: top-left
+  // Expanded icon: position from nodeview layout
   const exIconPath=v?.props?.icon;
   if(exIconPath){
     g.querySelectorAll('.node-icon-ex').forEach(el=>el.remove());
-    const isz=Math.min(40,(node.width||200)>0?(node.width||200):40);
+    const ax=nv.layout?.expandedIconAnchorX||nv.layout?.iconAnchorX||'left';
+    const ay=nv.layout?.expandedIconAnchorY||nv.layout?.iconAnchorY||'top';
+    const px=nv.layout?.expandedIconPadX??nv.layout?.iconPadX??4;
+    const py=nv.layout?.expandedIconPadY??nv.layout?.iconPadY??4;
+    const isz=nv.layout?.expandedIconSize??Math.min(40,(node.width||200)>0?(node.width||200):40);
+    let ix,iy;
+    if(ax==='right')ix=nx+expW-isz-px;
+    else if(ax==='center')ix=nx+(expW-isz)/2;
+    else ix=nx+px;
+    if(ay==='bottom')iy=ny+expH-isz-py;
+    else if(ay==='center')iy=ny+(expH-isz)/2;
+    else iy=ny+py;
     const img=document.createElementNS('http://www.w3.org/2000/svg','image');
     img.setAttribute('href','/_icons/'+exIconPath.split('/').pop());
-    img.setAttribute('x',nx+bodyPadX);img.setAttribute('y',ny+4);
+    img.setAttribute('x',ix);img.setAttribute('y',iy);
     img.setAttribute('width',isz);img.setAttribute('height',isz);
     img.setAttribute('class','node-icon-ex');
     img.style.pointerEvents='none';
