@@ -168,9 +168,11 @@ function applyNodeView(rect, node, expanded) {
   if(expanded) { nw=expanded.width; nh=expanded.height; }
   rect.setAttribute('x',node.x||0);rect.setAttribute('y',node.y||0);
   rect.setAttribute('width',nw);rect.setAttribute('height',nh);
+  // When expanded, always use rect shape (not circle) for readable content area
+  const shape=expanded?'rect':(nv.shape||'rect');
   const rx=nv.rx||4;
-  rect.setAttribute('rx',nv.shape==='circle'?Math.min(nw,nh)/2:nv.shape==='round'?18:rx);
-  rect.setAttribute('ry',nv.shape==='circle'?Math.min(nw,nh)/2:nv.shape==='round'?18:rx);
+  rect.setAttribute('rx',shape==='circle'?Math.min(nw,nh)/2:shape==='round'?18:rx);
+  rect.setAttribute('ry',shape==='circle'?Math.min(nw,nh)/2:shape==='round'?18:rx);
   rect.setAttribute('fill',node.color||td.color||'#555');
   rect.setAttribute('stroke',nv.stroke||'#fff6');
   rect.setAttribute('stroke-width',nv.strokeWidth||.5);
