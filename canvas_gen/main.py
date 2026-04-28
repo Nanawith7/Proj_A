@@ -53,22 +53,32 @@ def _parse_sort_by(raw: str) -> Any:
 def _parse_conditions(raw: str) -> dict[str, Any] | None:
     """Parse filter/exclude conditions.
 
-    Accepts two formats:
-      1. JSON dict:    '{"type":"character","tags":"main"}'
+    Accepts:
+      1. JSON dict:    '{"type":"character"}' or '{"type":["character","tag"]}'
       2. Key=value:    'type=character,tags=main'
+         Comma in value → OR list: 'type=character,tag' → {"type": ["character","tag"]}
     """
     if not raw:
         return None
     raw = raw.strip()
     if raw.startswith("{"):
         return json.loads(raw)
-    # key=value,key=value format
     result: dict[str, Any] = {}
     for pair in raw.split(","):
         pair = pair.strip()
         if "=" in pair:
             key, _, val = pair.partition("=")
-            result[key.strip()] = val.strip().strip("\"'")
+            key = key.strip()
+            val = val.strip().strip("\"'")
+            # If this key already exists, build a list
+            existing = result.get(key)
+            if existing is not None:
+                if isinstance(existing, list):
+                    existing.append(val)
+                else:
+                    result[key] = [existing, val]
+            else:
+                result[key] = val
     return result if result else None
 
 

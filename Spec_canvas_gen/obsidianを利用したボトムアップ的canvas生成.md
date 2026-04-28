@@ -268,7 +268,7 @@ STORY-ROW | 1      | 2      | 3      || 4      | 5      | 6      || 7      | (�
 | パラメータ | 型 | 説明 |
 |:---|:---|:---|
 | `base_node` | string | 起点となるノートのファイル名またはパス。 |
-| `filter` | dict | ノードがCanvasに含まれるために**満たすべき**条件（例: `{"type": "character", "tags": "main"}`）。AND評価。 |
+| `filter` | dict | ノードがCanvasに含まれるために**満たすべき**条件。キー間はAND評価。同一キーの複数値はOR評価（例: `type=character,type=event` → typeがcharacterまたはevent）。 |
 | `exclude` | dict | ノードを除外する条件（例: `{"title": "draft"}`）。AND評価。 |
 | `sort_by` | string or list of dict | ソートキー。単一文字列（例: `"date"`）または `[{"key": "date", "order": "asc"}]`。 |
 | `depth` | integer | 起点ノードからのリンク探索深度。 |

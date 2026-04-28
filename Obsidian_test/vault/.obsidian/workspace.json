@@ -13,15 +13,15 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "timeline.canvas",
+                "file": "characters.canvas",
                 "viewState": {
-                  "x": 2854.0629925546828,
-                  "y": 1491.3673886291822,
-                  "zoom": -0.6864129707982971
+                  "x": 605,
+                  "y": 273,
+                  "zoom": -0.6666666666666666
                 }
               },
               "icon": "lucide-layout-dashboard",
-              "title": "timeline"
+              "title": "characters"
             }
           }
         ]
@@ -185,9 +185,9 @@
   },
   "active": "5de152c9fde8f149",
   "lastOpenFiles": [
+    "timeline.canvas",
     "tag/demon.md",
     "characters_tags.canvas",
-    "timeline.canvas",
     "tag/royalty.md",
     "tag/wise.md",
     "tag/ruler.md",
