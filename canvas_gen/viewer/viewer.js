@@ -209,7 +209,7 @@ function toggleExpand(node, g, mainG) {
   if(expandedId===nid){collapseAll(mainG);expandedId=null;return;}
   expandedId=nid;
 
-  g.querySelectorAll('.node-title').forEach(el=>el.style.opacity='0');
+  g.querySelectorAll('.node-title,.node-icon-img').forEach(el=>el.style.opacity='0');
   const stem=nodeStem(node),v=VAULT[stem];if(!v)return;
   const type=nodeType(node),td=TYPEDEFS[type]||{},nv=NODEVIEWS[td.nodeview||'plain']||{shape:'rect',rx:4};
   const lines=buildBodyLines(v,nv);
@@ -366,7 +366,9 @@ function collapseAll(mainG){
   const node=currentNodes.find(n=>n.id===expandedId);if(!node)return;
   const rect=g.querySelector('.node-rect');if(rect)applyNodeView(rect,node,false);
   g.querySelectorAll('.node-title').forEach(el=>el.style.opacity='1');
-  g.querySelectorAll('.node-body').forEach(el=>el.remove());
+  g.querySelectorAll('.node-body,.node-bg,.node-icon-ex').forEach(el=>el.remove());
+  // Restore collapsed icon visibility
+  g.querySelectorAll('.node-icon-img').forEach(el=>el.style.display='');
   currentNodes.forEach(n=>{
     if(n.id===expandedId)return;
     const g2=mainG.querySelector(`g[data-id="${n.id}"]`);if(!g2)return;
