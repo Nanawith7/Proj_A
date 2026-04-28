@@ -29,7 +29,7 @@ from .config import (
 )
 from .edges import generate_edges
 from .extractor import collect_related_nodes, scan_vault
-from .filter_sort import apply_filter, run_filter_pipeline
+from .filter_sort import _match_condition, apply_filter, run_filter_pipeline
 from .icons import generate_type_icons, generate_node_icon
 from .layout import compute_layout
 from .models import DEFAULT_LABEL_MAPPING_PATH, DEFAULT_TYPE_DEF_PATH
@@ -152,7 +152,11 @@ Example:
     )
     p.add_argument(
         "--exclude", type=str, default=None,
-        help='Exclude (JSON or key=value). Supports | and $or like --filter.',
+        help='Exclusion conditions (JSON or key=value): \'{"title":"draft"}\' or \'title=draft\'.',
+    )
+    p.add_argument(
+        "--include-types", type=str, default=None,
+        help="Always include nodes matching these conditions (protected from pruning).",
     )
     p.add_argument(
         "--sort-by", type=str, default=None,
@@ -273,18 +277,19 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"[INFO] Canvas node set: {len(nodes)} nodes.")
 
-    # --- Include structural nodes for x_axis_key containers ---
-    if args.x_axis_key:
-        key = args.x_axis_key
+    # --- Include additional nodes by type ---
+    if args.include_types:
+        include_conditions = _parse_conditions(args.include_types)
         stems = {n.stem for n in nodes}
         added = 0
         for stem, vn in vault_index.items():
-            if stem not in stems and vn.properties.get(key) is not None:
-                nodes.append(vn)
-                stems.add(stem)
-                added += 1
+            if stem not in stems:
+                if all(_match_condition(vn, k, v) for k, v in (include_conditions or {}).items()):
+                    nodes.append(vn)
+                    stems.add(stem)
+                    added += 1
         if added:
-            print(f"[INFO] Added {added} structural node(s) with '{key}' property for containers.")
+            print(f"[INFO] Added {added} node(s) via --include-types.")
 
     # --- Parse per-node icon sizes and compute effective layout params ---
     max_icon_h = icon_size
@@ -345,11 +350,11 @@ def main(argv: list[str] | None = None) -> int:
         for edge in edges:
             connected_stems.add(edge.from_node)
             connected_stems.add(edge.to_node)
-        # Structural nodes (with x_axis_key value) are NEVER pruned
-        if args.x_axis_key:
-            xkey = args.x_axis_key
+        # Nodes matching --include-types are NEVER pruned
+        if args.include_types:
+            include_conditions = _parse_conditions(args.include_types)
             for node in nodes:
-                if node.properties.get(xkey) is not None:
+                if include_conditions and all(_match_condition(node, k, v) for k, v in include_conditions.items()):
                     connected_stems.add(node.stem)
         before = len(nodes)
         if prune_conditions:
