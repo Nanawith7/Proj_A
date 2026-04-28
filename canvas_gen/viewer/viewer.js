@@ -147,11 +147,16 @@ function truncateTitle(title, fs, lp) {
 }
 
 function drawWrappedTitle(g, svgNS, title, fs, lp, nx, ny, nv) {
-  const maxH=lp.contentH, startY=ny+lp.contentY+fs;
+  // For collapsed title: center vertically in the shape, use titleY as baseline
+  const maxW=lp.contentW;
+  const totalLines=Math.ceil(measureText(title,fs,'sans-serif')/maxW);
+  if(totalLines<1)return;
+  const titleBlockH=totalLines*(fs+2);
+  let startY=ny+lp.titleY-titleBlockH/2+fs;
   let pos=0,line=0;
-  while(pos<title.length && (line+1)*(fs+2)<=maxH){
+  while(pos<title.length){
     let len=1;
-    while(pos+len<=title.length&&measureText(title.slice(pos,pos+len),fs,'sans-serif')<lp.contentW)len++;
+    while(pos+len<=title.length&&measureText(title.slice(pos,pos+len),fs,'sans-serif')<maxW)len++;
     if(len===1&&pos+1<=title.length)len=2;
     const t2=document.createElementNS(svgNS,'text');t2.setAttribute('class','node-title');
     t2.setAttribute('font-size',fs);if(nv.boldTitle)t2.setAttribute('font-weight','bold');
