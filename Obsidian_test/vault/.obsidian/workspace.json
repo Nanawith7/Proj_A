@@ -11,10 +11,17 @@
             "id": "2ec1532ea9941862",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "グラフビュー"
+              "type": "canvas",
+              "state": {
+                "file": "thief_network.canvas",
+                "viewState": {
+                  "x": 427.9584733279295,
+                  "y": 950.8407162755444,
+                  "zoom": -1.1268786832128084
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "thief_network"
             }
           }
         ]
