@@ -34,8 +34,7 @@
               "title": "timeline"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -194,8 +193,9 @@
       "bases:新規ベースを作成": false
     }
   },
-  "active": "f03cac4a8793025c",
+  "active": "2ec1532ea9941862",
   "lastOpenFiles": [
+    "timeline.canvas",
     "bmp_test.canvas",
     "bmptest/test.md",
     "bmptest",
@@ -228,7 +228,6 @@
     "timeline_no_tags.canvas",
     "timeline_giant.canvas",
     "timeline_bigicons.canvas",
-    "timeline.canvas",
     "thief_network.canvas",
     "event/魔法学園創設.md",
     "event/大戦争勃発.md",
