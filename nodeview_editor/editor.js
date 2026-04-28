@@ -1,176 +1,4 @@
-// ═══════════ Nodeview Editor ═══════════
-let templates={};
-let currentName='';
-let propRows=[];
-let previewBG=null;
-let dragMode=''; // 'prop', 'title', 'body' or empty
-let dragIdx=-1;
-
-const SVGNS='http://www.w3.org/2000/svg';
-
-async function init(){
-  try{const r=await fetch('/api/templates');templates=await r.json();}
-  catch(e){templates={character:{shape:'rect',rx:4,nodeview:'character_card'}};}
-  renderTemplateList();
-  if(Object.keys(templates).length)loadTemplate(Object.keys(templates)[0]);
-}
-
-function renderTemplateList(){
-  const div=document.getElementById('template-list');
-  div.innerHTML='';
-  Object.entries(templates).forEach(([name,td])=>{
-    const btn=document.createElement('button');
-    btn.textContent=`${name} (${td.nodeview||'none'})`;
-    btn.onclick=()=>loadTemplate(name);
-    if(name===currentName)btn.classList.add('active');
-    div.appendChild(btn);
-  });
-}
-
-async function loadTemplate(name){
-  currentName=name;
-  const td=templates[name]||{};
-  const nvName=td.nodeview||'plain';
-  let nv={};
-  try{const r=await fetch(`/api/nodeview/${nvName}.json`);nv=await r.json();}
-  catch(e){nv={shape:'rect',rx:4};}
-  applyToForm(nv);
-  renderTemplateList();
-  update();
-}
-
-function newTemplate(){
-  currentName='untitled';
-  applyToForm({shape:'rect',rx:4});
-  renderTemplateList();
-  update();
-}
-
-function importJSON(){
-  const raw=prompt('Paste nodeview JSON:');
-  if(!raw)return;
-  try{applyToForm(JSON.parse(raw));update();}
-  catch(e){alert('Invalid JSON');}
-}
-
-function applyToForm(nv){
-  const l=nv.layout||{};
-  setVal('nv-shape',nv.shape||'rect');
-  setVal('nv-rx',nv.rx||4);
-  setVal('nv-sw',nv.strokeWidth||1);
-  setVal('nv-stroke',nv.stroke||'#fff6');
-  setVal('nv-fs',nv.fontSize||12);
-  setVal('nv-ty',nv.titleY||'center');
-  setVal('nv-tw',nv.titleWrap||false);
-  setVal('nv-tpx',l.titlePadX??10);
-  setVal('nv-tpy',l.titlePadY??10);
-  setVal('nv-cfop',l.collapsedFillOpacity??1);
-  setVal('nv-efop',l.expandedFillOpacity??1);
-  setVal('nv-bgop',l.backgroundOpacity??0.15);
-  setVal('nv-bg',nv.background||'');
-  setVal('nv-ew',l.expandMinW??300);
-  setVal('nv-eh',l.expandMinH??200);
-  setVal('nv-cpx',l.contentPadX??10);
-  setVal('nv-cpy',l.contentPadY??10);
-  // Title/body position
-  setVal('nv-bdx',l.bodyPosition?.x??'');
-  setVal('nv-bdy',l.bodyPosition?.y??'');
-  setVal('nv-tdx',l.titlePosition?.x??'');
-  setVal('nv-tdy',l.titlePosition?.y??'');
-  // Icon
-  setVal('nv-iax',l.iconAnchorX||'center');
-  setVal('nv-iay',l.iconAnchorY||'center');
-  setVal('nv-ipx',l.iconPadX??0);
-  setVal('nv-ipy',l.iconPadY??0);
-  setVal('nv-eiax',l.expandedIconAnchorX||'');
-  setVal('nv-eiay',l.expandedIconAnchorY||'');
-  setVal('nv-eipx',l.expandedIconPadX??'');
-  setVal('nv-eipy',l.expandedIconPadY??'');
-  setVal('nv-eisz',l.expandedIconSize??'');
-  // Properties
-  propRows=[];
-  const props=nv.properties||{};
-  Object.entries(props).forEach(([k,v])=>{
-    propRows.push({key:k,style:v.style||'text',shape:v.shape||'round',bg:v.bg||'#fff2',textColor:v.textColor||'#eee',px:v.position?.x||'',py:v.position?.y||''});
-  });
-  renderProps();
-}
-
-function setVal(id,val){
-  const el=document.getElementById(id);
-  if(!el)return;
-  if(el.type==='checkbox')el.checked=val;
-  else el.value=val??'';
-}
-
-function getVal(id){return document.getElementById(id)?.value||'';}
-function getNum(id){return parseFloat(document.getElementById(id)?.value)||0;}
-
-function renderProps(){
-  const div=document.getElementById('props-editor');
-  div.innerHTML='';
-  propRows.forEach((pr,i)=>{
-    const row=document.createElement('div');row.className='prop-row';
-    const isPill=pr.style==='pill';
-    let extraHTML='';
-    if(isPill){
-      extraHTML=`<select onchange="propRows[${i}].shape=this.value;update()" style="width:60px"><option ${pr.shape==='round'?'selected':''}>round</option><option ${pr.shape==='diamond'?'selected':''}>diamond</option><option ${pr.shape==='rect'?'selected':''}>rect</option></select><input value="${pr.bg}" placeholder="bg" style="width:60px" onchange="propRows[${i}].bg=this.value;update()"><input value="${pr.textColor}" placeholder="fg" style="width:60px" onchange="propRows[${i}].textColor=this.value;update()">`;
-    }
-    row.innerHTML=`<span>${i+1}</span><input value="${pr.key}" placeholder="key" oninput="propRows[${i}].key=this.value;update()"><select onchange="propRows[${i}].style=this.value;renderProps();update()"><option ${pr.style==='pill'?'selected':''}>pill</option><option ${pr.style==='text'?'selected':''}>text</option></select>${extraHTML}<input value="${pr.px}" placeholder="x" style="width:40px" oninput="propRows[${i}].px=this.value;update()"><input value="${pr.py}" placeholder="y" style="width:40px" oninput="propRows[${i}].py=this.value;update()"><button onclick="propRows.splice(${i},1);renderProps();update()" style="background:#533483;padding:2px 6px;font-size:10px">x</button>`;
-    div.appendChild(row);
-  });
-}
-
-function addProp(){propRows.push({key:'newKey',style:'text',shape:'round',bg:'#fff2',textColor:'#eee',px:'',py:''});renderProps();update();}
-
-// ═══════ Build nodeview JSON ═══════
-function buildNV(){
-  const props={};
-  propRows.forEach(pr=>{
-    const p={};
-    if(pr.style==='pill'){p.style='pill';p.shape=pr.shape;p.bg=pr.bg;p.textColor=pr.textColor;}
-    if(pr.px||pr.py){p.position={};if(pr.px)p.position.x=pr.px;if(pr.py)p.position.y=pr.py;}
-    if(Object.keys(p).length)props[pr.key]=p;
-  });
-  const layout={};
-  if(getNum('nv-tpx')!==10)layout.titlePadX=getNum('nv-tpx');
-  if(getNum('nv-tpy')!==10)layout.titlePadY=getNum('nv-tpy');
-  if(getNum('nv-cfop')!==1)layout.collapsedFillOpacity=getNum('nv-cfop');
-  if(getNum('nv-efop')!==1)layout.expandedFillOpacity=getNum('nv-efop');
-  if(getNum('nv-bgop')!==0.15)layout.backgroundOpacity=getNum('nv-bgop');
-  if(getNum('nv-ew')!==300)layout.expandMinW=getNum('nv-ew');
-  if(getNum('nv-eh')!==200)layout.expandMinH=getNum('nv-eh');
-  if(getNum('nv-cpx')!==10)layout.contentPadX=getNum('nv-cpx');
-  if(getNum('nv-cpy')!==10)layout.contentPadY=getNum('nv-cpy');
-  // Title/body position
-  const bdx=getNum('nv-bdx'),bdy=getNum('nv-bdy');
-  const tdx=getNum('nv-tdx'),tdy=getNum('nv-tdy');
-  if(bdx||bdy){layout.bodyPosition={};if(bdx)layout.bodyPosition.x=bdx;if(bdy)layout.bodyPosition.y=bdy;}
-  if(tdx||tdy){layout.titlePosition={};if(tdx)layout.titlePosition.x=tdx;if(tdy)layout.titlePosition.y=tdy;}
-  // Icon
-  if(getVal('nv-iax')!=='center')layout.iconAnchorX=getVal('nv-iax');
-  if(getVal('nv-iay')!=='center')layout.iconAnchorY=getVal('nv-iay');
-  if(getNum('nv-ipx'))layout.iconPadX=getNum('nv-ipx');
-  if(getNum('nv-ipy'))layout.iconPadY=getNum('nv-ipy');
-  if(getVal('nv-eiax'))layout.expandedIconAnchorX=getVal('nv-eiax');
-  if(getVal('nv-eiay'))layout.expandedIconAnchorY=getVal('nv-eiay');
-  if(getVal('nv-eipx')!=='')layout.expandedIconPadX=getNum('nv-eipx');
-  if(getVal('nv-eipy')!=='')layout.expandedIconPadY=getNum('nv-eipy');
-  if(getVal('nv-eisz')!=='')layout.expandedIconSize=getNum('nv-eisz');
-
-  const nv={shape:getVal('nv-shape'),rx:getNum('nv-rx')};
-  if(getNum('nv-sw')!==0.5)nv.strokeWidth=getNum('nv-sw');
-  if(getVal('nv-stroke')!=='#fff6')nv.stroke=getVal('nv-stroke');
-  if(getNum('nv-fs')!==12)nv.fontSize=getNum('nv-fs');
-  if(getVal('nv-ty')!=='center')nv.titleY=getVal('nv-ty');
-  if(getVal('nv-tw')==='true')nv.titleWrap=true;
-  if(getVal('nv-bg'))nv.background=getVal('nv-bg');
-  if(Object.keys(props).length)nv.properties=props;
-  if(Object.keys(layout).length)nv.layout=layout;
-  return nv;
-}
-
-// ═══════ Preview ═══════
+// ═══════════ Preview ═══════
 function update(){
   const nv=buildNV();
   document.getElementById('json-output').value=JSON.stringify(nv,null,2);
@@ -247,68 +75,78 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
     g.appendChild(txt);
   }
 
-  // Expanded: title + body + props (in viewer order)
+  // Expanded: text + draggable markers (markers appended LAST for z-order)
   if(expanded){
     const bodyY=nv.layout?.bodyPosition?.y||(lp.contentY+12);
     const bodyX=nv.layout?.bodyPosition?.x||lp.contentX;
     const titleY=nv.layout?.titlePosition?.y||bodyY;
     const titleX=nv.layout?.titlePosition?.x||bodyX;
 
-    // Title marker (draggable)
-    const tmk=document.createElementNS(SVGNS,'rect');
-    tmk.setAttribute('x',titleX-4);tmk.setAttribute('y',titleY-4);
-    tmk.setAttribute('width',8);tmk.setAttribute('height',8);
-    tmk.setAttribute('fill','#e94560');tmk.setAttribute('rx','2');
-    tmk.setAttribute('cursor','grab');
-    tmk.onmousedown=e=>{e.stopPropagation();e.preventDefault();dragMode='title';dragIdx='prev-expanded';};
-    g.appendChild(tmk);
+    // Title text
     const tt=document.createElementNS(SVGNS,'text');
-    tt.setAttribute('x',titleX+8);tt.setAttribute('y',titleY+4);
+    tt.setAttribute('x',titleX+10);tt.setAttribute('y',titleY+6);
     tt.setAttribute('fill','#e94560');tt.setAttribute('font-size','13');tt.setAttribute('font-weight','bold');
     tt.textContent='Title';g.appendChild(tt);
 
-    // Body marker (draggable, independent of title)
-    const by=nv.layout?.bodyPosition?.y||(lp.contentY+12);
-    const bx=nv.layout?.bodyPosition?.x||lp.contentX;
-    const bmk=document.createElementNS(SVGNS,'rect');
-    bmk.setAttribute('x',bx-4);bmk.setAttribute('y',by-4);
-    bmk.setAttribute('width',8);bmk.setAttribute('height',8);
-    bmk.setAttribute('fill','#4CAF50');bmk.setAttribute('rx','2');
-    bmk.setAttribute('cursor','grab');
-    bmk.onmousedown=e=>{e.stopPropagation();e.preventDefault();dragMode='body';dragIdx='prev-expanded';};
-    g.appendChild(bmk);
+    // Body text
     const bt=document.createElementNS(SVGNS,'text');
-    bt.setAttribute('x',bx+8);bt.setAttribute('y',by+4);
+    bt.setAttribute('x',bodyX+10);bt.setAttribute('y',bodyY+6);
     bt.setAttribute('fill','#aaa');bt.setAttribute('font-size','9');
     bt.textContent='Body text ...';g.appendChild(bt);
 
+    // Property texts
+    propRows.forEach((pr,i)=>{
+      if(!pr.key||!pr.px||!pr.py)return;
+      const x=toPctX(pr.px,w),y=toPctY(pr.py,h);
+      if(x<0||y<0)return;
+      const txt=document.createElementNS(SVGNS,'text');
+      txt.setAttribute('x',x+10);txt.setAttribute('y',y+6);
+      txt.setAttribute('fill','#fff');txt.setAttribute('font-size','9');
+      txt.textContent=pr.key;g.appendChild(txt);
+    });
+
+    // --- Drag markers (on top, with data attributes) ---
+
+    // Title marker
+    addMarker(g,titleX,titleY,'#e94560','title',-1);
+    // Body marker
+    addMarker(g,bodyX,bodyY,'#4CAF50','body',-1);
     // Property markers
     propRows.forEach((pr,i)=>{
       if(!pr.key||!pr.px||!pr.py)return;
       const x=toPctX(pr.px,w),y=toPctY(pr.py,h);
       if(x<0||y<0)return;
-      const marker=document.createElementNS(SVGNS,'rect');
-      marker.setAttribute('x',x-3);marker.setAttribute('y',y-3);
-      marker.setAttribute('width',6);marker.setAttribute('height',6);
-      marker.setAttribute('fill','#2196F3');marker.setAttribute('rx','2');
-      marker.setAttribute('cursor','grab');
-      marker.onmousedown=e=>{e.stopPropagation();e.preventDefault();dragMode='prop';dragIdx=i;};
-      g.appendChild(marker);
-      const txt=document.createElementNS(SVGNS,'text');
-      txt.setAttribute('x',x+8);txt.setAttribute('y',y+4);
-      txt.setAttribute('fill','#fff');txt.setAttribute('font-size','9');
-      txt.textContent=pr.key;g.appendChild(txt);
+      addMarker(g,x,y,'#2196F3','prop',i);
     });
   }
 
   svg.appendChild(g);
+  svg.onmousedown=handleMarkerDown;
 }
 
-// ═══════ Drag (title/body/prop) ═══════
+function addMarker(g,x,y,color,mode,idx){
+  const m=document.createElementNS(SVGNS,'rect');
+  m.setAttribute('x',x-5);m.setAttribute('y',y-5);
+  m.setAttribute('width',10);m.setAttribute('height',10);
+  m.setAttribute('fill',color);m.setAttribute('rx','2');
+  m.setAttribute('cursor','grab');
+  m.setAttribute('data-mode',mode);
+  m.setAttribute('data-idx',idx);
+  g.appendChild(m);
+}
+
+function handleMarkerDown(e){
+  const t=e.target;
+  const mode=t.getAttribute('data-mode');
+  const idx=t.getAttribute('data-idx');
+  if(!mode)return;
+  e.stopPropagation();e.preventDefault();
+  dragMode=mode;dragIdx=idx;
+}
+
 window.addEventListener('mousemove',e=>{
-  if(!dragMode||dragIdx==='')return;
-  const svgId=dragMode==='title'||dragMode==='body'?'prev-expanded':'prev-expanded';
-  const svg=document.getElementById(svgId);
+  if(!dragMode||dragIdx===null||dragIdx===undefined)return;
+  const svg=document.getElementById('prev-expanded');
   if(!svg||!svg.viewBox)return;
   const vb=svg.viewBox.baseVal;
   const r=svg.getBoundingClientRect();
@@ -317,61 +155,19 @@ window.addEventListener('mousemove',e=>{
   const pctY=Math.max(0,Math.min(100,(e.clientY-r.top)*sy/vb.height*100)).toFixed(1);
   if(dragMode==='title'){
     setVal('nv-tdx',pctX+'%');setVal('nv-tdy',pctY+'%');
-    document.getElementById('json-output').value=JSON.stringify(buildNV(),null,2);
   }else if(dragMode==='body'){
     setVal('nv-bdx',pctX+'%');setVal('nv-bdy',pctY+'%');
-    document.getElementById('json-output').value=JSON.stringify(buildNV(),null,2);
-  }else if(dragMode==='prop'&&dragIdx>=0){
-    propRows[dragIdx].px=pctX+'%';propRows[dragIdx].py=pctY+'%';
-    renderProps();
-    document.getElementById('json-output').value=JSON.stringify(buildNV(),null,2);
+  }else if(dragMode==='prop'){
+    const i=parseInt(dragIdx);
+    if(i>=0&&i<propRows.length){
+      propRows[i].px=pctX+'%';propRows[i].py=pctY+'%';
+      renderProps();
+    }
   }
-  // NOTE: don't call update() during drag - it redraws SVG and kills the drag
+  document.getElementById('json-output').value=JSON.stringify(buildNV(),null,2);
 });
+
 window.addEventListener('mouseup',()=>{
-  if(dragMode){
-    update(); // Redraw preview on release
-  }
-  dragMode='';dragIdx='';
+  if(dragMode){update();}
+  dragMode='';dragIdx=null;
 });
-
-// ═══════ BG image ═══════
-function loadBGFile(input){
-  const file=input.files[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=()=>{previewBG=reader.result;update();};
-  reader.readAsDataURL(file);
-}
-function loadBGURL(url){
-  if(!url){previewBG=null;update();return;}
-  const img=new Image();img.crossOrigin='anonymous';
-  img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);previewBG=c.toDataURL();update();};
-  img.onerror=()=>{previewBG=null;update();};
-  img.src=url;
-}
-
-// ═══════ Actions ═══════
-function copyJSON(){
-  const json=document.getElementById('json-output').value;
-  navigator.clipboard.writeText(json).then(()=>{
-    document.getElementById('status').textContent='Copied!';
-    setTimeout(()=>document.getElementById('status').textContent='',2000);
-  });
-}
-async function saveTemplate(){
-  const nv=buildNV();
-  const name=prompt('Template name:',currentName||'untitled');
-  if(!name)return;
-  try{
-    const r=await fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,nodeview:nv})});
-    const data=await r.json();
-    document.getElementById('json-output').value=data.json;
-    document.getElementById('status').textContent=`Saved: ${name}`;
-    setTimeout(()=>document.getElementById('status').textContent='',3000);
-  }catch(e){
-    document.getElementById('status').textContent='Save failed';
-  }
-}
-
-init();
