@@ -164,10 +164,10 @@ function update(){
 
 function computeLP(nv,nw,nh){
   const s=nv.shape||'rect';
-  const cpX=nv.layout?.contentPadX??10;
-  const cpY=nv.layout?.contentPadY??10;
-  const tpX=nv.layout?.titlePadX??10;
-  const tpY=nv.layout?.titlePadY??10;
+  const cpX=nv.layout?.contentPadX??8;
+  const cpY=nv.layout?.contentPadY??8;
+  const tpX=nv.layout?.titlePadX??(nv.titlePad??6);
+  const tpY=nv.layout?.titlePadY??(nv.titlePad??6);
   if(s==='circle'){
     const d=Math.min(nw,nh);
     const ox=Math.floor((nw-d)/2),oy=Math.floor((nh-d)/2);
@@ -234,20 +234,20 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
     propRows.forEach((pr,i)=>{
       if(!pr.key)return;
       const y=pr.py?parseInt(pr.py):startY+i*22;
-      const x=pr.px?parseInt(pr.px):8;
+      const x=pr.px?parseInt(pr.px):lp.contentX;
 
-      // Draggable marker
+      // Draggable marker at absolute position
       const marker=document.createElementNS(SVGNS,'rect');
-      marker.setAttribute('x',x-2);marker.setAttribute('y',y-2);
-      marker.setAttribute('width',8);marker.setAttribute('height',8);
+      marker.setAttribute('x',x-3);marker.setAttribute('y',y-3);
+      marker.setAttribute('width',6);marker.setAttribute('height',6);
       marker.setAttribute('fill','#e94560');marker.setAttribute('rx','2');
       marker.setAttribute('cursor','grab');marker.setAttribute('data-pi',i);
       marker.onmousedown=e=>startDragProp(e,i,svgId);
       g.appendChild(marker);
 
       const txt=document.createElementNS(SVGNS,'text');
-      txt.setAttribute('x',x+10);txt.setAttribute('y',y+10);
-      txt.setAttribute('fill','#fff');txt.setAttribute('font-size','10');
+      txt.setAttribute('x',x+8);txt.setAttribute('y',y+4);
+      txt.setAttribute('fill','#fff');txt.setAttribute('font-size','9');
       txt.setAttribute('font-weight','bold');
       txt.textContent=pr.key;
       g.appendChild(txt);
