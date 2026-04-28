@@ -19,10 +19,10 @@ class EditorHandler(BaseHTTPRequestHandler):
         path = self.path.split("?")[0]
         if path == "/" or path == "/index.html":
             self._serve_file("index.html", "text/html")
-        elif path == "/editor.css":
-            self._serve_file("editor.css", "text/css")
-        elif path == "/editor.js":
-            self._serve_file("editor.js", "application/javascript")
+        elif path.endswith(".css"):
+            self._serve_file(path.lstrip("/"), "text/css")
+        elif path.endswith(".js"):
+            self._serve_file(path.lstrip("/"), "application/javascript")
         elif path == "/api/templates":
             self._proxy_viewer("GET", "/api/typedefs")
         elif path.startswith("/api/nodeview/"):
