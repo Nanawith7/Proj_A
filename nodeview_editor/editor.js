@@ -2,7 +2,9 @@
 let templates={};
 let currentName='';
 let propRows=[];
-let previewBG=null; // loaded background image for preview
+let previewBG=null;
+let dragMode=''; // 'prop', 'title', 'body' or empty
+let dragIdx=-1;
 
 const SVGNS='http://www.w3.org/2000/svg';
 
@@ -70,11 +72,21 @@ function applyToForm(nv){
   setVal('nv-eh',l.expandMinH??200);
   setVal('nv-cpx',l.contentPadX??10);
   setVal('nv-cpy',l.contentPadY??10);
-  setVal('nv-bdy',l.bodyPosition?.y||0);
+  // Title/body position
+  setVal('nv-bdx',l.bodyPosition?.x??'');
+  setVal('nv-bdy',l.bodyPosition?.y??'');
+  setVal('nv-tdx',l.titlePosition?.x??'');
+  setVal('nv-tdy',l.titlePosition?.y??'');
+  // Icon
   setVal('nv-iax',l.iconAnchorX||'center');
   setVal('nv-iay',l.iconAnchorY||'center');
   setVal('nv-ipx',l.iconPadX??0);
   setVal('nv-ipy',l.iconPadY??0);
+  setVal('nv-eiax',l.expandedIconAnchorX||'');
+  setVal('nv-eiay',l.expandedIconAnchorY||'');
+  setVal('nv-eipx',l.expandedIconPadX??'');
+  setVal('nv-eipy',l.expandedIconPadY??'');
+  setVal('nv-eisz',l.expandedIconSize??'');
   // Properties
   propRows=[];
   const props=nv.properties||{};
@@ -82,14 +94,13 @@ function applyToForm(nv){
     propRows.push({key:k,style:v.style||'text',shape:v.shape||'round',bg:v.bg||'#fff2',textColor:v.textColor||'#eee',px:v.position?.x||'',py:v.position?.y||''});
   });
   renderProps();
-  renderProps();
 }
 
 function setVal(id,val){
   const el=document.getElementById(id);
   if(!el)return;
   if(el.type==='checkbox')el.checked=val;
-  else el.value=val;
+  else el.value=val??'';
 }
 
 function getVal(id){return document.getElementById(id)?.value||'';}
@@ -118,8 +129,8 @@ function buildNV(){
   propRows.forEach(pr=>{
     const p={};
     if(pr.style==='pill'){p.style='pill';p.shape=pr.shape;p.bg=pr.bg;p.textColor=pr.textColor;}
-    if(pr.px||pr.py){p.position={};if(pr.px)p.position.x=parseInt(pr.px);if(pr.py)p.position.y=parseInt(pr.py);}
-    props[pr.key]=p;
+    if(pr.px||pr.py){p.position={};if(pr.px)p.position.x=pr.px;if(pr.py)p.position.y=pr.py;}
+    if(Object.keys(p).length)props[pr.key]=p;
   });
   const layout={};
   if(getNum('nv-tpx')!==10)layout.titlePadX=getNum('nv-tpx');
@@ -131,11 +142,21 @@ function buildNV(){
   if(getNum('nv-eh')!==200)layout.expandMinH=getNum('nv-eh');
   if(getNum('nv-cpx')!==10)layout.contentPadX=getNum('nv-cpx');
   if(getNum('nv-cpy')!==10)layout.contentPadY=getNum('nv-cpy');
-  if(getNum('nv-bdy'))layout.bodyPosition={y:getNum('nv-bdy')};
+  // Title/body position
+  const bdx=getNum('nv-bdx'),bdy=getNum('nv-bdy');
+  const tdx=getNum('nv-tdx'),tdy=getNum('nv-tdy');
+  if(bdx||bdy){layout.bodyPosition={};if(bdx)layout.bodyPosition.x=bdx;if(bdy)layout.bodyPosition.y=bdy;}
+  if(tdx||tdy){layout.titlePosition={};if(tdx)layout.titlePosition.x=tdx;if(tdy)layout.titlePosition.y=tdy;}
+  // Icon
   if(getVal('nv-iax')!=='center')layout.iconAnchorX=getVal('nv-iax');
   if(getVal('nv-iay')!=='center')layout.iconAnchorY=getVal('nv-iay');
   if(getNum('nv-ipx'))layout.iconPadX=getNum('nv-ipx');
   if(getNum('nv-ipy'))layout.iconPadY=getNum('nv-ipy');
+  if(getVal('nv-eiax'))layout.expandedIconAnchorX=getVal('nv-eiax');
+  if(getVal('nv-eiay'))layout.expandedIconAnchorY=getVal('nv-eiay');
+  if(getVal('nv-eipx')!=='')layout.expandedIconPadX=getNum('nv-eipx');
+  if(getVal('nv-eipy')!=='')layout.expandedIconPadY=getNum('nv-eipy');
+  if(getVal('nv-eisz')!=='')layout.expandedIconSize=getNum('nv-eisz');
 
   const nv={shape:getVal('nv-shape'),rx:getNum('nv-rx')};
   if(getNum('nv-sw')!==0.5)nv.strokeWidth=getNum('nv-sw');
@@ -153,11 +174,8 @@ function buildNV(){
 function update(){
   const nv=buildNV();
   document.getElementById('json-output').value=JSON.stringify(nv,null,2);
-
-  // Simple layout params calculation (JS version of layoutParams)
-  const lp=computeLP(nv,120,80); // collapsed preview
-  const eLP=computeLP(nv,380,280); // expanded preview
-
+  const lp=computeLP(nv,120,80);
+  const eLP=computeLP(nv,380,280);
   drawPreview('prev-collapsed',120,80,nv,lp,false);
   drawPreview('prev-expanded',380,280,nv,eLP,true);
 }
@@ -177,20 +195,21 @@ function computeLP(nv,nw,nh){
   return{contentX:cpX,contentY:tH+cpY,contentW:nw-2*cpX,contentH:nh-tH-2*cpY,titleAnchor:'start',titleX:tpX,titleY:nv.titleY==='top'?tpY+(nv.fontSize||12):nh/2+(nv.fontSize||12)/3,titlePadX:tpX,titlePadY:tpY};
 }
 
+function toPctX(v,w){return String(v).endsWith('%')?parseFloat(v)/100*w:parseInt(v)||-1;}
+function toPctY(v,h){return String(v).endsWith('%')?parseFloat(v)/100*h:parseInt(v)||-1;}
+
 function drawPreview(svgId,w,h,nv,lp,expanded){
   const svg=document.getElementById(svgId);
   svg.innerHTML='';
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
   svg.style.width=w+'px';svg.style.height=h+'px';
-
   const g=document.createElementNS(SVGNS,'g');
 
   // Background
   if(expanded){
     if(previewBG){
       const bgImg=document.createElementNS(SVGNS,'image');
-      bgImg.setAttribute('href',previewBG);
-      bgImg.setAttribute('width',w);bgImg.setAttribute('height',h);
+      bgImg.setAttribute('href',previewBG);bgImg.setAttribute('width',w);bgImg.setAttribute('height',h);
       bgImg.setAttribute('preserveAspectRatio','xMidYMid slice');
       bgImg.setAttribute('opacity',nv.layout?.backgroundOpacity??1);
       g.appendChild(bgImg);
@@ -216,7 +235,7 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
   if(op!==undefined)rect.setAttribute('opacity',op);
   g.appendChild(rect);
 
-  // Title
+  // Collapsed title
   if(!expanded){
     const fs=nv.fontSize||12;
     const txt=document.createElementNS(SVGNS,'text');
@@ -228,60 +247,99 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
     g.appendChild(txt);
   }
 
-  // Mock body rendering: matches viewer's buildBodyLines order
+  // Expanded: title + body + props (in viewer order)
   if(expanded){
     const bodyY=nv.layout?.bodyPosition?.y||(lp.contentY+12);
-    // Title (always first in buildBodyLines)
-    let cy=bodyY+10;
-    const t=document.createElementNS(SVGNS,'text');
-    t.setAttribute('x',lp.contentX);t.setAttribute('y',cy);
-    t.setAttribute('fill','#e94560');t.setAttribute('font-size','13');t.setAttribute('font-weight','bold');
-    t.textContent='Title';
-    g.appendChild(t);
+    const bodyX=nv.layout?.bodyPosition?.x||lp.contentX;
+    const titleY=nv.layout?.titlePosition?.y||bodyY;
+    const titleX=nv.layout?.titlePosition?.x||bodyX;
 
-    // Properties with position overrides (rendered before body in viewer)
-    cy+=16;
+    // Title marker (draggable)
+    const tmk=document.createElementNS(SVGNS,'rect');
+    tmk.setAttribute('x',titleX-4);tmk.setAttribute('y',titleY-4);
+    tmk.setAttribute('width',8);tmk.setAttribute('height',8);
+    tmk.setAttribute('fill','#e94560');tmk.setAttribute('rx','2');
+    tmk.setAttribute('cursor','grab');
+    tmk.onmousedown=e=>{e.stopPropagation();dragMode='title';dragIdx=svgId;};
+    g.appendChild(tmk);
+    const tt=document.createElementNS(SVGNS,'text');
+    tt.setAttribute('x',titleX+8);tt.setAttribute('y',titleY+4);
+    tt.setAttribute('fill','#e94560');tt.setAttribute('font-size','13');tt.setAttribute('font-weight','bold');
+    tt.textContent='Title';g.appendChild(tt);
+
+    // Body marker (draggable)
+    const cy0=titleY+16;
+    const bmk=document.createElementNS(SVGNS,'rect');
+    bmk.setAttribute('x',bodyX-4);bmk.setAttribute('y',cy0-4);
+    bmk.setAttribute('width',8);bmk.setAttribute('height',8);
+    bmk.setAttribute('fill','#4CAF50');bmk.setAttribute('rx','2');
+    bmk.setAttribute('cursor','grab');
+    bmk.onmousedown=e=>{e.stopPropagation();dragMode='body';dragIdx=svgId;};
+    g.appendChild(bmk);
+    const bt=document.createElementNS(SVGNS,'text');
+    bt.setAttribute('x',bodyX+8);bt.setAttribute('y',cy0+4);
+    bt.setAttribute('fill','#aaa');bt.setAttribute('font-size','9');
+    bt.textContent='Body text ...';g.appendChild(bt);
+
+    // Property markers
     propRows.forEach((pr,i)=>{
-      if(!pr.key || !pr.px || !pr.py) return;
-      const pctX=String(pr.px).endsWith('%')?parseFloat(pr.px)/100*w:parseInt(pr.px);
-      const pctY=String(pr.py).endsWith('%')?parseFloat(pr.py)/100*h:parseInt(pr.py);
-      const y=pctY, x=pctX;
-      // Draggable marker
+      if(!pr.key||!pr.px||!pr.py)return;
+      const x=toPctX(pr.px,w),y=toPctY(pr.py,h);
+      if(x<0||y<0)return;
       const marker=document.createElementNS(SVGNS,'rect');
       marker.setAttribute('x',x-3);marker.setAttribute('y',y-3);
       marker.setAttribute('width',6);marker.setAttribute('height',6);
-      marker.setAttribute('fill','#e94560');marker.setAttribute('rx','2');
-      marker.setAttribute('cursor','grab');marker.setAttribute('data-pi',i);
-      marker.onmousedown=e=>startDragProp(e,i,svgId);
+      marker.setAttribute('fill','#2196F3');marker.setAttribute('rx','2');
+      marker.setAttribute('cursor','grab');
+      marker.onmousedown=e=>{e.stopPropagation();dragMode='prop';dragIdx=i;};
       g.appendChild(marker);
       const txt=document.createElementNS(SVGNS,'text');
       txt.setAttribute('x',x+8);txt.setAttribute('y',y+4);
       txt.setAttribute('fill','#fff');txt.setAttribute('font-size','9');
-      txt.textContent=pr.key;
-      g.appendChild(txt);
+      txt.textContent=pr.key;g.appendChild(txt);
     });
-
-    // Auto-flow properties (no position) + body
-    cy=bodyY+16;
-    let hasBody=false;
-    propRows.forEach(pr=>{
-      if(!pr.key||pr.px||pr.py)return;
-      const tt=document.createElementNS(SVGNS,'text');
-      tt.setAttribute('x',lp.contentX);tt.setAttribute('y',cy+10);
-      tt.setAttribute('fill','#ddd');tt.setAttribute('font-size','10');
-      tt.textContent=`${pr.key}: ...`;
-      g.appendChild(tt);cy+=16;hasBody=true;
-    });
-    if(!hasBody||propRows.filter(pr=>pr.key&&pr.px&&pr.py).length>0){
-      const b=document.createElementNS(SVGNS,'text');
-      b.setAttribute('x',lp.contentX);b.setAttribute('y',cy+10);
-      b.setAttribute('fill','#aaa');b.setAttribute('font-size','9');
-      b.textContent='Body text ...';
-      g.appendChild(b);
-    }
   }
 
   svg.appendChild(g);
+}
+
+// ═══════ Drag (title/body/prop) ═══════
+window.addEventListener('mousemove',e=>{
+  if(!dragMode||dragIdx==='')return;
+  const svgId=dragMode==='title'||dragMode==='body'?dragIdx:'prev-expanded';
+  const svg=document.getElementById(svgId);
+  if(!svg)return;
+  const vb=svg.viewBox.baseVal;
+  const r=svg.getBoundingClientRect();
+  const sx=vb.width/r.width,sy=vb.height/r.height;
+  const pctX=Math.max(0,Math.min(100,(e.clientX-r.left)*sx/vb.width*100)).toFixed(1);
+  const pctY=Math.max(0,Math.min(100,(e.clientY-r.top)*sy/vb.height*100)).toFixed(1);
+  if(dragMode==='title'){
+    setVal('nv-tdx',pctX+'%');setVal('nv-tdy',pctY+'%');
+  }else if(dragMode==='body'){
+    setVal('nv-bdx',pctX+'%');setVal('nv-bdy',pctY+'%');
+  }else if(dragMode==='prop'&&dragIdx>=0){
+    propRows[dragIdx].px=pctX+'%';propRows[dragIdx].py=pctY+'%';
+    renderProps();
+  }
+  update();
+});
+window.addEventListener('mouseup',()=>{dragMode='';dragIdx='';});
+
+// ═══════ BG image ═══════
+function loadBGFile(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{previewBG=reader.result;update();};
+  reader.readAsDataURL(file);
+}
+function loadBGURL(url){
+  if(!url){previewBG=null;update();return;}
+  const img=new Image();img.crossOrigin='anonymous';
+  img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);previewBG=c.toDataURL();update();};
+  img.onerror=()=>{previewBG=null;update();};
+  img.src=url;
 }
 
 // ═══════ Actions ═══════
@@ -292,7 +350,6 @@ function copyJSON(){
     setTimeout(()=>document.getElementById('status').textContent='',2000);
   });
 }
-
 async function saveTemplate(){
   const nv=buildNV();
   const name=prompt('Template name:',currentName||'untitled');
@@ -307,48 +364,5 @@ async function saveTemplate(){
     document.getElementById('status').textContent='Save failed';
   }
 }
-
-function loadBGFile(input){
-  const file=input.files[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=()=>{previewBG=reader.result;update();};
-  reader.readAsDataURL(file);
-}
-
-function loadBGURL(url){
-  if(!url){previewBG=null;update();return;}
-  const img=new Image();
-  img.crossOrigin='anonymous';
-  img.onload=()=>{
-    const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
-    c.getContext('2d').drawImage(img,0,0);
-    previewBG=c.toDataURL();
-    update();
-  };
-  img.onerror=()=>{previewBG=null;update();};
-  img.src=url;
-}
-
-// ═══════ Drag property positions in preview (percentage mode) ═══════
-let dragPI=-1,dragSvgId='';
-function startDragProp(e,pi,svgId){
-  e.stopPropagation();e.preventDefault();
-  dragPI=pi;dragSvgId=svgId;
-}
-window.addEventListener('mousemove',e=>{
-  if(dragPI<0)return;
-  const svg=document.getElementById(dragSvgId);
-  if(!svg)return;
-  const vb=svg.viewBox.baseVal;
-  const r=svg.getBoundingClientRect();
-  const sx=vb.width/r.width, sy=vb.height/r.height;
-  const pctX=Math.max(0,Math.min(100,(e.clientX-r.left)*sx/vb.width*100)).toFixed(1);
-  const pctY=Math.max(0,Math.min(100,(e.clientY-r.top)*sy/vb.height*100)).toFixed(1);
-  propRows[dragPI].px=pctX+'%';
-  propRows[dragPI].py=pctY+'%';
-  renderProps();update();
-});
-window.addEventListener('mouseup',()=>{dragPI=-1;});
 
 init();
