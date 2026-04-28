@@ -72,6 +72,26 @@ def _parse_conditions(raw: str) -> dict[str, Any] | None:
     return result if result else None
 
 
+def _parse_icon_size(raw: Any, default: int) -> tuple[int, int]:
+    """Parse icon_size value into (width, height).
+
+    Accepts:
+      - None / missing → (default, default)
+      - int: 80 → (80, 80)
+      - str: "80x60" → (80, 60)
+    """
+    if raw is None:
+        return (default, default)
+    if isinstance(raw, int):
+        return (raw, raw)
+    if isinstance(raw, str):
+        parts = raw.split("x")
+        if len(parts) == 2:
+            return (int(parts[0]), int(parts[1]))
+        return (int(parts[0]), int(parts[0]))
+    return (default, default)
+
+
 def _build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Generate an Obsidian Canvas from vault metadata using bottom-up extraction.",
@@ -188,15 +208,6 @@ def main(argv: list[str] | None = None) -> int:
         icons_dir = Path(str(vault_path)) / "_icons"
         icon_map = generate_type_icons(str(icons_dir), size=icon_size)
 
-    # --- Compute effective row_height from per-type node heights ---
-    type_heights = [td.node_height for td in type_defs.values()]
-    max_type_height = max(type_heights) if type_heights else args.node_height
-    effective_row_height = args.row_height
-    if icon_size > 0:
-        icon_row_height = icon_size + args.icon_gap + max_type_height
-        effective_row_height = max(args.row_height, icon_row_height)
-    print(f"[INFO] Effective row height: {effective_row_height} (icon={icon_size}, max_node_h={max_type_height})")
-
     # --- Scan vault ---
     print("[INFO] Scanning vault...")
     vault_index = scan_vault(str(vault_path))
@@ -231,10 +242,28 @@ def main(argv: list[str] | None = None) -> int:
     if not nodes:
         print("[WARN] No nodes match the criteria. Writing empty canvas.")
         # Still write an empty canvas file
-        write_canvas(args.output, [], [], icon_map, icon_size, args.icon_gap)
+        write_canvas(args.output, [], [], icon_map, icon_size, args.icon_gap, icon_size)
         return 0
 
     print(f"[INFO] Canvas node set: {len(nodes)} nodes.")
+
+    # --- Parse per-node icon sizes and compute effective layout params ---
+    max_icon_h = icon_size
+    type_heights = [td.node_height for td in type_defs.values()]
+    max_type_height = max(type_heights) if type_heights else args.node_height
+
+    for node in nodes:
+        iw, ih = _parse_icon_size(node.properties.get("icon_size"), icon_size)
+        node.icon_width = iw
+        node.icon_height = ih
+        if ih > max_icon_h:
+            max_icon_h = ih
+
+    effective_row_height = args.row_height
+    if icon_size > 0:
+        icon_row_height = max_icon_h + args.icon_gap + max_type_height
+        effective_row_height = max(args.row_height, icon_row_height)
+    print(f"[INFO] Row height: {effective_row_height} (max_icon_h={max_icon_h}, max_node_h={max_type_height})")
 
     # --- Generate per-node icons ---
     if icon_size > 0:
@@ -274,7 +303,7 @@ def main(argv: list[str] | None = None) -> int:
     # --- Write output ---
     output_path = write_canvas(
         args.output, positioned, edges,
-        icon_map, icon_size, args.icon_gap
+        icon_map, icon_size, args.icon_gap, max_icon_h
     )
     print(f"[INFO] Canvas written to: {output_path}")
 

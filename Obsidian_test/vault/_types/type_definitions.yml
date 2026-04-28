@@ -27,3 +27,9 @@ organization:
   color: "#4CAF50"
   node_width: 200
   node_height: 120
+tag:
+  lining: 5
+  centering: true
+  color: "#607D8B"
+  node_width: 100
+  node_height: 80

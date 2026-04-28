@@ -305,6 +305,8 @@ def _compute_container_layout(
                             height=nh,
                             color=node_color,
                             icon_path=node.icon_path,
+                            icon_width=node.icon_width,
+                            icon_height=node.icon_height,
                         ))
 
         total_container_width = sum(c.width_columns for c in containers) * column_width
@@ -395,6 +397,8 @@ def _compute_grid_layout(
                     height=nh,
                     color=node_color,
                     icon_path=node.icon_path,
+                    icon_width=node.icon_width,
+                    icon_height=node.icon_height,
                 ))
 
         y_cursor += subrows * row_height

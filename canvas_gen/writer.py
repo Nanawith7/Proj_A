@@ -1,8 +1,11 @@
 """JSON Canvas file output.
 
-Each entity generates up to two canvas nodes:
+Each entity generates two canvas nodes:
   1. An icon node (type: "file") positioned above the file node
   2. A file node (type: "file") pointing to the original markdown note
+
+The vertical icon space is uniform (max_icon_h across all nodes), but each
+icon node renders at its own per-node icon size within that space.
 """
 
 from __future__ import annotations
@@ -19,17 +22,24 @@ def _make_icon_node(
     node: PositionedNode,
     icon_id: str,
     icon_path: str,
-    icon_size: int,
+    icon_w: int,
+    icon_h: int,
+    max_icon_h: int,
     icon_gap: int,
 ) -> dict[str, Any]:
+    """Create an icon node anchored above the file node.
+    
+    The Y offset uses max_icon_h (uniform row space), but width/height
+    use the per-node icon dimensions.
+    """
     return {
         "id": icon_id,
         "type": "file",
         "file": icon_path,
         "x": int(node.x),
-        "y": int(node.y - icon_size - icon_gap),
-        "width": icon_size,
-        "height": icon_size,
+        "y": int(node.y - max_icon_h - icon_gap),
+        "width": icon_w,
+        "height": icon_h,
     }
 
 
@@ -75,15 +85,18 @@ def write_canvas(
     icon_map: dict[str, str] | None = None,
     icon_size: int = 50,
     icon_gap: int = 4,
+    max_icon_h: int | None = None,
 ) -> str:
     """Write a .canvas file with icon+file paired nodes.
-
-    Each entity outputs a file node for the note, plus an optional
-    icon node positioned above it (using per-node or per-type icon path).
-    Edges connect only to the file nodes.
+    
+    Args:
+        max_icon_h: Uniform icon row height (max across all nodes).
+                    Defaults to icon_size if not provided.
     """
     if icon_map is None:
         icon_map = {}
+    if max_icon_h is None:
+        max_icon_h = icon_size
 
     stem_to_canvas_id: dict[str, str] = {}
     canvas_nodes: list[dict[str, Any]] = []
@@ -96,13 +109,17 @@ def write_canvas(
             counter += 1
         stem_to_canvas_id[node.stem] = canvas_id
 
-        # Icon node (above file node)
         icon_path = node.icon_path or icon_map.get(node.node_type, "")
         if icon_path:
             icon_id = f"{canvas_id}_icon"
-            canvas_nodes.append(_make_icon_node(node, icon_id, icon_path, icon_size, icon_gap))
+            canvas_nodes.append(_make_icon_node(
+                node, icon_id, icon_path,
+                icon_w=node.icon_width,
+                icon_h=node.icon_height,
+                max_icon_h=max_icon_h,
+                icon_gap=icon_gap,
+            ))
 
-        # File node
         canvas_nodes.append(_make_file_node(node, canvas_id))
 
     canvas_edges: list[dict[str, Any]] = []

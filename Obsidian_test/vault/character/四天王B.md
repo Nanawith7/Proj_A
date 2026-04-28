@@ -4,8 +4,9 @@ title: 四天王B
 aliases:
   - General B
 tags:
-  - demon
-  - general
+  - "[[demon]]"
+  - "[[general]]"
+icon_size: 50x50
 icon: "_icons/node_四天王B.png"
 affiliation: "[[魔族連合]]"
 ally:

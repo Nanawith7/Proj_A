@@ -4,8 +4,9 @@ title: 四天王A
 aliases:
   - General A
 tags:
-  - demon
-  - general
+  - "[[demon]]"
+  - "[[general]]"
+icon_size: 50x50
 icon: "_icons/node_四天王A.png"
 affiliation: "[[魔族連合]]"
 rival:

@@ -20,6 +20,8 @@ class NoteNode:
     properties: dict[str, Any] = field(default_factory=dict)
     wikilinks: dict[str, list[str]] = field(default_factory=dict)
     icon_path: str = ""
+    icon_width: int = 50
+    icon_height: int = 50
 
     @property
     def node_id(self) -> str:
@@ -89,6 +91,8 @@ class PositionedNode:
     height: float
     color: str = ""
     icon_path: str = ""
+    icon_width: int = 50
+    icon_height: int = 50
 
     @property
     def node_id(self) -> str:
