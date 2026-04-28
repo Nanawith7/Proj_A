@@ -193,13 +193,15 @@ function toggleExpand(node, g, mainG) {
   const type=nodeType(node),td=TYPEDEFS[type]||{},nv=NODEVIEWS[td.nodeview||'plain']||{shape:'rect',rx:4};
   const lines=buildBodyLines(v,nv);
   const bodyPadX=nv.layout?.contentPadX ?? 8;
+  const bodyPadY=nv.layout?.contentPadY ?? 14;
 
   let expW=420,expH=340,fontSize=10;
+  const minH=bodyPadY+12+60;
   if(mode==='stretch'){
     let maxW=0,lineCount=0;
     lines.forEach(l=>{if(l.t==='br'){lineCount++;return;} if(l.t==='hr'||l.t==='code')return; const fs=l.t==='h'?14:10; if(l.text){const w=measureText(l.text,fs,'sans-serif');if(w>maxW)maxW=w;lineCount++;}});
     expW=Math.max(420,maxW+bodyPadX*2+16);
-    expH=Math.max(340,lineCount*16+40);
+    expH=Math.max(minH,lineCount*16+bodyPadY+20);
   }
 
   const rect=g.querySelector('.node-rect');
@@ -219,7 +221,7 @@ function toggleExpand(node, g, mainG) {
 
   g.querySelectorAll('.node-body').forEach(el=>el.remove());
   const svgNS='http://www.w3.org/2000/svg';
-  let cy=ny+26;
+  let cy=ny+bodyPadY+12;
   lines.forEach(ln=>{
     if(ln.t==='br'){cy+=10;return;} if(ln.t==='hr'){cy+=4;return;} if(ln.t==='code')return;
     if(ln.t==='pill'){

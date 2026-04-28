@@ -1,1 +1,1 @@
-{"shape":"plain","rx":4,"stroke":"#fff6","strokeWidth":0.5,"fontSize":12,"titleY":"center"}
+{"shape":"rect","rx":4,"stroke":"#fff6","strokeWidth":1,"fontSize":12,"titleY":"center","titlePad":6,"layout":{"contentPadX":10,"contentPadY":10,"titlePadX":10,"titlePadY":6}}
