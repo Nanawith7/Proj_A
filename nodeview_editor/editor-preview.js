@@ -42,7 +42,7 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
     const bc=nv.layout?.bodyColor||'#ddd';
     const t1=document.createElementNS(SVGNS,'text');t1.setAttribute('x',tx+10);t1.setAttribute('y',ty+6);t1.setAttribute('fill',tc);t1.setAttribute('font-size','13');t1.setAttribute('font-weight','bold');t1.textContent='Title';g.appendChild(t1);
     const t2=document.createElementNS(SVGNS,'text');t2.setAttribute('x',bx+10);t2.setAttribute('y',by+6);t2.setAttribute('fill',bc);t2.setAttribute('font-size','9');t2.textContent='Body text ...';g.appendChild(t2);
-    propRows.forEach((pr,i)=>{if(!pr.key||!pr.px||!pr.py)return;const x=toPctX(pr.px,w),y=toPctY(pr.py,h);if(x<0||y<0)return;const t=document.createElementNS(SVGNS,'text');t.setAttribute('x',x+10);t.setAttribute('y',y+6);t.setAttribute('fill','#fff');t.setAttribute('font-size','9');t.textContent=pr.key;g.appendChild(t);});
+    propRows.forEach((pr,i)=>{if(!pr.key||!pr.px||!pr.py)return;const x=toPctX(pr.px,w),y=toPctY(pr.py,h);if(x<0||y<0)return;const tc=pr.textColor||'#fff';const t=document.createElementNS(SVGNS,'text');t.setAttribute('x',x+10);t.setAttribute('y',y+6);t.setAttribute('fill',tc);t.setAttribute('font-size','9');t.textContent=pr.key;g.appendChild(t);});
     addMarker(g,tx,ty,'#e94560','title');addMarker(g,bx,by,'#4CAF50','body');
     propRows.forEach((pr,i)=>{if(!pr.key||!pr.px||!pr.py)return;const x=toPctX(pr.px,w),y=toPctY(pr.py,h);if(x<0||y<0)return;addMarker(g,x,y,'#2196F3','prop',i);});
   }
