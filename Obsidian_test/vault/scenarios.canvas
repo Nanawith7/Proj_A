@@ -1,62 +1,11 @@
 {
-  "nodes": [
-    {
-      "id": "冒険の始まり_icon",
-      "type": "file",
-      "file": "_icons/type_scenario.png",
-      "x": 0,
-      "y": -54,
-      "width": 50,
-      "height": 50
-    },
-    {
-      "id": "冒険の始まり",
-      "type": "file",
-      "file": "scenario/冒険の始まり.md",
-      "x": 0,
-      "y": 0,
-      "width": 280,
-      "height": 160,
-      "color": "#FF9800"
-    },
-    {
-      "id": "賢者との出会い_icon",
-      "type": "file",
-      "file": "_icons/type_scenario.png",
-      "x": 350,
-      "y": -54,
-      "width": 50,
-      "height": 50
-    },
-    {
-      "id": "賢者との出会い",
-      "type": "file",
-      "file": "scenario/賢者との出会い.md",
-      "x": 350,
-      "y": 0,
-      "width": 280,
-      "height": 160,
-      "color": "#FF9800"
-    },
-    {
-      "id": "最終決戦_icon",
-      "type": "file",
-      "file": "_icons/type_scenario.png",
-      "x": 700,
-      "y": -54,
-      "width": 50,
-      "height": 50
-    },
-    {
-      "id": "最終決戦",
-      "type": "file",
-      "file": "scenario/最終決戦.md",
-      "x": 700,
-      "y": 0,
-      "width": 280,
-      "height": 160,
-      "color": "#FF9800"
-    }
-  ],
-  "edges": []
+	"nodes":[
+		{"id":"冒険の始まり_icon","type":"file","file":"_icons/type_scenario.png","x":0,"y":-54,"width":50,"height":50},
+		{"id":"冒険の始まり","type":"file","file":"scenario/冒険の始まり.md","x":0,"y":0,"width":280,"height":160,"color":"#FF9800"},
+		{"id":"賢者との出会い_icon","type":"file","file":"_icons/type_scenario.png","x":350,"y":-54,"width":50,"height":50},
+		{"id":"賢者との出会い","type":"file","file":"scenario/賢者との出会い.md","x":350,"y":0,"width":280,"height":160,"color":"#FF9800"},
+		{"id":"最終決戦_icon","type":"file","file":"_icons/type_scenario.png","x":700,"y":-54,"width":50,"height":50},
+		{"id":"最終決戦","type":"file","file":"scenario/最終決戦.md","x":700,"y":0,"width":280,"height":160,"color":"#FF9800"}
+	],
+	"edges":[]
 }

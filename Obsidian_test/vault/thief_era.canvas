@@ -1,117 +1,11 @@
 {
   "nodes": [
     {
-      "id": "魔族領潜入",
-      "type": "file",
-      "file": "scenario/魔族領潜入.md",
-      "x": 110,
-      "y": 500,
-      "width": 280,
-      "height": 160,
-      "color": "#FF9800"
-    },
-    {
-      "id": "秘宝争奪戦",
-      "type": "file",
-      "file": "scenario/秘宝争奪戦.md",
-      "x": 460,
-      "y": 500,
-      "width": 280,
-      "height": 160,
-      "color": "#FF9800"
-    },
-    {
-      "id": "地下迷宮出現",
-      "type": "file",
-      "file": "event/地下迷宮出現.md",
-      "x": 110,
-      "y": 0,
-      "width": 220,
-      "height": 140,
-      "color": "#E91E63"
-    },
-    {
-      "id": "四天王A_icon",
-      "type": "file",
-      "file": "_icons/node_四天王A.png",
-      "x": 175,
-      "y": 936,
-      "width": 50,
-      "height": 50
-    },
-    {
-      "id": "四天王A",
-      "type": "file",
-      "file": "character/四天王A.md",
-      "x": 175,
-      "y": 1000,
-      "width": 160,
-      "height": 120,
-      "color": "#2196F3"
-    },
-    {
-      "id": "幼なじみ_icon",
-      "type": "file",
-      "file": "_icons/node_幼なじみ.png",
-      "x": 525,
-      "y": 936,
-      "width": 40,
-      "height": 40
-    },
-    {
-      "id": "幼なじみ",
-      "type": "file",
-      "file": "character/幼なじみ.md",
-      "x": 525,
-      "y": 1000,
-      "width": 160,
-      "height": 120,
-      "color": "#2196F3"
-    },
-    {
-      "id": "主人公_icon",
-      "type": "file",
-      "file": "_icons/node_主人公.png",
-      "x": 350,
-      "y": 1186,
-      "width": 80,
-      "height": 60
-    },
-    {
-      "id": "主人公",
-      "type": "file",
-      "file": "character/主人公.md",
-      "x": 350,
-      "y": 1250,
-      "width": 160,
-      "height": 120,
-      "color": "#2196F3"
-    },
-    {
-      "id": "盗賊_icon",
-      "type": "file",
-      "file": "_icons/node_盗賊.png",
-      "x": 350,
-      "y": 1436,
-      "width": 45,
-      "height": 50
-    },
-    {
-      "id": "盗賊",
-      "type": "file",
-      "file": "character/盗賊.md",
-      "x": 350,
-      "y": 1500,
-      "width": 160,
-      "height": 120,
-      "color": "#2196F3"
-    },
-    {
       "id": "era_080_120",
       "type": "file",
       "file": "era/era_080_120.md",
       "x": 0,
-      "y": 1750,
+      "y": 0,
       "width": 220,
       "height": 100,
       "color": "#9C27B0"
@@ -121,26 +15,132 @@
       "type": "file",
       "file": "era/era_120_150.md",
       "x": 350,
-      "y": 1750,
+      "y": 0,
       "width": 220,
       "height": 100,
       "color": "#9C27B0"
+    },
+    {
+      "id": "魔族領潜入",
+      "type": "file",
+      "file": "scenario/魔族領潜入.md",
+      "x": 350,
+      "y": 750,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "秘宝争奪戦",
+      "type": "file",
+      "file": "scenario/秘宝争奪戦.md",
+      "x": 700,
+      "y": 750,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "地下迷宮出現",
+      "type": "file",
+      "file": "event/地下迷宮出現.md",
+      "x": 350,
+      "y": 250,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
     },
     {
       "id": "era_150_180",
       "type": "file",
       "file": "era/era_150_180.md",
-      "x": 700,
-      "y": 1750,
+      "x": 1050,
+      "y": 0,
       "width": 220,
       "height": 100,
       "color": "#9C27B0"
     },
     {
+      "id": "盗賊_icon",
+      "type": "file",
+      "file": "_icons/node_盗賊.png",
+      "x": 445,
+      "y": 1186,
+      "width": 45,
+      "height": 50
+    },
+    {
+      "id": "盗賊",
+      "type": "file",
+      "file": "character/盗賊.md",
+      "x": 445,
+      "y": 1250,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "四天王A_icon",
+      "type": "file",
+      "file": "_icons/node_四天王A.png",
+      "x": 795,
+      "y": 1186,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "四天王A",
+      "type": "file",
+      "file": "character/四天王A.md",
+      "x": 795,
+      "y": 1250,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "幼なじみ_icon",
+      "type": "file",
+      "file": "_icons/node_幼なじみ.png",
+      "x": 620,
+      "y": 1436,
+      "width": 40,
+      "height": 40
+    },
+    {
+      "id": "幼なじみ",
+      "type": "file",
+      "file": "character/幼なじみ.md",
+      "x": 620,
+      "y": 1500,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "主人公_icon",
+      "type": "file",
+      "file": "_icons/node_主人公.png",
+      "x": 620,
+      "y": 1686,
+      "width": 80,
+      "height": 60
+    },
+    {
+      "id": "主人公",
+      "type": "file",
+      "file": "character/主人公.md",
+      "x": 620,
+      "y": 1750,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
       "id": "rogue",
       "type": "file",
       "file": "tag/rogue.md",
-      "x": 350,
+      "x": 620,
       "y": 2000,
       "width": 100,
       "height": 80,
@@ -150,7 +150,7 @@
       "id": "human",
       "type": "file",
       "file": "tag/human.md",
-      "x": 350,
+      "x": 620,
       "y": 2250,
       "width": 100,
       "height": 80,
@@ -159,147 +159,147 @@
   ],
   "edges": [
     {
-      "id": "0f5629ae-7d4c-4a6d-82c8-03f3b2e2efcf",
+      "id": "e2e37d44-342e-41ba-b90e-1a0dc2d02f99",
       "fromNode": "魔族領潜入",
       "toNode": "主人公",
       "label": "登場人物",
       "color": "#2196F3"
     },
     {
-      "id": "6cc51633-ae56-41d7-8f37-ca7b8d4efb9c",
+      "id": "267bd1d0-92fe-4f37-8dd5-33327858061d",
       "fromNode": "魔族領潜入",
       "toNode": "盗賊",
       "label": "登場人物",
       "color": "#2196F3"
     },
     {
-      "id": "f63b784d-c3f6-43de-91bb-048481ac43ba",
+      "id": "5f29a8bf-2558-4418-992c-1fcba50812ec",
       "fromNode": "地下迷宮出現",
       "toNode": "盗賊",
       "label": "関連",
       "color": "#9E9E9E"
     },
     {
-      "id": "5e763b58-27ec-4074-9d1d-cbfb2d4ef47b",
+      "id": "16f47f53-8730-4334-a322-455c8ab83ba4",
       "fromNode": "秘宝争奪戦",
       "toNode": "主人公",
       "label": "登場人物",
       "color": "#2196F3"
     },
     {
-      "id": "c9c30983-fffd-4923-8250-dd34ae9c3182",
+      "id": "efd9c3f4-53e1-44bc-afdc-fa1cd9de0c0d",
       "fromNode": "秘宝争奪戦",
       "toNode": "盗賊",
       "label": "登場人物",
       "color": "#2196F3"
     },
     {
-      "id": "38cf7a01-09d1-4d22-8614-ef03a92e7fb2",
+      "id": "590db6ab-52eb-4d7d-af09-7b7db5a11724",
       "fromNode": "秘宝争奪戦",
       "toNode": "四天王A",
       "label": "登場人物",
       "color": "#2196F3"
     },
     {
-      "id": "16f203ae-2350-4255-9927-2f2173826a1a",
-      "fromNode": "四天王A",
-      "toNode": "主人公",
-      "label": "敵対",
-      "color": "#F44336"
-    },
-    {
-      "id": "ca80a0da-0e57-4ae9-b368-5531d1623db6",
-      "fromNode": "主人公",
-      "toNode": "human",
-      "label": "タグ"
-    },
-    {
-      "id": "900bb8fa-f128-4537-90d8-a05cb478dd92",
-      "fromNode": "主人公",
-      "toNode": "幼なじみ",
-      "label": "味方",
-      "color": "#4CAF50"
-    },
-    {
-      "id": "0f1d2834-afc8-498a-ba20-8a4a27c9c083",
-      "fromNode": "主人公",
-      "toNode": "盗賊",
-      "label": "味方",
-      "color": "#4CAF50"
-    },
-    {
-      "id": "12f7de00-23cf-489f-a89e-773a4f421e2e",
-      "fromNode": "主人公",
-      "toNode": "四天王A",
-      "label": "敵対",
-      "color": "#F44336"
-    },
-    {
-      "id": "c7e41f08-0a6e-4c35-9a0b-eb40bf50050a",
-      "fromNode": "主人公",
-      "toNode": "幼なじみ",
-      "label": "好意",
-      "color": "#E91E63"
-    },
-    {
-      "id": "998f45c5-b70a-4d79-9c16-52e3d63e24b7",
+      "id": "5420a8cf-1fe6-4b5c-b201-dbd1a6364665",
       "fromNode": "盗賊",
       "toNode": "human",
       "label": "タグ"
     },
     {
-      "id": "789645fb-c25e-4739-bf86-eba2316ad11a",
+      "id": "da698862-8637-4cda-9682-a15c88c44bc2",
       "fromNode": "盗賊",
       "toNode": "rogue",
       "label": "タグ"
     },
     {
-      "id": "8064d9d1-9251-4bfb-9b47-841ac0659307",
+      "id": "03618abe-c2c3-481e-ac43-a5d1873adc52",
       "fromNode": "盗賊",
       "toNode": "幼なじみ",
       "label": "家族",
       "color": "#00BCD4"
     },
     {
-      "id": "ddc59cb5-7b63-4ad4-9e1f-2509cb60c3d0",
+      "id": "2f9b8da1-89d1-4bfc-b0d2-ee9a1d937541",
       "fromNode": "盗賊",
       "toNode": "主人公",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "ba7bd169-3ee1-4578-b6fa-fbd4fb5f1020",
+      "id": "20a10d6f-3cdd-49a0-aa71-ed51d80c47fc",
       "fromNode": "盗賊",
       "toNode": "四天王A",
       "label": "敵対",
       "color": "#F44336"
     },
     {
-      "id": "e21e678d-6d99-4e87-8318-dee4ac561ac4",
+      "id": "d7ffd8bf-3d3e-4abc-a2c6-376a9bc58fab",
       "fromNode": "幼なじみ",
       "toNode": "human",
       "label": "タグ"
     },
     {
-      "id": "00eeb35f-68df-46be-88ef-e2009d1a0af6",
+      "id": "574eff0b-58f2-4f1b-870c-8d222f3677c8",
       "fromNode": "幼なじみ",
       "toNode": "主人公",
       "label": "好意",
       "color": "#E91E63"
     },
     {
-      "id": "1f50775b-0439-4257-af4c-7a902c2558c7",
+      "id": "f3c338b4-a23d-4784-87c3-f9c7213f1e1d",
       "fromNode": "幼なじみ",
       "toNode": "主人公",
       "label": "味方",
       "color": "#4CAF50"
     },
     {
-      "id": "da0a5109-4a69-4cf0-855b-0d911484c343",
+      "id": "739c59bc-608b-4d08-9c22-a895a91680ba",
       "fromNode": "幼なじみ",
       "toNode": "盗賊",
       "label": "家族",
       "color": "#00BCD4"
+    },
+    {
+      "id": "ddac6e1c-9df1-46fb-9db7-1737d96a087d",
+      "fromNode": "主人公",
+      "toNode": "human",
+      "label": "タグ"
+    },
+    {
+      "id": "120f80ef-f2c4-40ee-b624-48ca40f966c1",
+      "fromNode": "主人公",
+      "toNode": "幼なじみ",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "49fa433a-5c33-4f33-8200-cf51317b2650",
+      "fromNode": "主人公",
+      "toNode": "盗賊",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "be89451c-237c-4775-b0d9-28ebbaeaf3bb",
+      "fromNode": "主人公",
+      "toNode": "四天王A",
+      "label": "敵対",
+      "color": "#F44336"
+    },
+    {
+      "id": "ff9c833c-7a7f-4f28-97bc-ea36f7db7c17",
+      "fromNode": "主人公",
+      "toNode": "幼なじみ",
+      "label": "好意",
+      "color": "#E91E63"
+    },
+    {
+      "id": "df028091-94b1-4df8-b79e-53dc615ce4e3",
+      "fromNode": "四天王A",
+      "toNode": "主人公",
+      "label": "敵対",
+      "color": "#F44336"
     }
   ]
 }

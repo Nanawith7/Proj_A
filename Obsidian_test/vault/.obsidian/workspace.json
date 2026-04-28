@@ -15,9 +15,9 @@
               "state": {
                 "file": "thief_era.canvas",
                 "viewState": {
-                  "x": 310.7449101903219,
-                  "y": 856.7680795378902,
-                  "zoom": -1.4257723072860662
+                  "x": 636.5825667703803,
+                  "y": 895.5447164255994,
+                  "zoom": -1.0924389739527327
                 }
               },
               "icon": "lucide-layout-dashboard",
@@ -185,22 +185,25 @@
   },
   "active": "2ec1532ea9941862",
   "lastOpenFiles": [
-    "thief_network.canvas",
-    "timeline.canvas",
-    "thief_era.canvas",
     "era_timeline.canvas",
+    "devil_timeline.canvas",
+    "timeline_no_tags.canvas",
+    "timeline_giant.canvas",
+    "timeline_bigicons.canvas",
+    "timeline.canvas",
+    "thief_network.canvas",
+    "scenarios.canvas",
+    "thief_era.canvas",
     "event/魔法学園創設.md",
     "event/大戦争勃発.md",
     "event/新魔王戴冠.md",
     "characters_tags.canvas",
-    "timeline_no_tags.canvas",
     "coronation]] [[succession.md",
     "scenario/竜との邂逅.md",
     "academy]] [[foundation.md",
     "event/竜の目覚め.md",
     "_icons/type_default.png",
     "scenario/四天王会戦.md",
-    "timeline_bigicons.canvas",
     "event/勇者伝説編纂.md",
     "event/復興大祭.md",
     "event/和平交渉開始.md",
@@ -219,8 +222,6 @@
     "era/era_150_180.md",
     "era/era_120_150.md",
     "era",
-    "timeline_giant.canvas",
-    "devil_timeline.canvas",
     "characters.canvas",
     "tag",
     "_icons/node_四天王B.png",
@@ -236,7 +237,6 @@
     "organization",
     "event",
     "scenario",
-    "character",
-    "events.canvas"
+    "character"
   ]
 }
