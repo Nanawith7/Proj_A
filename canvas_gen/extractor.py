@@ -163,7 +163,8 @@ def collect_related_nodes(
 ) -> set[str]:
     """BFS traversal from a base node to collect related node stems.
 
-    Follows wiki links up to the specified depth.
+    Follows wiki links in BOTH directions (outgoing + incoming) up
+    to the specified depth.
 
     Args:
         base_node_stem: The starting node's stem.
@@ -176,6 +177,15 @@ def collect_related_nodes(
     if base_node_stem not in index:
         raise ValueError(f"Base node not found in vault: {base_node_stem}")
 
+    # Build reverse index: stem -> set of stems that link TO it
+    reverse: dict[str, set[str]] = {}
+    for stem, node in index.items():
+        for links in node.wikilinks.values():
+            for link in links:
+                target_stem = _resolve_wikilink_target(link, index)
+                if target_stem:
+                    reverse.setdefault(target_stem, set()).add(stem)
+
     visited: set[str] = {base_node_stem}
     frontier: list[tuple[str, int]] = [(base_node_stem, 0)]
 
@@ -184,12 +194,21 @@ def collect_related_nodes(
         if current_depth >= depth:
             continue
 
+        neighbors: set[str] = set()
+        # Outgoing
         node = index[current_stem]
         for links in node.wikilinks.values():
             for link in links:
                 target_stem = _resolve_wikilink_target(link, index)
-                if target_stem and target_stem not in visited:
-                    visited.add(target_stem)
-                    frontier.append((target_stem, current_depth + 1))
+                if target_stem:
+                    neighbors.add(target_stem)
+        # Incoming
+        for source in reverse.get(current_stem, set()):
+            neighbors.add(source)
+
+        for target_stem in neighbors:
+            if target_stem not in visited:
+                visited.add(target_stem)
+                frontier.append((target_stem, current_depth + 1))
 
     return visited
