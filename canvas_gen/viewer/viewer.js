@@ -103,12 +103,27 @@ function render() {
   currentNodes.forEach(n=>{
     const type=nodeType(n),td=TYPEDEFS[type]||{},nvName=td.nodeview||'plain',nv=NODEVIEWS[nvName]||{shape:'rect',rx:4};
     const nw=n.width||200,nh=n.height||120,nx=n.x||0,ny=n.y||0,fill=n.color||td.color||'#555',title=nodeTitle(n);
+    const stem=nodeStem(n),v=VAULT[stem];
     const g=document.createElementNS(svgNS,'g');g.setAttribute('data-id',n.id);
     const rect=document.createElementNS(svgNS,'rect');
     rect.setAttribute('data-id',n.id);rect.setAttribute('class','node-rect');rect.style.cursor='pointer';
     rect.onclick=e=>{e.stopPropagation();toggleExpand(n,g,mainG);};
     applyNodeView(rect,n,false);
     g.appendChild(rect);
+
+    // Collapsed icon: centered
+    const iconPath=v?.props?.icon;
+    if(iconPath){
+      const isz=Math.min(nw,nh)*0.45;
+      const ix=nx+(nw-isz)/2, iy=ny+(nh-isz)/2;
+      const img=document.createElementNS(svgNS,'image');
+      img.setAttribute('href','/_icons/'+iconPath.split('/').pop());
+      img.setAttribute('x',ix);img.setAttribute('y',iy);
+      img.setAttribute('width',isz);img.setAttribute('height',isz);
+      img.setAttribute('class','node-icon-img');
+      img.style.pointerEvents='none';
+      g.appendChild(img);
+    }
 
     const lp=layoutParams(nv,nw,nh);
     const fs=Math.max(9,Math.min(14,nv.fontSize||12));
@@ -245,6 +260,34 @@ function toggleExpand(node, g, mainG) {
 
   const rect=g.querySelector('.node-rect');
   applyNodeView(rect,node,{width:expW,height:expH});
+
+  // Expanded icon: top-left
+  const exIconPath=v?.props?.icon;
+  if(exIconPath){
+    g.querySelectorAll('.node-icon-ex').forEach(el=>el.remove());
+    const isz=Math.min(40,nw>0?nw:40);
+    const img=document.createElementNS('http://www.w3.org/2000/svg','image');
+    img.setAttribute('href','/_icons/'+exIconPath.split('/').pop());
+    img.setAttribute('x',nx+bodyPadX);img.setAttribute('y',ny+4);
+    img.setAttribute('width',isz);img.setAttribute('height',isz);
+    img.setAttribute('class','node-icon-ex');
+    img.style.pointerEvents='none';
+    g.appendChild(img);
+  }
+
+  // Expanded background
+  g.querySelectorAll('.node-bg').forEach(el=>el.remove());
+  const bgPath=nv.background;
+  if(bgPath){
+    const bg=document.createElementNS('http://www.w3.org/2000/svg','image');
+    bg.setAttribute('href','/_viewbg/'+bgPath);
+    bg.setAttribute('x',nx);bg.setAttribute('y',ny);
+    bg.setAttribute('width',expW);bg.setAttribute('height',expH);
+    bg.setAttribute('class','node-bg');
+    bg.setAttribute('preserveAspectRatio','none');
+    bg.style.opacity='0.15';bg.style.pointerEvents='none';
+    g.insertBefore(bg,g.firstChild);
+  }
 
   const nx=node.x||0,ny=node.y||0;
   currentNodes.forEach(n=>{

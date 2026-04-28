@@ -196,6 +196,11 @@
   },
   "active": "f03cac4a8793025c",
   "lastOpenFiles": [
+    "_viewbg/tag_bg.png",
+    "_viewbg/era_bg.png",
+    "_viewbg/event_bg.png",
+    "_viewbg/char_bg.png",
+    "_viewbg",
     "nodeview/character_card.json",
     "nodeview/scenario_card.json",
     "nodeview/event_card.json",
@@ -205,7 +210,6 @@
     "nodeview",
     "thief_era_viewer.html",
     "characters_viewer.html",
-    "timeline_viewer.html",
     "era/era_120_150.md",
     "era/era_080_120.md",
     "characters.canvas",
@@ -242,15 +246,11 @@
     "scenario/塔の試練.md",
     "scenario/王都魔法大会.md",
     "scenario/魔法学園編入.md",
-    "era",
     "_icons/node_四天王B.png",
     "_icons/node_盗賊.png",
     "_icons/node_元魔王.png",
     "_icons/node_予言者.png",
     "_icons/node_魔王.png",
-    "_icons/node_騎士団長.png",
-    "_icons/node_賢者.png",
-    "_icons/node_王女.png",
-    "_icons/node_幼なじみ.png"
+    "_icons/node_騎士団長.png"
   ]
 }

@@ -212,6 +212,8 @@ class ViewerHandler(BaseHTTPRequestHandler):
         elif path.startswith("/api/nodeview/"):
             name = path.split("/api/nodeview/", 1)[1]
             self._serve_nodeview(name)
+        elif path.startswith("/_icons/") or path.startswith("/_viewbg/"):
+            self._serve_vault_file(path.lstrip("/"))
         else:
             self.send_error(404)
 
@@ -253,6 +255,19 @@ class ViewerHandler(BaseHTTPRequestHandler):
         data = icon_path.read_bytes()
         self.send_response(200)
         self.send_header("Content-Type", "image/png")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def _serve_vault_file(self, relpath):
+        fpath = Path(VAULT_PATH) / relpath
+        if not fpath.is_file() or ".." in relpath:
+            self.send_error(404)
+            return
+        data = fpath.read_bytes()
+        ct = "image/png" if relpath.endswith(".png") else "application/octet-stream"
+        self.send_response(200)
+        self.send_header("Content-Type", ct)
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)

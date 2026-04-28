@@ -20,3 +20,5 @@ body{font-family:sans-serif;display:flex;height:100vh;overflow:hidden;background
 .node-rect:hover{opacity:.85}
 .node-title{pointer-events:none;font-family:sans-serif;transition:opacity .15s}
 .node-body{pointer-events:none;font-family:sans-serif;font-size:10px;opacity:.9}
+.node-icon-img{opacity:.85}
+.node-icon-ex{opacity:.9}
