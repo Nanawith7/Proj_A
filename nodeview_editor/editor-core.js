@@ -73,7 +73,8 @@ function buildNV(){
   if(getNum('nv-bgop')!==0.15)layout.backgroundOpacity=getNum('nv-bgop');
   if(getNum('nv-ew')!==300)layout.expandMinW=getNum('nv-ew');if(getNum('nv-eh')!==200)layout.expandMinH=getNum('nv-eh');
   if(getNum('nv-cpx')!==10)layout.contentPadX=getNum('nv-cpx');if(getNum('nv-cpy')!==10)layout.contentPadY=getNum('nv-cpy');
-  const bdx=getNum('nv-bdx'),bdy=getNum('nv-bdy'),tdx=getNum('nv-tdx'),tdy=getNum('nv-tdy');
+  function getRaw(id){const v=document.getElementById(id)?.value||'';return v;}
+  const bdx=getRaw('nv-bdx'),bdy=getRaw('nv-bdy'),tdx=getRaw('nv-tdx'),tdy=getRaw('nv-tdy');
   if(bdx||bdy){layout.bodyPosition={};if(bdx)layout.bodyPosition.x=bdx;if(bdy)layout.bodyPosition.y=bdy;}
   if(tdx||tdy){layout.titlePosition={};if(tdx)layout.titlePosition.x=tdx;if(tdy)layout.titlePosition.y=tdy;}
   if(getVal('nv-iax')!=='center')layout.iconAnchorX=getVal('nv-iax');if(getVal('nv-iay')!=='center')layout.iconAnchorY=getVal('nv-iay');
