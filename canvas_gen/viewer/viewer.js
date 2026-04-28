@@ -1,0 +1,193 @@
+// ═══════════════ Canvas Viewer ═══════════════
+const API = '/api/filter';
+let ALL_NODES=[], ALL_EDGES=[], VAULT={}, TYPEDEFS={}, NODEVIEWS={};
+let currentNodes=[], currentEdges=[];
+let panX=0, panY=0, zoom=1, dragging=false, dsX=0, dsY=0, expandedId=null;
+
+// ═══════ INIT ═══════
+async function init() {
+  const [d1,d2] = await Promise.all([fetch('/api/data').then(r=>r.json()),fetch('/api/typedefs').then(r=>r.json())]);
+  ALL_NODES=d1.nodes; ALL_EDGES=d1.edges; VAULT=d1.vault; TYPEDEFS=d2;
+  NODEVIEWS = await loadNodeViews();
+  currentNodes=ALL_NODES; currentEdges=ALL_EDGES;
+  const keys=new Set(); Object.values(VAULT).forEach(v=>{if(v.props)Object.keys(v.props).forEach(k=>keys.add(k));});
+  const sel=document.getElementById('sort-key');
+  [...keys].sort().forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;sel.appendChild(o);});
+  render(); addRow('filter-rows');
+}
+
+async function loadNodeViews() {
+  const map={};
+  const names=Object.values(TYPEDEFS).map(td=>td.nodeview).filter(Boolean);
+  for(const name of [...new Set(names)]) {
+    try { map[name]=await fetch(`/api/nodeview/${name}.json`).then(r=>r.json()); }
+    catch(e){ map[name]={shape:'rect',rx:4}; }
+  }
+  return map;
+}
+
+function nodeStem(n){return(n.file||'').replace('.md','').split('/').pop();}
+function nodeType(n){const stem=nodeStem(n);return(VAULT[stem]?.props?.type)||'default';}
+function nodeTitle(n){const stem=nodeStem(n);return(VAULT[stem]?.props?.title)||stem;}
+
+// ═══════ RENDER ═══════
+function render() {
+  const graph=document.getElementById('graph'); graph.innerHTML='';
+  const svgNS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(svgNS,'svg');
+  let maxX=200,maxY=200;
+  currentNodes.forEach(n=>{const r=(n.x||0)+(n.width||200),b=(n.y||0)+(n.height||120);if(r>maxX)maxX=r;if(b>maxY)maxY=b;});
+  maxX+=400;maxY+=400;
+  svg.setAttribute('viewBox',`0 0 ${maxX} ${maxY}`);
+  svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+  svg.style.width='100%';svg.style.height='100%';svg.style.minWidth=maxX+'px';svg.style.minHeight=maxY+'px';
+  const mainG=document.createElementNS(svgNS,'g');mainG.id='main-group';
+  updateTransform(mainG);
+  // Edges
+  const nids=new Set(currentNodes.map(n=>n.id));
+  currentEdges.filter(e=>nids.has(e.fromNode)&&nids.has(e.toNode)).forEach(e=>{
+    const fn=currentNodes.find(n=>n.id===e.fromNode),tn=currentNodes.find(n=>n.id===e.toNode);
+    if(!fn||!tn)return;
+    const fw=fn.width||200,fh=fn.height||120,tw=tn.width||200,th=tn.height||120;
+    const x1=(fn.x||0)+fw/2,y1=(fn.y||0)+fh/2,x2=(tn.x||0)+tw/2,y2=(tn.y||0)+th/2;
+    const mx=(x1+x2)/2,my=(y1+y2)/2,ec=e.color||'#666';
+    const p=document.createElementNS(svgNS,'path');
+    p.setAttribute('d',`M${x1},${y1} Q${mx+30},${my-30} ${x2},${y2}`);
+    p.setAttribute('stroke',ec);p.setAttribute('class','edge-path');mainG.appendChild(p);
+    if(e.label){const t=document.createElementNS(svgNS,'text');t.setAttribute('x',mx);t.setAttribute('y',my-6);t.setAttribute('fill',ec);t.setAttribute('class','edge-label');t.setAttribute('text-anchor','middle');t.textContent=e.label;mainG.appendChild(t);}
+  });
+  // Nodes
+  currentNodes.forEach(n=>{
+    const type=nodeType(n),td=TYPEDEFS[type]||{},nvName=td.nodeview||'plain',nv=NODEVIEWS[nvName]||{shape:'rect',rx:4};
+    const nw=n.width||200,nh=n.height||120,nx=n.x||0,ny=n.y||0;
+    const fill=n.color||td.color||'#555',title=nodeTitle(n);
+    const g=document.createElementNS(svgNS,'g');g.setAttribute('data-id',n.id);
+    const rect=document.createElementNS(svgNS,'rect');
+    rect.setAttribute('data-id',n.id);rect.setAttribute('class','node-rect');rect.style.cursor='pointer';
+    rect.onclick=e=>{e.stopPropagation();toggleExpand(n,g,mainG);};
+    applyNodeView(rect,n,false);
+    const txt=document.createElementNS(svgNS,'text');txt.setAttribute('class','node-title');
+    const fs=Math.max(10,Math.min(14,nv.fontSize||12));
+    txt.setAttribute('font-size',fs);if(nv.boldTitle)txt.setAttribute('font-weight','bold');
+    const ty=nv.titleY||'center',tpad=nv.titlePad||6;
+    txt.setAttribute('y',ty==='top'?ny+tpad+fs:(ny+nh/2+fs/3));
+    txt.setAttribute('x',nx+Math.max(tpad,6));txt.setAttribute('fill','#fff');
+    txt.textContent=title;g.appendChild(rect);g.appendChild(txt);mainG.appendChild(g);
+  });
+  svg.appendChild(mainG);graph.appendChild(svg);expandedId=null;
+  // Pan/zoom
+  graph.onmousedown=e=>{if(e.target===svg||e.target===mainG||e.target===graph){dragging=true;dsX=e.clientX-panX;dsY=e.clientY-panY;graph.classList.add('dragging');e.preventDefault();}};
+  window.onmousemove=e=>{if(!dragging)return;panX=e.clientX-dsX;panY=e.clientY-dsY;updateTransform(mainG);};
+  window.onmouseup=()=>{dragging=false;graph.classList.remove('dragging');};
+  graph.onwheel=e=>{e.preventDefault();const d=e.deltaY>0?.9:1.1;const mx=e.clientX-graph.getBoundingClientRect().left,my=e.clientY-graph.getBoundingClientRect().top;const nz=Math.max(.1,Math.min(5,zoom*d));panX=mx-(mx-panX)*(nz/zoom);panY=my-(my-panY)*(nz/zoom);zoom=nz;updateTransform(mainG);updateZoomInfo();};
+  updateZoomInfo();
+  document.getElementById('stats').textContent=`Nodes: ${currentNodes.length} | Edges: ${currentEdges.length}`;
+}
+
+function applyNodeView(rect, node, expanded) {
+  const type=nodeType(node),td=TYPEDEFS[type]||{},nvName=td.nodeview||'plain',nv=NODEVIEWS[nvName]||{shape:'rect',rx:4};
+  let nw=node.width||200,nh=node.height||120;
+  if(expanded) { const mode=document.getElementById('expand-mode')?.value||'wrap'; nw=expanded.width; nh=expanded.height; }
+  rect.setAttribute('x',node.x||0);rect.setAttribute('y',node.y||0);
+  rect.setAttribute('width',nw);rect.setAttribute('height',nh);
+  const rx=nv.rx||4;
+  rect.setAttribute('rx',nv.shape==='circle'?Math.min(nw,nh)/2:nv.shape==='round'?18:rx);
+  rect.setAttribute('ry',nv.shape==='circle'?Math.min(nw,nh)/2:nv.shape==='round'?18:rx);
+  rect.setAttribute('fill',node.color||td.color||'#555');
+  rect.setAttribute('stroke',nv.stroke||'#fff6');
+  rect.setAttribute('stroke-width',nv.strokeWidth||.5);
+}
+
+function updateTransform(g){g.setAttribute('transform',`translate(${panX},${panY}) scale(${zoom})`);}
+function updateZoomInfo(){let el=document.getElementById('zoom-info');if(!el){el=document.createElement('div');el.id='zoom-info';document.getElementById('graph').appendChild(el);}el.textContent=`${Math.round(zoom*100)}%`;}
+
+// ═══════ EXPAND ═══════
+function toggleExpand(node, g, mainG) {
+  const nid=node.id,mode=document.getElementById('expand-mode')?.value||'wrap';
+  if(expandedId&&expandedId!==nid)collapseAll(mainG);
+  if(expandedId===nid){collapseAll(mainG);expandedId=null;return;}
+  expandedId=nid;
+
+  const titleEl=g.querySelector('.node-title'); if(titleEl)titleEl.style.opacity='0';
+
+  const stem=nodeStem(node),v=VAULT[stem];if(!v)return;
+  const lines=buildBodyLines(v);
+  const longest=Math.max(...lines.filter(l=>l.text).map(l=>l.text.length),0);
+
+  let expW=420,expH=340;
+  if(mode==='stretch'){
+    const fs=10;
+    expW=Math.max(420,longest*(fs*0.65)+20);
+    expH=Math.max(340,lines.filter(l=>l.text||l.t==='br'||l.t==='hr').length*14+40);
+  }
+
+  const rect=g.querySelector('.node-rect');
+  applyNodeView(rect,node,{width:expW,height:expH});
+
+  // Displace overlapping neighbors
+  const nx=node.x||0,ny=node.y||0;
+  const allNodes=currentNodes;
+  allNodes.forEach(n=>{
+    if(n.id===nid)return;
+    const g2=mainG.querySelector(`g[data-id="${n.id}"]`);if(!g2)return;
+    const rect2=g2.querySelector('.node-rect');if(!rect2)return;
+    const ox=n.x||0,oy=n.y||0,ow=n.width||200,oh=n.height||120;
+    if(nx+expW>ox&&nx<ox+ow&&ny+expH>oy&&ny<oy+oh){
+      const shift=Math.max(0,(nx+expW)-ox+20);
+      rect2.setAttribute('x',ox+shift);
+      const txt2=g2.querySelector('.node-title');if(txt2)txt2.setAttribute('x',ox+shift+6);
+    }
+  });
+
+  // Render body
+  g.querySelectorAll('.node-body').forEach(el=>el.remove());
+  const svgNS='http://www.w3.org/2000/svg';
+  let cy=ny+26;
+  lines.forEach(ln=>{
+    if(ln.t==='br'){cy+=8;return;} if(ln.t==='hr'){cy+=4;return;} if(ln.t==='code')return;
+    let fs=10,fill='#ddd';if(ln.t==='h'){fs=14;fill='#e94560';}else if(ln.t==='q'){fill='#aaa';}
+    if(ln.text){
+      let txt=ln.text;
+      if(mode==='wrap'){const wrap=Math.floor((expW-16)/(fs*.65));for(let i=0;i<txt.length;i+=wrap){if(cy>ny+expH-8)return;addBodyLine(g,svgNS,nx+8,cy,fill,fs,txt.slice(i,i+wrap));cy+=fs+4;}}
+      else {if(cy>ny+expH-8)return;addBodyLine(g,svgNS,nx+8,cy,fill,fs,txt);cy+=fs+4;}
+    }
+  });
+}
+
+function addBodyLine(g,ns,x,y,fill,fs,text){
+  const t=document.createElementNS(ns,'text');t.setAttribute('x',x);t.setAttribute('y',y);
+  t.setAttribute('fill',fill);t.setAttribute('font-size',fs);t.setAttribute('class','node-body');
+  t.textContent=text;g.appendChild(t);
+}
+
+function buildBodyLines(v){
+  const lines=[];
+  if(v.props?.title)lines.push({t:'h',text:v.props.title});
+  if(v.props)Object.entries(v.props).forEach(([k,val])=>{if(k==='title'||k==='type')return;lines.push({t:'p',text:`${k}: ${Array.isArray(val)?val.join(', '):val}`});});
+  if(v.body){lines.push({t:'hr'});v.body.split('\n').forEach(l=>{const t=l.trim();if(!t){lines.push({t:'br'});return;}if(t.startsWith('#'))lines.push({t:'h',text:t.replace(/^#+\s*/,'')});else if(t.startsWith('>'))lines.push({t:'q',text:t.slice(1).trim()});else if(t.startsWith('```')){lines.push({t:'code'});return;}else lines.push({t:'p',text:t});});}
+  return lines;
+}
+
+function collapseAll(mainG){
+  if(!expandedId)return;
+  const g=mainG.querySelector(`g[data-id="${expandedId}"]`);if(!g)return;
+  const node=currentNodes.find(n=>n.id===expandedId);if(!node)return;
+  const rect=g.querySelector('.node-rect');if(rect)applyNodeView(rect,node,false);
+  const titleEl=g.querySelector('.node-title');if(titleEl)titleEl.style.opacity='1';
+  g.querySelectorAll('.node-body').forEach(el=>el.remove());
+  currentNodes.forEach(n=>{
+    if(n.id===expandedId)return;
+    const g2=mainG.querySelector(`g[data-id="${n.id}"]`);if(!g2)return;
+    const rect2=g2.querySelector('.node-rect');if(rect2)rect2.setAttribute('x',n.x||0);
+    const txt2=g2.querySelector('.node-title');if(txt2)txt2.setAttribute('x',(n.x||0)+6);
+  });
+  expandedId=null;
+}
+
+// ═══════ GUI ═══════
+function addRow(cid){const div=document.getElementById(cid);const row=document.createElement('div');row.className='filter-row';const logic=document.createElement('span');logic.className='logic';logic.textContent=div.children.length?'AND':'WHERE';const sel=document.createElement('select');sel.innerHTML='<option value="$or">$or</option>';const keys=new Set();Object.values(VAULT).forEach(v=>{if(v.props)Object.keys(v.props).forEach(k=>keys.add(k));});[...keys].sort().forEach(k=>{sel.innerHTML+=`<option value="${k}">${k}</option>`;});const inp=document.createElement('input');inp.placeholder='value or val1|val2';const del=document.createElement('button');del.textContent='x';del.style.background='#533483';del.style.padding='2px 6px';del.onclick=()=>row.remove();row.appendChild(logic);row.appendChild(sel);row.appendChild(inp);row.appendChild(del);div.appendChild(row);}
+function buildFilterStr(cid){const pairs=[];document.getElementById(cid).querySelectorAll('.filter-row').forEach(r=>{const s=r.querySelector('select'),i=r.querySelector('input');if(s&&i&&i.value.trim())pairs.push(s.value+'='+i.value.trim());});return pairs.join(',');}
+async function apply(){const params={filter:buildFilterStr('filter-rows'),exclude:buildFilterStr('exclude-rows'),sortKey:document.getElementById('sort-key').value,sortDesc:document.getElementById('sort-desc').checked,prune:document.getElementById('prune-orphans').checked};const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params)});const data=await res.json();currentNodes=data.nodes;currentEdges=data.edges;panX=0;panY=0;zoom=1;expandedId=null;render();}
+function reset(){document.getElementById('filter-rows').innerHTML='';document.getElementById('exclude-rows').innerHTML='';document.getElementById('sort-key').value='';document.getElementById('sort-desc').checked=false;document.getElementById('prune-orphans').checked=false;currentNodes=ALL_NODES;currentEdges=ALL_EDGES;panX=0;panY=0;zoom=1;expandedId=null;render();addRow('filter-rows');}
+
+init();

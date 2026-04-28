@@ -24,12 +24,11 @@ CANVAS_DATA: dict[str, Any] = {}
 VAULT_CONTENT: dict[str, dict[str, Any]] = {}
 FILE_NODES: list[dict[str, Any]] = []
 ALL_EDGES: list[dict[str, Any]] = []
-INDEX_HTML: str = ""
 
 
 def init_server(vault_path: str, canvas_path: str) -> None:
     """Load canvas + vault data into global state."""
-    global VAULT_PATH, CANVAS_DATA, VAULT_CONTENT, FILE_NODES, ALL_EDGES, INDEX_HTML
+    global VAULT_PATH, CANVAS_DATA, VAULT_CONTENT, FILE_NODES, ALL_EDGES
 
     VAULT_PATH = vault_path
 
@@ -60,11 +59,6 @@ def init_server(vault_path: str, canvas_path: str) -> None:
                 "props": props,
                 "body": body.strip(),
             }
-
-    # Load index.html template
-    tpl_path = Path(__file__).parent / "index.html"
-    with open(tpl_path, "r", encoding="utf-8") as f:
-        INDEX_HTML = f.read()
 
 
 # ═══════════════ Filter engine (server-side, calls pipeline) ═══════════════
@@ -199,7 +193,10 @@ class ViewerHandler(BaseHTTPRequestHandler):
         path = parsed.path
 
         if path == "/" or path == "/index.html":
-            self._serve_html()
+            self._serve_static("index.html", "text/html")
+        elif path in ("/viewer.css", "/viewer.js"):
+            ct = "text/css" if path.endswith(".css") else "application/javascript"
+            self._serve_static(path.lstrip("/"), ct)
         elif path == "/api/data":
             self._serve_json({
                 "nodes": FILE_NODES,
@@ -228,11 +225,17 @@ class ViewerHandler(BaseHTTPRequestHandler):
         else:
             self.send_error(404)
 
-    def _serve_html(self):
+    def _serve_static(self, filename, content_type):
+        fpath = Path(__file__).parent / filename
+        if not fpath.is_file():
+            self.send_error(404)
+            return
+        data = fpath.read_bytes()
         self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Type", content_type + "; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
         self.end_headers()
-        self.wfile.write(INDEX_HTML.encode("utf-8"))
+        self.wfile.write(data)
 
     def _serve_json(self, data):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
