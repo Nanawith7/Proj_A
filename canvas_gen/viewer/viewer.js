@@ -350,7 +350,9 @@ function toggleExpand(node, g, mainG) {
   let cy=ny+bodyPadY+12;
   // Body position override
   const bodyPos=nv.layout?.bodyPosition;
+  const titlePos=nv.layout?.titlePosition;
   if(bodyPos)cy=ny+(bodyPos.y||bodyPadY+12);
+  // Title position override (renders BEFORE body, so we handle in buildBodyLines)
   lines.forEach(ln=>{
     // Absolute/percentage position override: save flow cy, restore after
     const savedCY=cy;
@@ -403,7 +405,8 @@ function addBodyLine(g,ns,x,y,fill,fs,text){const t=document.createElementNS(ns,
 
 function buildBodyLines(v,nv){
   const lines=[];
-  if(v.props?.title)lines.push({t:'h',text:v.props.title});
+  const tp=nv.layout?.titlePosition;
+  if(v.props?.title)lines.push({t:'h',text:v.props.title,pos:tp||null});
   if(v.props){
     const propStyles=nv.properties||{};
     Object.entries(v.props).forEach(([k,val])=>{
