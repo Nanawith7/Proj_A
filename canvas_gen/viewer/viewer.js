@@ -190,18 +190,20 @@ function toggleExpand(node, g, mainG) {
   const stem=nodeStem(node),v=VAULT[stem];if(!v)return;
   const type=nodeType(node),td=TYPEDEFS[type]||{},nv=NODEVIEWS[td.nodeview||'plain']||{shape:'rect',rx:4};
   const lines=buildBodyLines(v,nv);
-  const expLP=layoutParams(nv,expW,expH,true);
-  const bodyPadX=expLP.contentX;
-  const bodyPadY=expLP.contentY;
+  const bodyPadX0=nv.layout?.contentPadX ?? 8;
+  const bodyPadY0=nv.layout?.contentPadY ?? 8;
 
-  let expW=420,expH=340,fontSize=10;
-  const minH=bodyPadY+12+60;
+  let expW=420,expH=340;
   if(mode==='stretch'){
     let maxW=0,lineCount=0;
     lines.forEach(l=>{if(l.t==='br'){lineCount++;return;} if(l.t==='hr'||l.t==='code')return; const fs=l.t==='h'?14:10; if(l.text){const w=measureText(l.text,fs,'sans-serif');if(w>maxW)maxW=w;lineCount++;}});
-    expW=Math.max(420,maxW+bodyPadX*2+16);
-    expH=Math.max(minH,lineCount*16+bodyPadY+20);
+    expW=Math.max(420,maxW+bodyPadX0*2+16);
+    expH=Math.max(340,lineCount*16+bodyPadY0+40);
   }
+
+  const expLP=layoutParams(nv,expW,expH,true);
+  const bodyPadX=expLP.contentX;
+  const bodyPadY=expLP.contentY;
 
   const rect=g.querySelector('.node-rect');
   applyNodeView(rect,node,{width:expW,height:expH});
