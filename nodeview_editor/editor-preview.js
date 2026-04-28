@@ -15,9 +15,10 @@ function toPctY(v,h){return String(v).endsWith('%')?parseFloat(v)/100*h:parseInt
 function updatePreview(){
   const nv=buildNV();
   document.getElementById('json-output').value=JSON.stringify(nv,null,2);
-  const lp=computeLP(nv,120,80),eLP=computeLP(nv,380,280);
+  const lp=computeLP(nv,120,80);
+  const ew=nv.layout?.expandMinW||300, eh=nv.layout?.expandMinH||200;
   drawPreview('prev-collapsed',120,80,nv,lp,false);
-  drawPreview('prev-expanded',380,280,nv,eLP,true);
+  drawPreview('prev-expanded',ew,eh,nv,computeLP(nv,ew,eh),true);
 }
 
 function drawPreview(svgId,w,h,nv,lp,expanded){
