@@ -149,12 +149,14 @@ Vaultの `nodeview/{name}.json` を返す。ノード描画テンプレート。
 
 ノードをクリックすると、その場で矩形が拡大し本文を表示する。
 
-- **展開サイズ**: デフォルト 420×340px
-- **Wrap mode**: テキストが矩形幅を超えると折り返し。実測値（Canvas2D `measureText()`）で正確に判定
-- **Stretch mode**: 最長行の実測幅に合わせて矩形を拡大。縦方向も行数に追従
-- **タイトル非表示**: 展開中はノードタイトルを `opacity:0` で非表示
-- **近隣ノード変位**: 展開矩形と重なるノードを右方向にシフト
-- **折りたたみ**: 再度クリックで元のサイズに戻り、近隣ノードも元の位置に復帰
+- **展開サイズ**: 本文の実測値から動的計算（`measureText()` で全行の最大幅と総高さを測定）
+- **下限サイズ**: nodeviewの `layout.expandMinW` / `expandMinH` で指定（デフォルト300×200）
+- **矩形形状**: 展開時はnodeviewの `shape` に従う。`circle` はpill型（横幅≧縦幅）を維持
+- **Wrap/Stretch mode**: サイドバーで切替。Wrapは折り返し、Stretchは最長行まで拡張。
+- **タイトル非表示**: 展開中は全 `.node-title` 要素を `opacity:0` で非表示
+- **近隣ノード変位**: 展開矩形と重なるノードを右方向にシフト（rect + title同時移動）
+- **折りたたみ**: 再度クリックで元のサイズに戻り、近隣ノードも元の位置に復帰（差分計算）
+- **円形展開**: テキスト位置は `layoutParams(shape=circle)` で直径からcontent領域を計算
 
 ### 4.4 フィルタGUI
 
@@ -195,25 +197,43 @@ key選択ドロップダウンはVault内の全プロパティ名から自動生
 
 ```json
 {
-  "shape": "rect|round|circle",   // 基本形状
-  "rx": 4,                         // 角丸半径 (round=18, circle=w/2)
+  "shape": "rect|round|circle",   // 基本形状。展開時も維持される
+  "rx": 4,                         // 角丸半径 (round=18, circle=min(w,h)/2)
   "stroke": "#fff6",               // 枠線色
   "strokeWidth": 0.5,              // 枠線幅
   "fontSize": 12,                  // タイトル文字サイズ
   "boldTitle": false,              // タイトル太字
   "titleY": "center|top",          // タイトル垂直位置
-  "titlePad": 6,                   // タイトル余白
-  "titleWrap": false,              // タイトル折り返し (circle用)
+  "titlePad": 6,                   // タイトル余白（非推奨、layout内を使用）
+  "titleWrap": false,              // タイトル折り返し（circle用）
+  "layout": {                      // レイアウトパラメータ（全形状共通）
+    "contentPadX": 8,              // 本文・タイトルの横パディング
+    "contentPadY": 8,              // 本文の縦パディング（展開時に使用）
+    "titlePadX": 10,               // タイトル横パディング
+    "titlePadY": 10,               // タイトル縦パディング（縮小時に使用）
+    "expandMinW": 300,             // 展開時の最小横幅
+    "expandMinH": 200              // 展開時の最小縦幅
+  },
   "properties": {                  // プロパティ別pill設定
     "タグ名": {
-      "style": "pill",             // pill形式で描画
-      "shape": "round|diamond",    // バッジ形状
-      "bg": "#4CAF5044",           // 背景色 (RGBA HEX8)
-      "textColor": "#8BC34A"       // 文字色
+      "style": "pill",
+      "shape": "round|diamond",
+      "bg": "#4CAF5044",
+      "textColor": "#8BC34A"
     }
   }
 }
 ```
+
+**layoutパラメータの適用**:
+
+| パラメータ | 縮小時 | 展開時 |
+|---|---|---|
+| `contentPadX` | タイトル折り返し幅の計算に使用 | 本文の左余白 |
+| `contentPadY` | 不使用 | 本文の上余白 |
+| `titlePadX` | タイトル左余白 | 不使用（タイトルは非表示） |
+| `titlePadY` | 折り返しタイトルの上下余白 | 不使用 |
+| `expandMinW/H` | 不使用 | 展開サイズの下限 |
 
 ### 5.3 定義例
 
@@ -305,10 +325,48 @@ nodeview JSONの `properties` に新しいキーを追加するだけで、展�
 
 サーバー側の `run_filter()` 関数に新しいフィルタ条件を追加することで、GUI側も自動的に対応する（key選択ドロップダウンがVaultの全プロパティを動的走査するため）。
 
-### 8.4 データと表現の分離
+### 8.4 レイアウトエンジン（layoutParams）
 
-ノードの描画スタイルはnodeview JSONに完全に分離されている。同一のCanvasデータに対して異なるnodeviewセットを適用することで、見た目だけを変更した複数のビューを生成できる。type_definitionsの `color`, `lining` 等のレイアウト情報はサーバー側で使用されず、フロントエンドの表示のみに影響する。
+ノードの描画位置計算は `layoutParams(nv, nw, nh)` 関数に集約されている。nodeview JSONの `shape` と `layout` ブロックのみから全パラメータを算出し、ビューアコード内にハードコードされた形状分岐は存在しない。
+
+**計算アルゴリズム**:
+
+1. `shape` が `circle` の場合、`diameter = min(nw, nh)` で直径を決定し、content領域を直径からパディングを引いた矩形として計算する
+2. `shape` が `rect` / `round` の場合、`nw × nh` 全体からパディングを引いた矩形をcontent領域とする
+3. タイトルアンカー（`titleAnchor`）と垂直位置（`titleVAlign`）を形状に応じて設定
+4. 円形では `text-anchor: middle` で中央揃え、矩形では `start` で左揃え
+
+### 8.5 縮小時タイトル描画
+
+縮小時のノードタイトルは以下のルールで描画される：
+
+| 条件 | 描画方式 |
+|---|---|
+| `titleWrap: false` | 単一行テキスト。`titleAnchor` に従い配置。横幅超過時は末尾を `..` に短縮 |
+| `titleWrap: true` | 複数行折り返し。`contentW` 幅で折り返し、タイトルブロック全体を `titleY` を中心に縦方向センタリング |
+
+折り返しタイトル（`drawWrappedTitle`）では、`titleY` を縦方向の中心軸とし、全行の合計高さを計算して `titleY - blockH/2` から描画を開始する。`contentH` による縦方向制限は行わない（縮小時の狭い円形で内容が切れることを防止するため）。
+
+### 8.6 展開時サイズ計算
+
+展開時の矩形サイズは、本文の実測値から動的に計算される。ハードコードされた固定値は使用しない。
+
+1. `buildBodyLines()` で本文行を構築
+2. 各行を `measureText()` で実測し `maxLineW`（最大行幅）と `lineH`（総行高）を算出
+3. pillバッジ行も個別のテキスト幅＋余白を加味して合計幅を計算
+4. `expandMinW` / `expandMinH` を下限として `expW = max(minW, maxLineW + cpX*2 + 16)` で幅を決定
+5. 円形形状では `diameter >= max(neededW, neededH)` を保証し、テキストが直径内に収まることを担保
+6. 最終サイズで `layoutParams` を再計算し、正確なcontent座標を取得
+
+### 8.7 近隣ノード変位
+
+展開時に展開矩形と重なる近隣ノードは、以下のロジックで右方向にシフトされる：
+
+1. 展開矩形 `(nx, ny, expW, expH)` と他ノード `(ox, oy, ow, oh)` の重なりを判定
+2. 重なりがある場合、`shift = (nx + expW) - ox + 20` で変位量を計算
+3. ノードの rect と全 `.node-title` 要素を同時にシフト
+4. 折りたたみ時（`collapseAll`）は差分 `origX - curX` を計算し全要素を元の位置に復元
 
 ## 9. 結論
 
-本ビューアーは、Canvas Generatorで生成されたJSON Canvasファイルを、サーバー/クライアント分離アーキテクチャによってブラウザ上でインタラクティブに表示する。フィルタ・ソートロジックをPython側に集約することでJS移植の必要を排除し、nodeviewテンプレートによってtype別・プロパティ別の描画スタイルを完全に外部化した。標準ライブラリのみで動作し、VaultとCanvasファイルさえあれば単一コマンドで起動できる。
+本ビューアーは、Canvas Generatorで生成されたJSON Canvasファイルを、サーバー/クライアント分離アーキテクチャによってブラウザ上でインタラクティブに表示する。フィルタ・ソートロジックをPython側に集約することでJS移植の必要を排除し、nodeviewテンプレートによってtype別・プロパティ別の描画スタイルを完全に外部化した。展開サイズは本文の実測値から動的に計算され、円形・矩形を問わずテキストが形状内部に収まる。標準ライブラリのみで動作し、VaultとCanvasファイルさえあれば単一コマンドで起動できる。
