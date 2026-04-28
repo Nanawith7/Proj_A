@@ -409,6 +409,36 @@ nodeview JSONの `properties` に新しいキーを追加するだけで、展�
 3. ノードの rect と全 `.node-title` 要素を同時にシフト
 4. 折りたたみ時（`collapseAll`）は差分 `origX - curX` を計算し全要素を元の位置に復元
 
+### 8.8 プロパティ位置指定（position）
+
+nodeviewの各プロパティに `position: {x, y}` を指定することで、展開時の描画位置を絶対座標または割合で制御できる。
+
+**絶対座標**（px）:
+```json
+"tags": { "style": "pill", "position": { "x": 10, "y": 30 } }
+```
+
+**割合座標**（%）:
+```json
+"tags": { "style": "pill", "position": { "x": "25%", "y": "50%" } }
+```
+
+割合指定時は `resolvePos()` 関数が展開rectの幅・高さに応じて動的に絶対座標へ変換する。これにより展開サイズが変動しても相対位置が維持される。
+
+**フロー位置との共存**: 位置指定された行は独立レイヤーとして描画され、描画前に `savedCY` にフロー位置を保存、描画後に `cy = savedCY` で復元する。これにより位置指定行が後続の本文フロー位置をずらさない。
+
+### 8.9 アスペクト比維持
+
+展開時、元ノードの縦横比（`width / height`）が維持される。
+
+- **circle形状**: 直径 = `max(expW, expH, neededW, neededH)` で正方形を保証
+- **rect/round形状**: 元ノードの縦横比 `ow/oh` に従い、短辺を長辺に合わせて拡張
+- 計算後 `max(neededW/neededH)` で本文収容を保証
+
+### 8.10 editor_spec.md
+
+Nodeview Editorの仕様は別途 `Spec_canvas_gen/editor_spec.md` に記載。
+
 ## 9. 結論
 
 本ビューアーは、Canvas Generatorで生成されたJSON Canvasファイルを、サーバー/クライアント分離アーキテクチャによってブラウザ上でインタラクティブに表示する。フィルタ・ソートロジックをPython側に集約することでJS移植の必要を排除し、nodeviewテンプレートによってtype別・プロパティ別の描画スタイルを完全に外部化した。展開サイズは本文の実測値から動的に計算され、円形・矩形を問わずテキストが形状内部に収まる。標準ライブラリのみで動作し、VaultとCanvasファイルさえあれば単一コマンドで起動できる。
