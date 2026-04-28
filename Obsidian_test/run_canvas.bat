@@ -14,7 +14,7 @@ REM --- Canvas A: All notes, timeline by year ---
 echo [1/4] Generating full timeline canvas...
 python -m canvas_gen.main ^
     --vault "vault" ^
-    --output "timeline.canvas" ^
+    --output "vault\timeline.canvas" ^
     --x-axis-key year ^
     --column-width 350 ^
     --row-height 250
@@ -24,7 +24,7 @@ REM --- Canvas B: Characters only ---
 echo [2/4] Generating character relation canvas...
 python -m canvas_gen.main ^
     --vault "vault" ^
-    --output "characters.canvas" ^
+    --output "vault\characters.canvas" ^
     --filter "type=character" ^
     --sort-by title
 IF %ERRORLEVEL% NEQ 0 goto :error
@@ -33,7 +33,7 @@ REM --- Canvas C: Scenarios only, with linked targets ---
 echo [3/4] Generating scenario canvas...
 python -m canvas_gen.main ^
     --vault "vault" ^
-    --output "scenarios.canvas" ^
+    --output "vault\scenarios.canvas" ^
     --filter "type=scenario" ^
     --sort-by year
 IF %ERRORLEVEL% NEQ 0 goto :error
@@ -42,7 +42,7 @@ REM --- Canvas D: Events timeline ---
 echo [4/4] Generating event timeline canvas...
 python -m canvas_gen.main ^
     --vault "vault" ^
-    --output "events.canvas" ^
+    --output "vault\events.canvas" ^
     --filter "type=event" ^
     --x-axis-key year ^
     --sort-by year

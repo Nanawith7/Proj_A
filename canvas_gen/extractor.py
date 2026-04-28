@@ -118,7 +118,7 @@ def scan_vault(vault_path: str, reserved_keys: Optional[set[str]] = None) -> dic
 
         index[stem] = NoteNode(
             stem=stem,
-            file_path=str(md_file.relative_to(vault)),
+            file_path=str(md_file.relative_to(vault)).replace("\\", "/"),
             title=title,
             node_type=node_type,
             properties=properties,

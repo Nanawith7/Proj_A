@@ -24,7 +24,7 @@ Write-Host ""
 Write-Host "[1/4] Generating full timeline canvas..." -ForegroundColor Yellow
 python -m canvas_gen.main `
     --vault "vault" `
-    --output "timeline.canvas" `
+    --output "vault\timeline.canvas" `
     --x-axis-key year `
     --column-width 350 `
     --row-height 250
@@ -34,7 +34,7 @@ if ($LASTEXITCODE -ne 0) { throw "Generation failed" }
 Write-Host "[2/4] Generating character relation canvas..." -ForegroundColor Yellow
 python -m canvas_gen.main `
     --vault "vault" `
-    --output "characters.canvas" `
+    --output "vault\characters.canvas" `
     --filter "type=character" `
     --sort-by title
 if ($LASTEXITCODE -ne 0) { throw "Generation failed" }
@@ -43,7 +43,7 @@ if ($LASTEXITCODE -ne 0) { throw "Generation failed" }
 Write-Host "[3/4] Generating scenario canvas..." -ForegroundColor Yellow
 python -m canvas_gen.main `
     --vault "vault" `
-    --output "scenarios.canvas" `
+    --output "vault\scenarios.canvas" `
     --filter "type=scenario" `
     --sort-by year
 if ($LASTEXITCODE -ne 0) { throw "Generation failed" }
@@ -52,7 +52,7 @@ if ($LASTEXITCODE -ne 0) { throw "Generation failed" }
 Write-Host "[4/4] Generating event timeline canvas..." -ForegroundColor Yellow
 python -m canvas_gen.main `
     --vault "vault" `
-    --output "events.canvas" `
+    --output "vault\events.canvas" `
     --filter "type=event" `
     --x-axis-key year `
     --sort-by year
