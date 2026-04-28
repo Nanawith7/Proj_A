@@ -213,7 +213,8 @@ class ViewerHandler(BaseHTTPRequestHandler):
             name = path.split("/api/nodeview/", 1)[1]
             self._serve_nodeview(name)
         elif path.startswith("/_icons/") or path.startswith("/_viewbg/"):
-            self._serve_vault_file(path.lstrip("/"))
+            from urllib.parse import unquote
+            self._serve_vault_file(unquote(path.lstrip("/")))
         else:
             self.send_error(404)
 
