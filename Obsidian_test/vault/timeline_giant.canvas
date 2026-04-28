@@ -25,7 +25,6 @@
 		{"id":"四天王B","type":"file","file":"character/四天王B.md","x":795,"y":10820,"width":160,"height":120,"color":"#2196F3"},
 		{"id":"盗賊_icon","type":"file","file":"_icons/node_盗賊.png","x":1145,"y":8816,"width":45,"height":45},
 		{"id":"盗賊","type":"file","file":"character/盗賊.md","x":1145,"y":10820,"width":160,"height":120,"color":"#2196F3"},
-		{"id":"魔王_icon","type":"file","file":"_icons/node_魔王.png","x":1495,"y":8816,"width":2000,"height":2000},
 		{"id":"魔王","type":"file","file":"character/魔王.md","x":1495,"y":10820,"width":160,"height":120,"color":"#2196F3"},
 		{"id":"元魔王_icon","type":"file","file":"_icons/node_元魔王.png","x":620,"y":10980,"width":65,"height":65},
 		{"id":"元魔王","type":"file","file":"character/元魔王.md","x":620,"y":12984,"width":160,"height":120,"color":"#2196F3"},
@@ -37,7 +36,9 @@
 		{"id":"王国","type":"file","file":"organization/王国.md","x":795,"y":15148,"width":200,"height":120,"color":"#4CAF50"},
 		{"id":"魔族連合_icon","type":"file","file":"_icons/type_organization.png","x":1145,"y":13144,"width":50,"height":50},
 		{"id":"魔族連合","type":"file","file":"organization/魔族連合.md","x":1145,"y":15148,"width":200,"height":120,"color":"#4CAF50"},
-		{"id":"平和条約締結_icon","type":"file","file":"_icons/type_event.png","x":1760,"y":-2004,"width":1000,"height":1000}
+		{"id":"平和条約締結_icon","type":"file","file":"_icons/type_event.png","x":1760,"y":-2004,"width":1000,"height":1000},
+		{"id":"100ee5cb402e2a17","type":"file","file":"_icons/type_event.png","x":1750,"y":-2004,"width":1000,"height":1000},
+		{"id":"魔王_icon","type":"file","file":"_icons/node_魔王.png","x":1495,"y":8820,"width":2000,"height":2000}
 	],
 	"edges":[
 		{"id":"997d6b59-965f-4e62-bdc1-67064b779f03","fromNode":"王国建国","fromSide":"bottom","toNode":"王国","toSide":"top","color":"#795548","label":"舞台"},

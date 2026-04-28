@@ -275,8 +275,11 @@ def main(argv: list[str] | None = None) -> int:
 
     # --- Parse per-node icon sizes and compute effective layout params ---
     max_icon_h = icon_size
+    max_icon_w = icon_size
     type_heights = [td.node_height for td in type_defs.values()]
+    type_widths = [td.node_width for td in type_defs.values()]
     max_type_height = max(type_heights) if type_heights else args.node_height
+    max_type_width = max(type_widths) if type_widths else args.node_width
 
     for node in nodes:
         iw, ih = _parse_icon_size(node.properties.get("icon_size"), icon_size)
@@ -284,12 +287,18 @@ def main(argv: list[str] | None = None) -> int:
         node.icon_height = ih
         if ih > max_icon_h:
             max_icon_h = ih
+        if iw > max_icon_w:
+            max_icon_w = iw
 
     effective_row_height = args.row_height
+    effective_column_width = args.column_width
     if icon_size > 0:
         icon_row_height = max_icon_h + args.icon_gap + max_type_height
         effective_row_height = max(args.row_height, icon_row_height)
+        effective_column_width = max(args.column_width, max_icon_w, max_type_width)
     print(f"[INFO] Row height: {effective_row_height} (max_icon_h={max_icon_h}, max_node_h={max_type_height})")
+    if effective_column_width != args.column_width:
+        print(f"[INFO] Column width: {effective_column_width} (max_icon_w={max_icon_w}, max_node_w={max_type_width})")
 
     # --- Generate per-node icons ---
     if icon_size > 0:
@@ -340,7 +349,7 @@ def main(argv: list[str] | None = None) -> int:
         nodes=nodes,
         x_axis_key=args.x_axis_key,
         type_defs=type_defs,
-        column_width=args.column_width,
+        column_width=effective_column_width,
         row_height=effective_row_height,
         node_width=args.node_width,
         node_height=args.node_height,

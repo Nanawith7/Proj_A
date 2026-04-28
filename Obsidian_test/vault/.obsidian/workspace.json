@@ -15,9 +15,9 @@
               "state": {
                 "file": "timeline_giant.canvas",
                 "viewState": {
-                  "x": 1850.9927701208535,
-                  "y": -682.3650451186609,
-                  "zoom": -1.666666666666666
+                  "x": 4017.3878346574566,
+                  "y": 2323.561379908151,
+                  "zoom": -4
                 }
               },
               "icon": "lucide-layout-dashboard",
@@ -185,6 +185,7 @@
   },
   "active": "2ec1532ea9941862",
   "lastOpenFiles": [
+    "timeline_bigicons.canvas",
     "timeline.canvas",
     "timeline_no_tags.canvas",
     "timeline_giant.canvas",
