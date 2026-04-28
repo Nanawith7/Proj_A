@@ -13,15 +13,15 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "devil_timeline.canvas",
+                "file": "timeline_no_tags.canvas",
                 "viewState": {
-                  "x": 790.3003630556512,
-                  "y": 573.7704972313774,
-                  "zoom": -1.1613533042298199
+                  "x": 1487.6942356508862,
+                  "y": 1160.6436175029908,
+                  "zoom": -2.164470571350204
                 }
               },
               "icon": "lucide-layout-dashboard",
-              "title": "devil_timeline"
+              "title": "timeline_no_tags"
             }
           }
         ]
@@ -185,8 +185,10 @@
   },
   "active": "2ec1532ea9941862",
   "lastOpenFiles": [
-    "devil_timeline.canvas",
+    "timeline_giant.canvas",
     "timeline.canvas",
+    "timeline_no_tags.canvas",
+    "devil_timeline.canvas",
     "character/主人公.md",
     "characters.canvas",
     "tag/demon.md",
