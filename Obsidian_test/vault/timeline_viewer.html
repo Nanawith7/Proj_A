@@ -8,10 +8,9 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:sans-serif;display:flex;height:100vh;overflow:hidden;background:#1a1a2e}
-#graph{flex:1;position:relative;overflow:auto;cursor:grab}
-#graph:active{cursor:grabbing}
-#graph svg{display:block}
-#sidebar{width:320px;background:#16213e;color:#eee;overflow-y:auto;padding:12px;border-left:2px solid #0f3460;font-size:13px}
+#graph{flex:1;position:relative;overflow:auto;background:#1a1a2e}
+#graph svg{display:block;min-width:100%;min-height:100%}
+#sidebar{width:320px;background:#16213e;color:#eee;overflow-y:auto;padding:12px;border-left:2px solid #0f3460;font-size:13px;flex-shrink:0}
 #sidebar h3{color:#e94560;margin:8px 0 4px}
 #sidebar label{display:block;margin:2px 0;color:#aaa;font-size:11px}
 #sidebar input,#sidebar select{width:100%;padding:4px 6px;background:#0f3460;color:#eee;border:1px solid #533483;border-radius:3px;font-size:12px}
@@ -20,52 +19,36 @@ body{font-family:sans-serif;display:flex;height:100vh;overflow:hidden;background
 #sidebar .filter-row{display:flex;gap:4px;margin:3px 0;align-items:center}
 #sidebar .filter-row select{flex:1}
 #sidebar .filter-row input{flex:1}
-#sidebar .filter-row .logic{width:40px;text-align:center;color:#e94560}
+#sidebar .filter-row .logic{width:42px;text-align:center;color:#e94560;font-size:10px}
 #stats{color:#aaa;font-size:11px;margin:4px 0}
-.expanded{position:absolute;background:#1e1e3a;border:2px solid #e94560;border-radius:6px;padding:12px;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.5);max-width:500px;max-height:400px;overflow-y:auto;color:#ddd;font-size:12px;transition:opacity .2s}
+.expanded{position:absolute;background:#1e1e3a;border:2px solid #e94560;border-radius:6px;padding:12px;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.5);max-width:500px;max-height:400px;overflow-y:auto;color:#ddd;font-size:12px}
 .expanded h1,.expanded h2{color:#e94560;font-size:14px}
 .expanded .prop{display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;font-size:11px}
-.node-icon{pointer-events:none}
-.edge-label{font-size:10px;fill:#aaa;text-anchor:middle}
-.edge-path{fill:none;stroke-width:1.5;opacity:.7}
+.edge-path{fill:none;stroke-width:1.5;opacity:.6}
 .edge-path:hover{stroke-width:3;opacity:1}
+.edge-label{font-size:10px;fill:#aaa}
 </style>
 </head>
 <body>
-
 <div id="graph"></div>
 <div id="sidebar">
-  <h3>Filter / Sort</h3>
+  <h3>Filter</h3>
   <div id="filter-rows"></div>
-  <button onclick="addFilterRow('filter-rows','filter')">+ Filter AND</button>
-  <button onclick="addOrGroup()">+ $or Group</button>
-
+  <button onclick="addFilterRow('filter-rows')">+ Filter</button>
   <h3>Exclude</h3>
   <div id="exclude-rows"></div>
-  <button onclick="addFilterRow('exclude-rows','exclude')">+ Exclude</button>
-
+  <button onclick="addFilterRow('exclude-rows')">+ Exclude</button>
   <h3>Sort</h3>
   <select id="sort-key"><option value="">none</option></select>
-  <label style="display:inline;margin-left:8px">
-    <input type="checkbox" id="sort-desc"> desc
-  </label>
-
-  <h3>Layout</h3>
-  <label>Row Height <input type="number" id="row-height" value="250" min="50"></label>
-  <label>Col Width <input type="number" id="col-width" value="350" min="50"></label>
+  <label style="display:inline;margin-left:8px"><input type="checkbox" id="sort-desc"> desc</label>
+  <h3>Options</h3>
   <label><input type="checkbox" id="prune-orphans"> Prune orphans</label>
-
-  <div style="margin-top:8px">
-    <button onclick="applyFilters()">Apply</button>
-    <button onclick="resetAll()">Reset</button>
-  </div>
+  <div style="margin-top:8px"><button onclick="applyFilters()">Apply</button><button onclick="resetAll()">Reset</button></div>
   <div id="stats">Nodes: 0 | Edges: 0</div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════════════════
+// ═══════════════ DATA ═══════════════
 const DATA = JSON.parse({"canvas": {"nodes": [{"id": "era_080_120", "type": "file", "file": "era/era_080_120.md", "x": 0, "y": 0, "width": 220, "height": 100, "color": "#9C27B0"}, {"id": "王国建国", "type": "file", "file": "event/王国建国.md", "x": 0, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "魔法学園創設", "type": "file", "file": "event/魔法学園創設.md", "x": 350, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "竜の目覚め", "type": "file", "file": "event/竜の目覚め.md", "x": 700, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "冒険の始まり", "type": "file", "file": "scenario/冒険の始まり.md", "x": 700, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "魔法学園編入", "type": "file", "file": "scenario/魔法学園編入.md", "x": 1050, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "竜との邂逅", "type": "file", "file": "scenario/竜との邂逅.md", "x": 1400, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "賢者との出会い", "type": "file", "file": "scenario/賢者との出会い.md", "x": 1750, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "王都魔法大会", "type": "file", "file": "scenario/王都魔法大会.md", "x": 2100, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "era_120_150", "type": "file", "file": "era/era_120_150.md", "x": 2450, "y": 0, "width": 220, "height": 100, "color": "#9C27B0"}, {"id": "王都防衛戦", "type": "file", "file": "event/王都防衛戦.md", "x": 2450, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "塔の試練", "type": "file", "file": "scenario/塔の試練.md", "x": 2800, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "賢者の塔完成", "type": "file", "file": "event/賢者の塔完成.md", "x": 3150, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "魔族侵攻宣言", "type": "file", "file": "event/魔族侵攻宣言.md", "x": 3500, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "魔族領潜入", "type": "file", "file": "scenario/魔族領潜入.md", "x": 3850, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "大戦争勃発", "type": "file", "file": "event/大戦争勃発.md", "x": 4200, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "四天王会戦", "type": "file", "file": "scenario/四天王会戦.md", "x": 4550, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "地下迷宮出現", "type": "file", "file": "event/地下迷宮出現.md", "x": 4900, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "秘宝争奪戦", "type": "file", "file": "scenario/秘宝争奪戦.md", "x": 5250, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "era_150_180", "type": "file", "file": "era/era_150_180.md", "x": 5600, "y": 0, "width": 220, "height": 100, "color": "#9C27B0"}, {"id": "最終決戦", "type": "file", "file": "scenario/最終決戦.md", "x": 5600, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "新魔王戴冠", "type": "file", "file": "event/新魔王戴冠.md", "x": 5950, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "最後の試練", "type": "file", "file": "scenario/最後の試練.md", "x": 6300, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "平和条約締結", "type": "file", "file": "event/平和条約締結.md", "x": 6650, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "和平交渉開始", "type": "file", "file": "event/和平交渉開始.md", "x": 7000, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "新たな旅立ち", "type": "file", "file": "scenario/新たな旅立ち.md", "x": 7350, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "復興大祭", "type": "file", "file": "event/復興大祭.md", "x": 7700, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "後日譚", "type": "file", "file": "scenario/後日譚.md", "x": 8050, "y": 750, "width": 280, "height": 160, "color": "#FF9800"}, {"id": "勇者伝説編纂", "type": "file", "file": "event/勇者伝説編纂.md", "x": 8400, "y": 250, "width": 220, "height": 140, "color": "#E91E63"}, {"id": "主人公_icon", "type": "file", "file": "_icons/node_主人公.png", "x": 3800, "y": 1176, "width": 60, "height": 60}, {"id": "主人公", "type": "file", "file": "character/主人公.md", "x": 3800, "y": 1250, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "四天王A_icon", "type": "file", "file": "_icons/node_四天王A.png", "x": 4150, "y": 1176, "width": 50, "height": 50}, {"id": "四天王A", "type": "file", "file": "character/四天王A.md", "x": 4150, "y": 1250, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "王女_icon", "type": "file", "file": "_icons/node_王女.png", "x": 4500, "y": 1176, "width": 55, "height": 55}, {"id": "王女", "type": "file", "file": "character/王女.md", "x": 4500, "y": 1250, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "騎士団長_icon", "type": "file", "file": "_icons/node_騎士団長.png", "x": 4850, "y": 1176, "width": 50, "height": 50}, {"id": "騎士団長", "type": "file", "file": "character/騎士団長.md", "x": 4850, "y": 1250, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "予言者_icon", "type": "file", "file": "_icons/node_予言者.png", "x": 3800, "y": 1426, "width": 50, "height": 50}, {"id": "予言者", "type": "file", "file": "character/予言者.md", "x": 3800, "y": 1500, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "四天王B_icon", "type": "file", "file": "_icons/node_四天王B.png", "x": 4150, "y": 1426, "width": 50, "height": 50}, {"id": "四天王B", "type": "file", "file": "character/四天王B.md", "x": 4150, "y": 1500, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "盗賊_icon", "type": "file", "file": "_icons/node_盗賊.png", "x": 4500, "y": 1426, "width": 45, "height": 45}, {"id": "盗賊", "type": "file", "file": "character/盗賊.md", "x": 4500, "y": 1500, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "魔王_icon", "type": "file", "file": "_icons/node_魔王.png", "x": 4850, "y": 1426, "width": 70, "height": 70}, {"id": "魔王", "type": "file", "file": "character/魔王.md", "x": 4850, "y": 1500, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "元魔王_icon", "type": "file", "file": "_icons/node_元魔王.png", "x": 3975, "y": 1676, "width": 65, "height": 65}, {"id": "元魔王", "type": "file", "file": "character/元魔王.md", "x": 3975, "y": 1750, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "幼なじみ_icon", "type": "file", "file": "_icons/node_幼なじみ.png", "x": 4325, "y": 1676, "width": 40, "height": 40}, {"id": "幼なじみ", "type": "file", "file": "character/幼なじみ.md", "x": 4325, "y": 1750, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "賢者_icon", "type": "file", "file": "_icons/node_賢者.png", "x": 4675, "y": 1676, "width": 60, "height": 60}, {"id": "賢者", "type": "file", "file": "character/賢者.md", "x": 4675, "y": 1750, "width": 160, "height": 120, "color": "#2196F3"}, {"id": "王国", "type": "file", "file": "organization/王国.md", "x": 4150, "y": 2000, "width": 200, "height": 120, "color": "#4CAF50"}, {"id": "魔族連合", "type": "file", "file": "organization/魔族連合.md", "x": 4500, "y": 2000, "width": 200, "height": 120, "color": "#4CAF50"}, {"id": "ancient", "type": "file", "file": "tag/ancient.md", "x": 3100, "y": 2250, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "demon", "type": "file", "file": "tag/demon.md", "x": 3450, "y": 2250, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "human", "type": "file", "file": "tag/human.md", "x": 3800, "y": 2250, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "leader", "type": "file", "file": "tag/leader.md", "x": 4150, "y": 2250, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "main", "type": "file", "file": "tag/main.md", "x": 4500, "y": 2250, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "rogue", "type": "file", "file": "tag/rogue.md", "x": 4850, "y": 2250, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "ruler", "type": "file", "file": "tag/ruler.md", "x": 5200, "y": 2250, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "wise", "type": "file", "file": "tag/wise.md", "x": 5550, "y": 2250, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "civilian", "type": "file", "file": "tag/civilian.md", "x": 3275, "y": 2500, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "general", "type": "file", "file": "tag/general.md", "x": 3625, "y": 2500, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "knight", "type": "file", "file": "tag/knight.md", "x": 3975, "y": 2500, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "mage", "type": "file", "file": "tag/mage.md", "x": 4325, "y": 2500, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "mystic", "type": "file", "file": "tag/mystic.md", "x": 4675, "y": 2500, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "royalty", "type": "file", "file": "tag/royalty.md", "x": 5025, "y": 2500, "width": 100, "height": 80, "color": "#607D8B"}, {"id": "villain", "type": "file", "file": "tag/villain.md", "x": 5375, "y": 2500, "width": 100, "height": 80, "color": "#607D8B"}], "edges": [{"id": "8387da60-ab59-4a61-ba71-f8e3c4ca2136", "fromNode": "王国建国", "fromSide": "right", "toNode": "王国", "toSide": "left", "color": "#795548", "label": "舞台"}, {"id": "302b637c-ee27-4f20-ab60-086be10dcca3", "fromNode": "王国建国", "fromSide": "bottom", "toNode": "冒険の始まり", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "804a624a-34a1-412f-998c-4e2ed2d82fe2", "fromNode": "魔法学園創設", "fromSide": "right", "toNode": "王国", "toSide": "left", "color": "#9E9E9E", "label": "関連"}, {"id": "184e923b-a3c6-4ffa-86b3-790c36fbe5c0", "fromNode": "竜の目覚め", "fromSide": "right", "toNode": "賢者", "toSide": "left", "color": "#9E9E9E", "label": "関連"}, {"id": "37b80ab4-12e0-430a-ac02-ae1f04468445", "fromNode": "冒険の始まり", "fromSide": "right", "toNode": "主人公", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "f31593f4-16fe-4d68-8fb4-77beaacd92e1", "fromNode": "冒険の始まり", "fromSide": "top", "toNode": "王国建国", "toSide": "bottom", "color": "#9E9E9E", "label": "関連"}, {"id": "711bfbe7-d4c8-4e1c-a427-8209141d516b", "fromNode": "冒険の始まり", "fromSide": "right", "toNode": "王国", "toSide": "left", "color": "#9E9E9E", "label": "関連"}, {"id": "94da8ad7-6b0e-4f54-99dc-bf85dfebe456", "fromNode": "魔法学園編入", "fromSide": "right", "toNode": "主人公", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "d97ec816-d536-4dab-93e4-25f1c82e8160", "fromNode": "魔法学園編入", "fromSide": "right", "toNode": "賢者", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "80da0f07-eeeb-4d17-8a4a-2751f5c4e78e", "fromNode": "魔法学園編入", "fromSide": "right", "toNode": "王国", "toSide": "left", "color": "#9E9E9E", "label": "関連"}, {"id": "486d97ba-4d3d-4253-8081-86e91ccff585", "fromNode": "竜との邂逅", "fromSide": "right", "toNode": "主人公", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "b9de755d-c932-4097-bd0d-579d49768f7b", "fromNode": "竜との邂逅", "fromSide": "right", "toNode": "賢者", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "95d05aea-438a-4298-9f7b-9cdcbf72ef22", "fromNode": "竜との邂逅", "fromSide": "right", "toNode": "王国", "toSide": "left", "color": "#9E9E9E", "label": "関連"}, {"id": "2bc9bd99-46f6-4cbe-88d4-b145fc3833fe", "fromNode": "賢者との出会い", "fromSide": "right", "toNode": "主人公", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "4d9adf8e-23e9-4723-95bb-efc51bb31a7d", "fromNode": "賢者との出会い", "fromSide": "right", "toNode": "賢者", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "747c5c7f-43ae-4e61-8f4a-01f9a7c85bef", "fromNode": "賢者との出会い", "fromSide": "right", "toNode": "王国", "toSide": "left", "color": "#9E9E9E", "label": "関連"}, {"id": "f857dae3-70a9-4dc3-b30b-533fa9165e11", "fromNode": "王都魔法大会", "fromSide": "right", "toNode": "主人公", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "20bed82b-bd0f-49e4-98e0-c56028ec2442", "fromNode": "王都魔法大会", "fromSide": "right", "toNode": "賢者", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "6f004d8a-0c1b-4d06-9854-e5841ad29a36", "fromNode": "王都魔法大会", "fromSide": "right", "toNode": "王女", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "915a89ac-69c7-434a-92a8-53bf1abd8421", "fromNode": "王都魔法大会", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "66ca6f81-0f38-4d4e-a2f6-fb87bb4b8477", "fromNode": "王都防衛戦", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "bd5663d4-2189-4f51-912f-332ff994296c", "fromNode": "王都防衛戦", "fromSide": "right", "toNode": "騎士団長", "toSide": "left", "color": "#9E9E9E", "label": "関連"}, {"id": "0740eead-b59e-45c8-901d-219fda959ec6", "fromNode": "塔の試練", "fromSide": "right", "toNode": "主人公", "toSide": "left", "color": "#2196F3", "label": "登場人物"}, {"id": "9026ca52-522f-4161-833b-ba4ffa32699d", "fromNode": "塔の試練", "fromSide": "bottom", "toNode": "予言者", "toSide": "top", "color": "#2196F3", "label": "登場人物"}, {"id": "2d2800a7-800a-4af3-93a6-d0490cf63b6a", "fromNode": "塔の試練", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "401626b9-94ec-4ec8-9336-3d2692abafca", "fromNode": "賢者の塔完成", "fromSide": "bottom", "toNode": "賢者", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "b623c937-9a56-4185-baed-b64498782c27", "fromNode": "魔族侵攻宣言", "fromSide": "bottom", "toNode": "魔王", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "1b04835a-56c3-44e5-8f01-9327aa6e91fb", "fromNode": "魔族侵攻宣言", "fromSide": "bottom", "toNode": "魔族連合", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "403a836b-5cc3-42cd-a5ce-ef2fc130d305", "fromNode": "魔族領潜入", "fromSide": "bottom", "toNode": "主人公", "toSide": "top", "color": "#2196F3", "label": "登場人物"}, {"id": "c08e5dbe-103c-48c3-becf-afd875aaddac", "fromNode": "魔族領潜入", "fromSide": "bottom", "toNode": "盗賊", "toSide": "top", "color": "#2196F3", "label": "登場人物"}, {"id": "e73a3783-682e-4fd7-9c1b-059d75a982bf", "fromNode": "魔族領潜入", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "0aff39e0-a134-4dfb-951b-75bb49c0e802", "fromNode": "大戦争勃発", "fromSide": "bottom", "toNode": "魔王", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "f84f3df2-509a-46c2-9952-2f0600dd3cb6", "fromNode": "大戦争勃発", "fromSide": "right", "toNode": "最終決戦", "toSide": "left", "color": "#9E9E9E", "label": "関連"}, {"id": "271181f8-a5b4-47a0-b5ee-ca6215cb4db0", "fromNode": "四天王会戦", "fromSide": "bottom", "toNode": "主人公", "toSide": "right", "color": "#2196F3", "label": "登場人物"}, {"id": "4ee3bda5-8e2f-4175-ab22-90132fda2222", "fromNode": "四天王会戦", "fromSide": "bottom", "toNode": "四天王A", "toSide": "top", "color": "#2196F3", "label": "登場人物"}, {"id": "c6d6f28e-cb98-47c5-abbc-50d3167f27c7", "fromNode": "四天王会戦", "fromSide": "bottom", "toNode": "四天王B", "toSide": "top", "color": "#2196F3", "label": "登場人物"}, {"id": "f3d9fa21-fdc5-43ee-ae1a-8fe654a092f3", "fromNode": "四天王会戦", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "0ef66117-8fb4-4925-b9a3-80a77844d215", "fromNode": "地下迷宮出現", "fromSide": "bottom", "toNode": "盗賊", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "d63c8945-54a7-411d-b68c-7a2e186f1b61", "fromNode": "秘宝争奪戦", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#2196F3", "label": "登場人物"}, {"id": "b9428e3c-ee0a-4fb5-a2a0-2a38087e5c0b", "fromNode": "秘宝争奪戦", "fromSide": "bottom", "toNode": "盗賊", "toSide": "top", "color": "#2196F3", "label": "登場人物"}, {"id": "cbee0898-370a-46e9-88d0-7721d581192e", "fromNode": "秘宝争奪戦", "fromSide": "left", "toNode": "四天王A", "toSide": "right", "color": "#2196F3", "label": "登場人物"}, {"id": "96f39873-307f-40c1-ad31-febe48515063", "fromNode": "秘宝争奪戦", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "78a8c941-22ef-4cd9-81a6-fddaacc2cb0b", "fromNode": "最終決戦", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#2196F3", "label": "登場人物"}, {"id": "4e715c89-1f1d-48e0-a9a1-69b38178af07", "fromNode": "最終決戦", "fromSide": "bottom", "toNode": "賢者", "toSide": "top", "color": "#2196F3", "label": "登場人物"}, {"id": "93ceb1a7-111e-41b3-b41e-f84064248808", "fromNode": "最終決戦", "fromSide": "bottom", "toNode": "魔王", "toSide": "top", "color": "#2196F3", "label": "登場人物"}, {"id": "981de727-33d5-449d-b277-e6c2f46a01d2", "fromNode": "最終決戦", "fromSide": "left", "toNode": "大戦争勃発", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "de81406f-4ed8-4119-b1bf-46c8e20dd7fc", "fromNode": "最終決戦", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "4a7fefd1-a159-4b23-bb47-ad7f1d72ba97", "fromNode": "最終決戦", "fromSide": "bottom", "toNode": "魔族連合", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "8dd7c3a1-ae15-4757-aebb-6fb3024ccff8", "fromNode": "新魔王戴冠", "fromSide": "bottom", "toNode": "元魔王", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "3aad902d-2363-4601-838e-5299f0c3b5aa", "fromNode": "最後の試練", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#2196F3", "label": "登場人物"}, {"id": "6640ac15-4a52-4c11-8ca9-516b35213fa9", "fromNode": "最後の試練", "fromSide": "left", "toNode": "元魔王", "toSide": "right", "color": "#2196F3", "label": "登場人物"}, {"id": "5e810119-bc04-4a20-8bf9-0e35bfcea0c2", "fromNode": "最後の試練", "fromSide": "left", "toNode": "王国", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "dcbfb197-fe05-4c8f-9106-0dd8681e17d2", "fromNode": "平和条約締結", "fromSide": "left", "toNode": "最終決戦", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "117a2b03-a63e-449c-ba11-1419baecc87b", "fromNode": "平和条約締結", "fromSide": "bottom", "toNode": "魔王", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "1977f347-1402-449d-9136-81b9c434cb40", "fromNode": "平和条約締結", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "a996c657-b4d0-40ad-a4a2-fee7a2dd91c6", "fromNode": "平和条約締結", "fromSide": "bottom", "toNode": "魔族連合", "toSide": "top", "color": "#9E9E9E", "label": "関連"}, {"id": "518713c8-9c17-4ac7-a6c6-e440830e377b", "fromNode": "和平交渉開始", "fromSide": "left", "toNode": "王女", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "4db7a90e-7d73-4d29-bfd1-dd84b3bb4b58", "fromNode": "和平交渉開始", "fromSide": "left", "toNode": "魔王", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "2a1cd0d8-2ae2-43c4-be6d-d5ba61ebc5d0", "fromNode": "新たな旅立ち", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#2196F3", "label": "登場人物"}, {"id": "e9b772cc-c404-426e-bb76-4faa2a5ae21b", "fromNode": "新たな旅立ち", "fromSide": "left", "toNode": "幼なじみ", "toSide": "right", "color": "#2196F3", "label": "登場人物"}, {"id": "0a2cbf4b-73b3-4f86-ab87-5792d1cce9fe", "fromNode": "新たな旅立ち", "fromSide": "left", "toNode": "王国", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "5a0dbe46-2de3-47db-b1c1-0a19a0e9e82c", "fromNode": "復興大祭", "fromSide": "left", "toNode": "王国", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "3a8a03c8-fb22-4926-8dd8-58939f681f38", "fromNode": "復興大祭", "fromSide": "left", "toNode": "魔族連合", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "1b5aaad5-5026-43bb-ae20-afe32c04caa5", "fromNode": "後日譚", "fromSide": "left", "toNode": "王女", "toSide": "right", "color": "#2196F3", "label": "登場人物"}, {"id": "bc3e64bc-ef8c-49e5-9128-b61d40d32991", "fromNode": "後日譚", "fromSide": "left", "toNode": "騎士団長", "toSide": "right", "color": "#2196F3", "label": "登場人物"}, {"id": "20c05efa-82a3-4328-97d8-498884018d90", "fromNode": "後日譚", "fromSide": "left", "toNode": "王国", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "5d09254e-4cbc-4e6b-9629-60c56c802e2e", "fromNode": "勇者伝説編纂", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "62be3461-e366-4205-aec8-ca417e12c89f", "fromNode": "勇者伝説編纂", "fromSide": "left", "toNode": "賢者", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "680afe39-8922-48da-ace5-f7bc19f0abd4", "fromNode": "主人公", "fromSide": "bottom", "toNode": "main", "toSide": "top", "label": "タグ"}, {"id": "fb1c32a7-91c2-47ad-ab07-f6a8062473e7", "fromNode": "主人公", "fromSide": "bottom", "toNode": "human", "toSide": "top", "label": "タグ"}, {"id": "ae15faf7-884c-4de5-a266-78baa7f9aab1", "fromNode": "主人公", "fromSide": "bottom", "toNode": "knight", "toSide": "top", "label": "タグ"}, {"id": "604464aa-71fc-46e7-a5bd-8a717293fa0a", "fromNode": "主人公", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#4CAF50", "label": "所属"}, {"id": "2ec196df-f517-44b7-89de-0041ea668ae7", "fromNode": "主人公", "fromSide": "right", "toNode": "騎士団長", "toSide": "left", "color": "#4CAF50", "label": "味方"}, {"id": "9aa6ad68-6ecd-4f2a-b869-b121166e9ef8", "fromNode": "主人公", "fromSide": "bottom", "toNode": "幼なじみ", "toSide": "top", "color": "#4CAF50", "label": "味方"}, {"id": "62ece786-d1a1-458e-9005-fccf26e2cd49", "fromNode": "主人公", "fromSide": "right", "toNode": "盗賊", "toSide": "left", "color": "#4CAF50", "label": "味方"}, {"id": "cda88a77-dfbc-4a5b-a408-281bc0153f53", "fromNode": "主人公", "fromSide": "right", "toNode": "賢者", "toSide": "left", "color": "#FF9800", "label": "師弟"}, {"id": "81de245c-d215-48c7-8f5e-38a4213aa286", "fromNode": "主人公", "fromSide": "right", "toNode": "騎士団長", "toSide": "left", "color": "#FF9800", "label": "師弟"}, {"id": "e3623783-1a4c-4533-83e1-cf514dedad55", "fromNode": "主人公", "fromSide": "right", "toNode": "四天王A", "toSide": "left", "color": "#F44336", "label": "敵対"}, {"id": "293f7d22-b98e-4e1d-93fb-0b85a3e7f6e0", "fromNode": "主人公", "fromSide": "right", "toNode": "四天王B", "toSide": "left", "color": "#9C27B0", "label": "嫌悪"}, {"id": "8688ebd5-7a1b-4f5d-8fc2-88c8641b9f2c", "fromNode": "主人公", "fromSide": "bottom", "toNode": "幼なじみ", "toSide": "top", "color": "#E91E63", "label": "好意"}, {"id": "8645e45d-130f-4e37-9733-dcd9243aaa88", "fromNode": "主人公", "fromSide": "right", "toNode": "王女", "toSide": "left", "color": "#E91E63", "label": "好意"}, {"id": "fc4f777c-b50c-4252-be51-29aabe503589", "fromNode": "主人公", "fromSide": "left", "toNode": "冒険の始まり", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "249f1749-809e-4f12-af7f-9196c4bfe62c", "fromNode": "主人公", "fromSide": "left", "toNode": "賢者との出会い", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "2435087d-a9ff-405a-a49c-84053765dd35", "fromNode": "主人公", "fromSide": "right", "toNode": "最終決戦", "toSide": "left", "color": "#9E9E9E", "label": "関連"}, {"id": "0625f3a8-bbef-4b7d-82f4-d0c06ad12daa", "fromNode": "予言者", "fromSide": "bottom", "toNode": "human", "toSide": "top", "label": "タグ"}, {"id": "bc75020f-a950-4e74-b466-d78c588b9036", "fromNode": "予言者", "fromSide": "bottom", "toNode": "mystic", "toSide": "top", "label": "タグ"}, {"id": "9cda056b-1f9c-4824-b3f0-aba44ac12fd1", "fromNode": "予言者", "fromSide": "right", "toNode": "賢者", "toSide": "left", "color": "#E91E63", "label": "好意"}, {"id": "12bab21f-031d-4583-8d31-d4ef378145ad", "fromNode": "予言者", "fromSide": "right", "toNode": "王女", "toSide": "left", "color": "#FF9800", "label": "師弟"}, {"id": "166b4978-b855-4332-8b4a-2a2340effb21", "fromNode": "予言者", "fromSide": "bottom", "toNode": "元魔王", "toSide": "top", "color": "#9C27B0", "label": "嫌悪"}, {"id": "32fd2fd1-af3d-4997-ad9c-d3e54170eef0", "fromNode": "元魔王", "fromSide": "bottom", "toNode": "demon", "toSide": "top", "label": "タグ"}, {"id": "810cea52-39e1-421c-b547-10487c78170f", "fromNode": "元魔王", "fromSide": "left", "toNode": "ancient", "toSide": "right", "label": "タグ"}, {"id": "33969b6b-637c-4a9e-bcf3-5215122bc390", "fromNode": "元魔王", "fromSide": "right", "toNode": "魔王", "toSide": "left", "color": "#00BCD4", "label": "家族"}, {"id": "119fe929-a1d2-4d33-a83e-63c0da57de0b", "fromNode": "元魔王", "fromSide": "right", "toNode": "賢者", "toSide": "left", "color": "#F44336", "label": "敵対"}, {"id": "555ecd70-fd8a-45c4-a415-f4db1da256fa", "fromNode": "元魔王", "fromSide": "top", "toNode": "予言者", "toSide": "bottom", "color": "#9C27B0", "label": "嫌悪"}, {"id": "d37bef1e-b914-47d1-ae74-67b67b597bcc", "fromNode": "四天王A", "fromSide": "bottom", "toNode": "demon", "toSide": "top", "label": "タグ"}, {"id": "c3201860-aae8-4331-8608-5cf70d726fc1", "fromNode": "四天王A", "fromSide": "bottom", "toNode": "general", "toSide": "top", "label": "タグ"}, {"id": "8b26828a-d547-43de-b63a-fcbf7335ac63", "fromNode": "四天王A", "fromSide": "bottom", "toNode": "魔族連合", "toSide": "top", "color": "#4CAF50", "label": "所属"}, {"id": "c801b026-217d-4743-8c79-6337cce7953e", "fromNode": "四天王A", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#F44336", "label": "敵対"}, {"id": "7a27132a-493d-429e-b315-1ea0535816de", "fromNode": "四天王A", "fromSide": "right", "toNode": "魔王", "toSide": "left", "color": "#9C27B0", "label": "嫌悪"}, {"id": "6eb5527d-203d-4096-80d3-0b68d94cd3d9", "fromNode": "四天王A", "fromSide": "bottom", "toNode": "四天王B", "toSide": "top", "color": "#4CAF50", "label": "味方"}, {"id": "e8df2a86-978f-499b-91bc-ed1c5a9673d9", "fromNode": "四天王B", "fromSide": "bottom", "toNode": "demon", "toSide": "top", "label": "タグ"}, {"id": "a93a099f-62f1-47cb-b3ea-59669777821e", "fromNode": "四天王B", "fromSide": "bottom", "toNode": "general", "toSide": "top", "label": "タグ"}, {"id": "bbcf6194-d30e-4cc0-9287-c844d36f0171", "fromNode": "四天王B", "fromSide": "bottom", "toNode": "魔族連合", "toSide": "top", "color": "#4CAF50", "label": "所属"}, {"id": "38a00146-dac0-4fa5-aeee-e478fb91dac2", "fromNode": "四天王B", "fromSide": "right", "toNode": "魔王", "toSide": "left", "color": "#4CAF50", "label": "味方"}, {"id": "52882300-685e-458a-99ec-3ce323ce16aa", "fromNode": "四天王B", "fromSide": "top", "toNode": "四天王A", "toSide": "bottom", "color": "#4CAF50", "label": "味方"}, {"id": "7f5a8156-2ce4-4f6f-af02-0e99926b493b", "fromNode": "四天王B", "fromSide": "left", "toNode": "予言者", "toSide": "right", "color": "#9C27B0", "label": "嫌悪"}, {"id": "bf4f2535-7b0e-4b99-b242-320bc39c5425", "fromNode": "幼なじみ", "fromSide": "bottom", "toNode": "human", "toSide": "top", "label": "タグ"}, {"id": "71819759-e1e2-4292-b829-667507d44205", "fromNode": "幼なじみ", "fromSide": "left", "toNode": "civilian", "toSide": "right", "label": "タグ"}, {"id": "6f5e540c-2ffc-44b8-8595-3ccb33f81855", "fromNode": "幼なじみ", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#4CAF50", "label": "所属"}, {"id": "0d9d265a-2694-4a9c-b6c5-2ad3efbe5436", "fromNode": "幼なじみ", "fromSide": "top", "toNode": "主人公", "toSide": "bottom", "color": "#E91E63", "label": "好意"}, {"id": "e7d24cf4-c7ee-4fc4-a1da-0da9108498fc", "fromNode": "幼なじみ", "fromSide": "top", "toNode": "主人公", "toSide": "bottom", "color": "#4CAF50", "label": "味方"}, {"id": "2f48a4b7-7a81-4900-80d4-ee490404c075", "fromNode": "幼なじみ", "fromSide": "top", "toNode": "盗賊", "toSide": "bottom", "color": "#00BCD4", "label": "家族"}, {"id": "bab1649f-8bcf-4bd2-acb3-3185437a5e75", "fromNode": "王女", "fromSide": "bottom", "toNode": "human", "toSide": "top", "label": "タグ"}, {"id": "10e69ec6-5035-4dc7-9201-5ddfef1af12d", "fromNode": "王女", "fromSide": "bottom", "toNode": "royalty", "toSide": "top", "label": "タグ"}, {"id": "cbffe105-9399-4b65-839b-627ef1c14a8c", "fromNode": "王女", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#4CAF50", "label": "所属"}, {"id": "75f56563-4ff8-4c31-b35b-7889256a29b1", "fromNode": "王女", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#E91E63", "label": "好意"}, {"id": "8fb00ab8-929f-4253-89af-c1946694552e", "fromNode": "王女", "fromSide": "right", "toNode": "騎士団長", "toSide": "left", "color": "#4CAF50", "label": "味方"}, {"id": "e40162fc-8ed9-4da6-b166-9cca9b4018cd", "fromNode": "王女", "fromSide": "left", "toNode": "予言者", "toSide": "right", "color": "#FF9800", "label": "師弟"}, {"id": "67effc4c-ec66-4b2a-b158-a4a827adae80", "fromNode": "盗賊", "fromSide": "bottom", "toNode": "human", "toSide": "top", "label": "タグ"}, {"id": "98f64c76-c35e-4567-b42e-d4be2b7686c4", "fromNode": "盗賊", "fromSide": "bottom", "toNode": "rogue", "toSide": "top", "label": "タグ"}, {"id": "dba4e964-74f6-41e7-a13b-329607d55734", "fromNode": "盗賊", "fromSide": "bottom", "toNode": "幼なじみ", "toSide": "top", "color": "#00BCD4", "label": "家族"}, {"id": "dc61599c-21c9-4de1-8ec5-d128e4b11993", "fromNode": "盗賊", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#4CAF50", "label": "味方"}, {"id": "4e6faaea-7853-4981-8dc4-f53828a0abae", "fromNode": "盗賊", "fromSide": "left", "toNode": "四天王A", "toSide": "right", "color": "#F44336", "label": "敵対"}, {"id": "fd3d796a-f1cf-4546-a40d-1d75d8f5b8b3", "fromNode": "賢者", "fromSide": "right", "toNode": "wise", "toSide": "left", "label": "タグ"}, {"id": "9f039845-68b5-478d-b386-70831e8f08c5", "fromNode": "賢者", "fromSide": "left", "toNode": "human", "toSide": "right", "label": "タグ"}, {"id": "dd2e8a92-7303-4001-a615-401c130c5140", "fromNode": "賢者", "fromSide": "bottom", "toNode": "mage", "toSide": "top", "label": "タグ"}, {"id": "5140cfed-25ae-414c-8ef7-2c67595e6145", "fromNode": "賢者", "fromSide": "left", "toNode": "王国", "toSide": "right", "color": "#4CAF50", "label": "所属"}, {"id": "0a961c39-260d-40fc-983c-3cec8c42ebb5", "fromNode": "賢者", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#4CAF50", "label": "味方"}, {"id": "ebde27c6-dd38-4a1d-bc79-695afbcf4c21", "fromNode": "賢者", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#FF9800", "label": "師弟"}, {"id": "ab7195f9-0e3b-4c31-aab6-c408f45d1540", "fromNode": "賢者", "fromSide": "left", "toNode": "予言者", "toSide": "right", "color": "#E91E63", "label": "好意"}, {"id": "cbcfef56-05ea-4988-bbca-72970866a3c0", "fromNode": "賢者", "fromSide": "left", "toNode": "元魔王", "toSide": "right", "color": "#F44336", "label": "敵対"}, {"id": "6a0f2431-217e-4ff5-820a-b8eb35dfa313", "fromNode": "賢者", "fromSide": "left", "toNode": "賢者との出会い", "toSide": "right", "color": "#9E9E9E", "label": "関連"}, {"id": "afc93161-c29d-45e0-8156-d131a7087b83", "fromNode": "賢者", "fromSide": "top", "toNode": "最終決戦", "toSide": "bottom", "color": "#9E9E9E", "label": "関連"}, {"id": "9763a4d9-8fd4-4afc-93b4-54d68e55ac68", "fromNode": "騎士団長", "fromSide": "bottom", "toNode": "human", "toSide": "top", "label": "タグ"}, {"id": "a459143e-5b8d-4c7d-916b-3d3a60a85fb6", "fromNode": "騎士団長", "fromSide": "bottom", "toNode": "knight", "toSide": "top", "label": "タグ"}, {"id": "c10e403f-760b-4706-9399-a847e47f929f", "fromNode": "騎士団長", "fromSide": "bottom", "toNode": "leader", "toSide": "top", "label": "タグ"}, {"id": "ad46f9f5-41fe-4c55-baf6-e3a5292e0abf", "fromNode": "騎士団長", "fromSide": "bottom", "toNode": "王国", "toSide": "top", "color": "#4CAF50", "label": "所属"}, {"id": "eda46fe3-2899-434a-930b-132f7b322c65", "fromNode": "騎士団長", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#4CAF50", "label": "味方"}, {"id": "b0db98e6-9a52-4108-9b55-3816c2cf84b9", "fromNode": "騎士団長", "fromSide": "left", "toNode": "主人公", "toSide": "right", "color": "#FF9800", "label": "師弟"}, {"id": "ee37ccde-4819-4e35-ba92-338ded3410ac", "fromNode": "騎士団長", "fromSide": "bottom", "toNode": "魔王", "toSide": "top", "color": "#F44336", "label": "敵対"}, {"id": "084aef40-c085-41fe-8909-22c0e646f8c9", "fromNode": "騎士団長", "fromSide": "left", "toNode": "王女", "toSide": "right", "color": "#E91E63", "label": "好意"}, {"id": "66e1156c-583b-463a-921f-e3f78663ba82", "fromNode": "魔王", "fromSide": "bottom", "toNode": "villain", "toSide": "top", "label": "タグ"}, {"id": "66f7ab52-3914-4ded-ae60-c315ee58338d", "fromNode": "魔王", "fromSide": "left", "toNode": "demon", "toSide": "right", "label": "タグ"}, {"id": "8c6a2777-f3b0-42f1-b431-bd9bb540348c", "fromNode": "魔王", "fromSide": "bottom", "toNode": "ruler", "toSide": "top", "label": "タグ"}, {"id": "ef85755c-56a9-495f-b0fc-2f44ff9817ea", "fromNode": "魔王", "fromSide": "bottom", "toNode": "魔族連合", "toSide": "top", "color": "#4CAF50", "label": "所属"}, {"id": "ca6a1e80-58df-4ade-8718-b7109e729b61", "fromNode": "魔王", "fromSide": "left", "toNode": "四天王B", "toSide": "right", "color": "#4CAF50", "label": "味方"}, {"id": "7a7c043c-808b-4623-9723-022a2611570e", "fromNode": "魔王", "fromSide": "top", "toNode": "騎士団長", "toSide": "bottom", "color": "#F44336", "label": "敵対"}, {"id": "9d199c77-e497-4bc1-b2ea-f799eb8fce0a", "fromNode": "魔王", "fromSide": "left", "toNode": "元魔王", "toSide": "right", "color": "#00BCD4", "label": "家族"}, {"id": "97bf1bad-58de-4aeb-b993-642406014537", "fromNode": "魔王", "fromSide": "left", "toNode": "四天王A", "toSide": "right", "color": "#9C27B0", "label": "嫌悪"}, {"id": "361a8d2e-19d1-4d03-bb67-4cbbbd22c027", "fromNode": "魔王", "fromSide": "top", "toNode": "大戦争勃発", "toSide": "bottom", "color": "#9E9E9E", "label": "関連"}, {"id": "1efd6543-649d-4918-922e-6ebb4e4a923c", "fromNode": "魔王", "fromSide": "top", "toNode": "最終決戦", "toSide": "bottom", "color": "#9E9E9E", "label": "関連"}, {"id": "6b161292-c54c-426d-a680-a3fb9b436c20", "fromNode": "魔王", "fromSide": "right", "toNode": "平和条約締結", "toSide": "bottom", "color": "#9E9E9E", "label": "関連"}]}, "vault": {"主人公": {"file": "character/主人公.md", "props": {"type": "character", "title": "主人公", "aliases": ["Hero"], "tags": ["[[main]]", "[[human]]", "[[knight]]"], "icon_size": "80x60", "icon": "_icons/node_主人公.png", "affiliation": "[[王国]]", "ally": ["[[騎士団長]]", "[[幼なじみ]]", "[[盗賊]]"], "mentor": ["[[賢者]]", "[[騎士団長]]"], "rival": ["[[四天王A]]"], "dislikes": ["[[四天王B]]"], "likes": ["[[幼なじみ]]", "[[王女]]"], "related": ["[[冒険の始まり]]", "[[賢者との出会い]]", "[[最終決戦]]"]}, "body": "# 主人公\n\n王国の騎士見習い。幼い頃に両親を失い、騎士団長に拾われて育った。正義感が強く、困っている人を見捨てられない性格。\n\n> 「誰かを守れる強さがほしい」"}, "予言者": {"file": "character/予言者.md", "props": {"type": "character", "icon_size": "50x50", "icon": "_icons/node_予言者.png", "title": "予言者", "aliases": ["Prophet"], "tags": ["[[human]]", "[[mystic]]"], "likes": ["[[賢者]]"], "mentor": ["[[王女]]"], "dislikes": ["[[元魔王]]"]}, "body": "# 予言者\n\n星の声を聴く盲目の預言者。賢者の旧友であり、王国の未来を憂いて王女に助言を与えている。かつて元魔王との遭遇で視力を失った過去を持つ。\n\n> 「未来は定められた道ではなく、選び取る意志の先にある」"}, "元魔王": {"file": "character/元魔王.md", "props": {"type": "character", "icon_size": "65x65", "icon": "_icons/node_元魔王.png", "title": "元魔王", "aliases": ["Former Demon King"], "tags": ["[[demon]]", "[[ancient]]"], "family": ["[[魔王]]"], "rival": ["[[賢者]]"], "dislikes": ["[[予言者]]"]}, "body": "# 元魔王\n\n先代の魔王にして現魔王の実父。人間との共存を掲げ和平路線を推進していたが、人間側の裏切りによって暗殺されかけた過去を持つ。現在は隠居の身だが、その力は健在。賢者とは数百年にわたる宿敵関係にある。\n\n> 「若者よ、憎しみの連鎖を断ち切れるのは、痛みを知る者だけだ」"}, "四天王A": {"file": "character/四天王A.md", "props": {"type": "character", "title": "四天王A", "aliases": ["General A"], "tags": ["[[demon]]", "[[general]]"], "icon_size": "50x50", "icon": "_icons/node_四天王A.png", "affiliation": "[[魔族連合]]", "rival": ["[[主人公]]"], "dislikes": ["[[魔王]]"], "ally": ["[[四天王B]]"]}, "body": "# 四天王A（狂炎の将）\n\n魔族四天王の一角。炎を操る戦闘狂で、強者との戦いを何より好む。魔王の統治方針に内心反発しており、より好戦的な魔族政権を望んでいる。主人公を「好敵手」と認めている。\n\n> 「てめぇと殺し合えるなら、それだけで生きてる価値がある」"}, "四天王B": {"file": "character/四天王B.md", "props": {"type": "character", "title": "四天王B", "aliases": ["General B"], "tags": ["[[demon]]", "[[general]]"], "icon_size": "50x50", "icon": "_icons/node_四天王B.png", "affiliation": "[[魔族連合]]", "ally": ["[[魔王]]", "[[四天王A]]"], "dislikes": ["[[予言者]]"]}, "body": "# 四天王B（氷壁の将）\n\n魔族四天王の一角。冷静沈着な策士で、魔王の側近として魔族連合の実務を統括する。魔王への忠誠は絶対だが、四天王Aの造反の兆候には気づいており密かに警戒している。\n\n> 「忠誠とは思考停止ではない。主の為に考え抜くことこそが忠誠だ」"}, "幼なじみ": {"file": "character/幼なじみ.md", "props": {"type": "character", "title": "幼なじみ", "aliases": ["Childhood Friend"], "tags": ["[[human]]", "[[civilian]]"], "icon_size": "40x40", "icon": "_icons/node_幼なじみ.png", "affiliation": "[[王国]]", "likes": ["[[主人公]]"], "ally": ["[[主人公]]"], "family": ["[[盗賊]]"]}, "body": "# 幼なじみ\n\n主人公と孤児院で共に育った幼なじみ。明るく世話焼きな性格で、王国の宿屋で働きながら主人公の帰りを待っている。戦う力はないが、街の人々からの信頼が厚い。\n\n> 「あんたが無事でいること、それだけで十分だからね」"}, "王女": {"file": "character/王女.md", "props": {"type": "character", "title": "王女", "aliases": ["Princess"], "tags": ["[[human]]", "[[royalty]]"], "icon_size": "55x55", "icon": "_icons/node_王女.png", "affiliation": "[[王国]]", "likes": ["[[主人公]]"], "ally": ["[[騎士団長]]"], "mentor": ["[[予言者]]"]}, "body": "# 王女\n\n王国の第一王女。表向きは清楚で可憐な姫君だが、内に強い政治的意思を秘めている。和平派の急先鋒であり、人間と魔族の共存を本気で目指している。主人公に密かな想いを寄せている。\n\n> 「血を流さずに勝ち取る和平こそ、真の強さの証です」"}, "盗賊": {"file": "character/盗賊.md", "props": {"type": "character", "icon_size": "45x50", "icon": "_icons/node_盗賊.png", "title": "盗賊", "aliases": ["Thief"], "tags": ["[[human]]", "[[rogue]]"], "family": ["[[幼なじみ]]"], "ally": ["[[主人公]]"], "rival": ["[[四天王A]]"]}, "body": "# 盗賊\n\n王国の裏社会に生きる義賊。幼なじみの実の兄だが、幼い頃に生き別れとなり盗賊団に拾われた。主人公とは孤児院時代からの腐れ縁で、表沙汰にできない情報を流している。\n\n> 「義理なんて重たいだけだ。だが、てめぇにだけは借りがある」"}, "賢者": {"file": "character/賢者.md", "props": {"type": "character", "title": "賢者", "aliases": ["Sage"], "tags": ["[[wise]]", "[[human]]", "[[mage]]"], "icon_size": "60x60", "icon": "_icons/node_賢者.png", "affiliation": "[[王国]]", "ally": ["[[主人公]]"], "mentor": ["[[主人公]]"], "likes": ["[[予言者]]"], "rival": ["[[元魔王]]"], "related": ["[[賢者との出会い]]", "[[最終決戦]]"]}, "body": "# 賢者\n\n王国の宮廷魔術師であり、百年の時を生きる大賢者。表向きは飄々としているが、世界の均衡を守るために暗躍している。\n\n> 「知識は力だが、知恵はそれをどう使うかだ」"}, "騎士団長": {"file": "character/騎士団長.md", "props": {"type": "character", "title": "騎士団長", "aliases": ["Knight Captain"], "tags": ["[[human]]", "[[knight]]", "[[leader]]"], "icon_size": "60x50", "icon": "_icons/node_騎士団長.png", "affiliation": "[[王国]]", "ally": ["[[主人公]]"], "mentor": ["[[主人公]]"], "rival": ["[[魔王]]"], "likes": ["[[王女]]"]}, "body": "# 騎士団長\n\n王国騎士団を率いる歴戦の戦士。幼い主人公を拾い育てた義理の父親的存在。厳格だが部下思いで、騎士団からの信頼は厚い。\n\n> 「剣を振るうのは最後の手段だ。だが抜いたからには勝て」"}, "魔王": {"file": "character/魔王.md", "props": {"type": "character", "title": "魔王", "aliases": ["Demon King"], "tags": ["[[villain]]", "[[demon]]", "[[ruler]]"], "icon_size": "80x70", "icon": "_icons/node_魔王.png", "affiliation": "[[魔族連合]]", "ally": ["[[四天王B]]"], "rival": ["[[騎士団長]]"], "family": ["[[元魔王]]"], "dislikes": ["[[四天王A]]"], "related": ["[[大戦争勃発]]", "[[最終決戦]]", "[[平和条約締結]]"]}, "body": "# 魔王\n\n魔族を統べる絶対的な支配者。かつては人間と共存を望んでいたが、人間側の裏切りにより現在の強硬路線へと転じた。その真意を知る者は少ない。\n\n> 「平和とは、強者が弱者の犠牲の上に築く虚構に過ぎぬ」"}, "era_080_120": {"file": "era/era_080_120.md", "props": {"type": "era", "era": "era_080_120", "year": 80, "title": "80-120年代"}, "body": "# 80-120年代\n\n王国の黄金期。建国から繁栄へ"}, "era_120_150": {"file": "era/era_120_150.md", "props": {"type": "era", "era": "era_120_150", "year": 120, "title": "120-150年代"}, "body": "# 120-150年代\n\n魔族侵攻と大戦争の時代"}, "era_150_180": {"file": "era/era_150_180.md", "props": {"type": "era", "era": "era_150_180", "year": 150, "title": "150-170年代"}, "body": "# 150-170年代\n\n和平と復興の時代"}, "勇者伝説編纂": {"file": "event/勇者伝説編纂.md", "props": {"type": "event", "title": "勇者伝説編纂", "year": 178, "era": "era_150_180", "tags": ["[[history]]", "[[legend]]"], "related": ["[[主人公]]", "[[賢者]]"]}, "body": "# 勇者伝説編纂\n\n**年**: 王国暦 178年"}, "和平交渉開始": {"file": "event/和平交渉開始.md", "props": {"type": "event", "title": "和平交渉開始", "year": 162, "era": "era_150_180", "tags": ["[[diplomacy]]", "[[peace]]"], "related": ["[[王女]]", "[[魔王]]"]}, "body": "# 和平交渉開始\n\n**年**: 王国暦 162年"}, "地下迷宮出現": {"file": "event/地下迷宮出現.md", "props": {"type": "event", "title": "地下迷宮出現", "year": 145, "era": "era_120_150", "tags": ["[[dungeon]]", "[[discovery]]"], "related": ["[[盗賊]]"]}, "body": "# 地下迷宮出現\n\n**年**: 王国暦 145年"}, "大戦争勃発": {"file": "event/大戦争勃発.md", "props": {"type": "event", "title": "大戦争勃発", "year": 140, "era": "era_120_150", "related": ["[[魔王]]", "[[最終決戦]]"]}, "body": "# 大戦争勃発\n\n魔族連合が人類領への侵攻を開始し、百年規模の大戦争が始まる。王国は全戦力を結集して防衛線を張るが、魔王の圧倒的な力の前に劣勢を強いられる。\n\n**年**: 王国暦 60年\n**発端**: 国境の砦への魔族襲撃\n**影響**: 全人類国家に戦時体制が敷かれる"}, "平和条約締結": {"file": "event/平和条約締結.md", "props": {"type": "event", "title": "平和条約締結", "year": 160, "era": "era_150_180", "related": ["[[最終決戦]]", "[[魔王]]", "[[王国]]", "[[魔族連合]]"]}, "body": "# 平和条約締結\n\n最終決戦から十年後、主人公の仲介により王国と魔族連合の間に歴史的和平条約が締結される。両種族の共存を目指す新時代の幕開けとなった。\n\n**年**: 王国暦 80年\n**場所**: 旧・魔王城（和平記念広場）\n**意義**: 千年にわたる人魔戦争の終結"}, "復興大祭": {"file": "event/復興大祭.md", "props": {"type": "event", "title": "復興大祭", "year": 170, "era": "era_150_180", "tags": ["[[festival]]", "[[rebuilding]]"], "related": ["[[王国]]", "[[魔族連合]]"]}, "body": "# 復興大祭\n\n**年**: 王国暦 170年"}, "新魔王戴冠": {"file": "event/新魔王戴冠.md", "props": {"type": "event", "title": "新魔王戴冠", "year": 155, "era": "era_150_180", "tags": ["[[coronation]]", "[[succession]]"], "related": ["[[元魔王]]"]}, "body": "# 新魔王戴冠\n\n**年**: 王国暦 155年"}, "王国建国": {"file": "event/王国建国.md", "props": {"type": "event", "title": "王国建国", "year": 80, "era": "era_080_120", "location": "[[王国]]", "related": ["[[冒険の始まり]]"]}, "body": "# 王国建国\n\n初代国王アルトリウス一世が周辺諸侯を統一し、王国を建国。騎士団と宮廷魔術師団が創設され、現在に至る王国の礎が築かれた。\n\n**年**: 王国暦 元年\n**場所**: 王都セントリア\n**意義**: 人間勢力の統一"}, "王都防衛戦": {"file": "event/王都防衛戦.md", "props": {"type": "event", "title": "王都防衛戦", "year": 120, "era": "era_080_120", "tags": ["[[battle]]", "[[defense]]"], "related": ["[[王国]]", "[[騎士団長]]"]}, "body": "# 王都防衛戦\n\n**年**: 王国暦 120年"}, "竜の目覚め": {"file": "event/竜の目覚め.md", "props": {"type": "event", "title": "竜の目覚め", "year": 100, "era": "era_080_120", "tags": ["[[dragon]]", "[[omen]]"], "related": ["[[賢者]]"]}, "body": "# 竜の目覚め\n\n**年**: 王国暦 100年"}, "賢者の塔完成": {"file": "event/賢者の塔完成.md", "props": {"type": "event", "title": "賢者の塔完成", "year": 127, "era": "era_120_150", "tags": ["[[construction]]", "[[magic]]"], "related": ["[[賢者]]"]}, "body": "# 賢者の塔完成\n\n**年**: 王国暦 127年"}, "魔族侵攻宣言": {"file": "event/魔族侵攻宣言.md", "props": {"type": "event", "title": "魔族侵攻宣言", "year": 130, "era": "era_120_150", "tags": ["[[war]]", "[[declaration]]"], "related": ["[[魔王]]", "[[魔族連合]]"]}, "body": "# 魔族侵攻宣言\n\n**年**: 王国暦 130年"}, "魔法学園創設": {"file": "event/魔法学園創設.md", "props": {"type": "event", "title": "魔法学園創設", "year": 90, "era": "era_080_120", "tags": ["[[academy]]", "[[foundation]]"], "related": ["[[王国]]"]}, "body": "# 魔法学園創設\n\n**年**: 王国暦 90年"}, "王国": {"file": "organization/王国.md", "props": {"type": "organization", "title": "王国", "aliases": ["Kingdom"]}, "body": "# 王国\n\n人間族最大の国家。騎士団と宮廷魔術師団を有し、法と秩序による統治を理念とする。首都はセントリア。\n\n**関連組織**:\n- \"[[王国]]の騎士団\"\n- \"[[王国]]の宮廷魔術師団\""}, "魔族連合": {"file": "organization/魔族連合.md", "props": {"type": "organization", "title": "魔族連合", "aliases": ["Demon Alliance"]}, "body": "# 魔族連合\n\n魔王を頂点とする魔族の統合勢力。多種族の魔族から構成され、実力主義の階級社会を形成している。\n\n**関連組織**:\n- \"[[魔族連合]]の四天王\"\n- \"[[魔族連合]]の魔導部隊\""}, "冒険の始まり": {"file": "scenario/冒険の始まり.md", "props": {"type": "scenario", "title": "冒険の始まり", "year": 100, "era": "era_080_120", "tags": ["beginning", "quest"], "characters": ["[[主人公]]"], "related": ["[[王国建国]]", "[[王国]]"]}, "body": "# 冒険の始まり\n\n主人公が騎士見習いとして最初の任務を受ける。街道に出没する魔獣の討伐という単純な任務だったが、道中で謎の古代遺跡を発見する。\n\n**参加者**: 主人公\n**舞台**: 王国領 辺境街道\n**結果**: 魔獣討伐成功、古代遺跡の存在が王国上層部に報告される"}, "四天王会戦": {"file": "scenario/四天王会戦.md", "props": {"type": "scenario", "title": "四天王会戦", "year": 142, "era": "era_120_150", "tags": ["[[battle]]", "[[climax]]"], "characters": ["[[主人公]]", "[[四天王A]]", "[[四天王B]]"], "related": ["[[王国]]"]}, "body": "# 四天王会戦\n\n**年**: 王国暦 142年\n**参加者**: 主人公, 四天王A, 四天王B"}, "塔の試練": {"file": "scenario/塔の試練.md", "props": {"type": "scenario", "title": "塔の試練", "year": 125, "era": "era_120_150", "tags": ["[[trial]]", "[[growth]]"], "characters": ["[[主人公]]", "[[予言者]]"], "related": ["[[王国]]"]}, "body": "# 塔の試練\n\n**年**: 王国暦 125年\n**参加者**: 主人公, 予言者"}, "後日譚": {"file": "scenario/後日譚.md", "props": {"type": "scenario", "title": "後日譚", "year": 175, "era": "era_150_180", "tags": ["[[epilogue]]", "[[peace]]"], "characters": ["[[王女]]", "[[騎士団長]]"], "related": ["[[王国]]"]}, "body": "# 後日譚\n\n**年**: 王国暦 175年\n**参加者**: 王女, 騎士団長"}, "新たな旅立ち": {"file": "scenario/新たな旅立ち.md", "props": {"type": "scenario", "title": "新たな旅立ち", "year": 165, "era": "era_150_180", "tags": ["[[epilogue]]", "[[journey]]"], "characters": ["[[主人公]]", "[[幼なじみ]]"], "related": ["[[王国]]"]}, "body": "# 新たな旅立ち\n\n**年**: 王国暦 165年\n**参加者**: 主人公, 幼なじみ"}, "最後の試練": {"file": "scenario/最後の試練.md", "props": {"type": "scenario", "title": "最後の試練", "year": 158, "era": "era_150_180", "tags": ["[[trial]]", "[[final]]"], "characters": ["[[主人公]]", "[[元魔王]]"], "related": ["[[王国]]"]}, "body": "# 最後の試練\n\n**年**: 王国暦 158年\n**参加者**: 主人公, 元魔王"}, "最終決戦": {"file": "scenario/最終決戦.md", "props": {"type": "scenario", "title": "最終決戦", "year": 150, "era": "era_120_150", "tags": ["climax", "battle"], "characters": ["[[主人公]]", "[[賢者]]", "[[魔王]]"], "related": ["[[大戦争勃発]]", "[[王国]]", "[[魔族連合]]"]}, "body": "# 最終決戦\n\n魔王城の最深部で繰り広げられる決戦。賢者の犠牲によって主人公は魔王の真意を知り、戦いの果てに対話による和平への道を選ぶ。\n\n**参加者**: 主人公, 賢者, 魔王\n**舞台**: 魔王城 最深部\n**結果**: 賢者の死、魔王との和平合意"}, "王都魔法大会": {"file": "scenario/王都魔法大会.md", "props": {"type": "scenario", "title": "王都魔法大会", "year": 115, "era": "era_080_120", "tags": ["[[tournament]]", "[[festival]]"], "characters": ["[[主人公]]", "[[賢者]]", "[[王女]]"], "related": ["[[王国]]"]}, "body": "# 王都魔法大会\n\n**年**: 王国暦 115年\n**参加者**: 主人公, 賢者, 王女"}, "秘宝争奪戦": {"file": "scenario/秘宝争奪戦.md", "props": {"type": "scenario", "title": "秘宝争奪戦", "year": 148, "era": "era_120_150", "tags": ["[[race]]", "[[artifact]]"], "characters": ["[[主人公]]", "[[盗賊]]", "[[四天王A]]"], "related": ["[[王国]]"]}, "body": "# 秘宝争奪戦\n\n**年**: 王国暦 148年\n**参加者**: 主人公, 盗賊, 四天王A"}, "竜との邂逅": {"file": "scenario/竜との邂逅.md", "props": {"type": "scenario", "title": "竜との邂逅", "year": 108, "era": "era_080_120", "tags": ["[[encounter]]", "[[dragon]]"], "characters": ["[[主人公]]", "[[賢者]]"], "related": ["[[王国]]"]}, "body": "# 竜との邂逅\n\n**年**: 王国暦 108年\n**参加者**: 主人公, 賢者"}, "賢者との出会い": {"file": "scenario/賢者との出会い.md", "props": {"type": "scenario", "title": "賢者との出会い", "year": 110, "era": "era_120_150", "tags": ["encounter", "training"], "characters": ["[[主人公]]", "[[賢者]]"], "related": ["[[王国]]"]}, "body": "# 賢者との出会い\n\n遺跡調査の命を受けた主人公は、宮廷魔術師である賢者と同行することになる。旅の途中で魔族の襲撃を受け、主人公は賢者の圧倒的な魔術を目の当たりにする。\n\n**参加者**: 主人公, 賢者\n**舞台**: 古代遺跡〜魔の森\n**結果**: 主人公が賢者の弟子となる"}, "魔族領潜入": {"file": "scenario/魔族領潜入.md", "props": {"type": "scenario", "title": "魔族領潜入", "year": 135, "era": "era_120_150", "tags": ["[[infiltration]]", "[[danger]]"], "characters": ["[[主人公]]", "[[盗賊]]"], "related": ["[[王国]]"]}, "body": "# 魔族領潜入\n\n**年**: 王国暦 135年\n**参加者**: 主人公, 盗賊"}, "魔法学園編入": {"file": "scenario/魔法学園編入.md", "props": {"type": "scenario", "title": "魔法学園編入", "year": 105, "era": "era_080_120", "tags": ["[[training]]", "[[academy]]"], "characters": ["[[主人公]]", "[[賢者]]"], "related": ["[[王国]]"]}, "body": "# 魔法学園編入\n\n**年**: 王国暦 105年\n**参加者**: 主人公, 賢者"}, "ancient": {"file": "tag/ancient.md", "props": {"type": "tag", "title": "ancient"}, "body": "# ancient"}, "civilian": {"file": "tag/civilian.md", "props": {"type": "tag", "title": "civilian"}, "body": "# civilian"}, "demon": {"file": "tag/demon.md", "props": {"type": "tag", "title": "demon"}, "body": "# demon"}, "general": {"file": "tag/general.md", "props": {"type": "tag", "title": "general"}, "body": "# general"}, "human": {"file": "tag/human.md", "props": {"type": "tag", "title": "human"}, "body": "# human"}, "knight": {"file": "tag/knight.md", "props": {"type": "tag", "title": "knight"}, "body": "# knight"}, "leader": {"file": "tag/leader.md", "props": {"type": "tag", "title": "leader"}, "body": "# leader"}, "mage": {"file": "tag/mage.md", "props": {"type": "tag", "title": "mage"}, "body": "# mage"}, "main": {"file": "tag/main.md", "props": {"type": "tag", "title": "main"}, "body": "# main"}, "mystic": {"file": "tag/mystic.md", "props": {"type": "tag", "title": "mystic"}, "body": "# mystic"}, "rogue": {"file": "tag/rogue.md", "props": {"type": "tag", "title": "rogue"}, "body": "# rogue"}, "royalty": {"file": "tag/royalty.md", "props": {"type": "tag", "title": "royalty"}, "body": "# royalty"}, "ruler": {"file": "tag/ruler.md", "props": {"type": "tag", "title": "ruler"}, "body": "# ruler"}, "villain": {"file": "tag/villain.md", "props": {"type": "tag", "title": "villain"}, "body": "# villain"}, "wise": {"file": "tag/wise.md", "props": {"type": "tag", "title": "wise"}, "body": "# wise"}}, "icons": {"node_主人公.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABGElEQVR4nO1ZuxHCMAyV39EyAGVqZmIBBmIBZqJWyQAMAD13iS1bspVYr03uffTk3CUhCgQCgT0hWZAuj883dw/fz6raqad5y1BpZADNQPASopUv9Ra0agceQ9TowGOIGj14DSHVbTrsngDPbUj04T1EqY85Vmtx0kaJny6NXC83cw30CmEdBntZq5wv00b+W7BsBVbEa6atwoAOAliQ5qZu0Qq0CUtNaocBHQTQJJNOWbMVaBHVmtIKg17fnbTAK75UGmmdqkYrp2YGInq9nzQa2Lrobb14w888j1920gpnfBQ1MjoMF+jPs1qjW+FCXVEjvcOwQE+8Wr3CsFCnyZTFez1XDqrpsGu3ww188Q/R21/dQCAwCX4/42lawOIXKgAAAABJRU5ErkJggg==", "node_予言者.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABLUlEQVR4nO2ZvRHCMAyFY10KGobIUCzBDqmyA0swlIagoYOKhsuPZP1YOeuVXM56H0+yMRmGVCqVOpOKxaLT4/U5egbvV9XaxdO8JVRpCaAJBFEgpOsV74JW6UBEiJo6EBGiph5EheDWFQ17JEHkNDj1IToE1YdLa82Xp3kNsE5DE2La8eM27NapwNlb6hBE2lZrEBpg04avUbwy0+Das8v7FqO1FoERDQjVGakxpAWhPuwcY5oQJrsWxaA2RH8/GrsEmQlbscVBOe7dmaWH4v8saADgxl1e5UCkDvPvc4tEyhnuIpREwPNvTalwx08/uxYGSQUPfJASaQ2DhPr9tFbrVJBYl5WINwwy6rFbywsGmXVEpiwOTKz8okTDrp0OCtbLd4jR3uqmUqlO9AWXU4b2Q0dX1QAAAABJRU5ErkJggg==", "node_元魔王.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABLklEQVR4nO2ZzQ3CMAyFG6tXhugoDIHUGRiIGSoxBKN4CAaAExfUHzv+iav4HVEVv49nJ4QOQyqVSp1JxWLR6fH+HD2D94tq7eJp3hKqtATQBIIoENL1indBq3QgIkRNHYgIUVMPokJw64qGPZIgchqc+hAdgurDpbXm1828BlinoQkx7fhxG3brVODsLXUIIm2rNQgNsGnD1yhemWlw7dnl+ozRWovAiAaE6ozUGNKCUB92jjFNCJNdi2JQG6K/H41dgsyErdjioBz37szSQ/F/FjQAcOMur3IgUof597lFIuUMdxFKIuD5t6ZUuOOnn10Lg6SCBz5IibSGQUL9flqrdSpIrMtKxBsGGfXYreUFg8w6IlMWByZWflGiYddOBwXr5TvEaG91U6lUJ/oCTuGG9q3GCu0AAAAASUVORK5CYII=", "node_四天王A.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABF0lEQVR4nO1Z2w3CMAx0TvwyRFmAEdiHgdiHEVgAD8EA8I/UJk7sxG18v63u4XMqtSUKBAKBPSFZkC6Pzzd3D9/Pqtqpp3nLUGlkAM1A8BKilS/1FrRqBx5D1OjAY4gaPXgNIdVtOuyeAM9tSPThPUSpjzlWa3HSRomfLo28n1dzDfQKYR0Ge1mrnC/TRv5bsGwFVsRrpq3CgA4CWJDmpm7RCrQJS01qhwEdBNAkk05ZsxVoEdWa0gqDXt+dtMArvlQaaZ2qRiunZgYiutxeNBrYuuhtvXjDzzyPX3bSCmd8FDUyOgwX6M+zWqNb4UJdUSO9w7BAT7xavcKwUKfJlMV7PVcOqumwa7fDDXzxD9HbX91AIDAJfqFefCrVH2eFAAAAAElFTkSuQmCC", "node_四天王B.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAA80lEQVR4nO2ZsRXCMAxE5Xu0zMBLw3AMxHA095iBAcgEEDuSHVnRrxOdLicVjkWSJElmovQoujw/361n+LiaapeRzfc0VY40YGkIXkxo65XRgr3SgUcTe3Tg0cQePXg10aqrWnZPwHMaLfrwbqK2j4sYwPtbXWN53VTvY4Y0avo517JPbWRxNlZbfcVPZDYgQYAEARIESBAgQYBEN0Lj/05W8Edf8RMJZYTOxot/+jE5WGkPRUNGi05S4UYfVTtytBlW6J9j2T2kwkrdpkRGm2GDXvNojTLDRh1VUz3O9dz5oVTLbp0OFfXyDtHbrW6SJCdhBRkVYGbyQxb8AAAAAElFTkSuQmCC", "node_幼なじみ.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABPUlEQVR4nO2ZsRXCMAxEbfUMkS2YiYqSESipmIktNAQDhCpN3nNsWSdbvOjqoLufs/OCk1IoFAr9k7LF0OX9XWvX8O0C9c4jw1tC5ZkASCDyAqGdl0cbWrVDHiF6fMgjRI8feYWQ+qo2uyeR5zYk/uQdojXHkKX1ed7NPci6jQ0CAbMc5DFtZB/eshmyGlwKbQVDFsuqFlYDsxRywRtpDYluhpDDpOGQMIQa1BsKBUOIIdowCBhST0gpXR+vqb+HLq3eMAgI+GaXhkJBmDx+W8MhIQ5BNCcatZAaCC7kMntFKYVFNzHkpXEf2gqiCoI4AdzCIyD4IM+QP1aWTTSDoA+be8WVHE2NzIbhBv9zHQfNbIUbfUWNjIZhgZ94aY2CYaGPKpTF4R133ijVZke3w4p58Q3R21fdUCh0Ev0ACvKPSGJlp14AAAAASUVORK5CYII=", "node_王女.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABNUlEQVR4nO2ZOxKDMAxEbfUcghwvB8rxokPQJ6lomPFH1spWBm1NtPtYmyEmpVAoFPonZYuh++v4tq7h5wb1zjPDW0LllQBIIPICoZ2XZxtatUMeIUZ8yCPEiB95hZD6qja7J5HnNiT+5B2iN8eUpfWmzdyDrNs4IRAweyWPaSPX8JbNkNXgUmgrGLJYVq2wGpi9kAveSG9IdDOEHCYNh4Qh1KDRUCgYQgzRhkHAkHpCSunxOZb+Hrq0RsMgIOCbXRoKBWHy+O0Nh4SogmhONFohNRBcyGX2ilIKi25iykvjNbQVRBMEcQJ4hkdAcCXPlD9Wlk10g6APm0fFjRxdjayG4Q7/ex0HrWyFO31FjcyGYYGfeGnNgmGhjyqUxeEdD94o1WZHt8OKefEN0dtX3VAodBP9AC+Vj0jNnGijAAAAAElFTkSuQmCC", "node_盗賊.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABGUlEQVR4nO1ZuxHCMAyV39EyRGZhGxoGoGYAGrZhFg3BANBzl9iyJVuJ9drk3kdPzl0SokAgENgTkgXp8vp8c/fw9ayqnXqatwyVRgbQDAQvIVr5Um9Bq3bgMUSNDjyGqNGD1xBS3abD7gnw3IZEH95DlPqYY7UWJ22U+OnSyP35NtdArxDWYbCXtcr5Mm3kvwXLVmBFvGbaKgzoIIAFaW7qFq1Am7DUpHYY0EEATTLplDVbgRZRrSmtMOj13UkLvOJLpZHWqWq0cmpmIKLH7UKjga2L3taLN/zM8/hlJ61wxkdRI6PDcIH+PKs1uhUu1BU10jsMC/TEq9UrDAt1mkxZvNdz5aCaDrt2O9zAF/8Qvf3VDQQCk+AHfIN72pUj+EUAAAAASUVORK5CYII=", "node_賢者.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABLElEQVR4nO2ZyxHCMAxEY02uFJFUQwM0QUE0QQNUExVBAXDiwuQjWR8rY+2RyVj7WMnGZBhSqVTqTCoWi06P9+foGbxfVGsXT/OWUKUlgCYQRIGQrle8C1qlAxEhaupARIiaehAVgltXNOyRBJHT4NSH6BBUHy6ttdyu5jXAOg1NiGnHj9uwW6cCZ2+pQxBpW61BaIBNG75G8cpMg2vPzs9XjNaaBUY0IFRnpMaQFoT6sHOMaUKY7FoUg9oQ/f1o7BJkIWzFFgfluHdnlh6K/7OgAYAbd3mVA5E6zL/PLRIpZ7iLUBIBz781pcIdP/3sWhgkFTzwQUqkNQwS6vfTWq1TQWJdViLeMMiox24tLxhk1hGZsjgwsfKLEg27djooWC/fIUZ7q5tKpTrRF7y9hvZlgCKoAAAAAElFTkSuQmCC", "node_騎士団長.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAA9ElEQVR4nO2ZsRXCMAxE5Xu0dCwALZsxEJvRcgvQMQBMALEj2ZEV/TrR6XJS4VgkSZJkJkqPouf7+7P0DG9HU+0ysvmepsqWBiwNwYsJbb0yWrBXOvBoYo0OPJpYowevJlp1VcvuCXhOo0Uf3k3U9nEQA57Xk7rG5fFSvY8Z0qjpZ1/LPrWRs7OxWuorfiKzAQkCJAiQIECCAAkCJLoRGv93soI/+oqfSCgjdDZe/NOPycFKeygaMlp0kgoX+qjaka3NsEJ/H8vuIRVW6jYlMtoMG/SaR2uUGTbqqJrqca7nyg+lWnbrdKiol3eI3m51kyTZCV+JhmEvIItsQAAAAABJRU5ErkJggg==", "node_魔王.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABGklEQVR4nO1Z2w3CMAx0TvwyRAdgCkZgCwZiC0ZgCgbwEAwA/0ht4sRO3Mb32+oePqdSW6JAIBDYE5IF6fL4fHP38P2sqp16mrcMlUYG0AwELyFa+VJvQat24DFEjQ48hqjRg9cQUt2mw+4J8NyGRB/eQ5T6mGO1FidtlPjp0sj7eTXXQK8Q1mGwl7XK+TJt5L8Fy1ZgRbxm2ioM6CCABWlu6hatQJuw1KR2GNBBAE0y6ZQ1W4EWUa0prTDo9d1JC7ziS6WR1qlqtHJqZiCiy+1Fo4Gti97Wizf8zPP4ZSetcMZHUSOjw3CB/jyrNboVLtQVNdI7DAv0xKvVKwwLdZpMWbzXc+Wgmg67djvcwBf/EL391Q0EApPgBzxMe3ouOJOwAAAAAElFTkSuQmCC", "type_character.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABEklEQVR4nO1ZSQ7CMAx0RhzhEeV38CD4HX4E3OGO1CZO7MRtPNdWs3icSm2JAoFAYE9IFqTL4/3N3cP3i6p26mneMlQaGUAzELyEaOVLvQWt2oHHEDU68BiiRg9eQ0h1mw67J8BzGxJ9eA9R6mOO1VqctFHip0sjr9vZXAO9QliHwV7WKufLtJH/FixbgRXxmmmrMKCDABakualbtAJtwlKT2mFABwE0yaRT1mwFWkS1prTCoNd3Jy3wii+VRlqnqtHKqZmBiK7PD40Gti56Wy/e8DPP45edtMIZH0WNjA7DBfrzrNboVrhQV9RI7zAs0BOvVq8wLNRpMmXxXs+Vg2o67NrtcANf/EP09lc3EAhMgh/xtXR6zK+IJwAAAABJRU5ErkJggg==", "type_default.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABFklEQVR4nO2ZURKDMAhEyU4vKgeLR7UHaK0hWSKNvE9Hs6yQCahIkiTJP1E8Fq21Hlf3qCpVu8wM3tNUudMA0xCimBhdr8wW9MoOIpro0UFEEz16iGrCqju02SOByNmw6CO6idY4XuLItm0f1/Z9d9EqHtn4ZoBlSE/OF/pmbzFhua8VqhFrcEwzYJVVb1DW5+pJXM86R7xLhFFikEWALAJkESCLAMYio20Ho22BLAJYM3PvW7U+pzN6LWtQzE4YQqY1OHY7XzwHK/Y8oj/K3XWw8hqiukqL/bG5F72Io2mP3G1GG/TXP0eiZEUbdU0ZmW1GDXrm0pplRo06Q0F5fLzTzhc1tNnZ2dGB9fIfYrS/ukmSPIQ3Iah/J5TE3aEAAAAASUVORK5CYII=", "type_event.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABGElEQVR4nO2YTQ4CIQxG6xfPoDs9nB5LD6e7egkNO0OG4a8dGOhbGuj064OMSmQYhmGMCl9uX+1nYKsQ2mFAgwDN4r4FTSugQYBW4dD0tayABgEaRWNT17AC6YKpTUqHAQ0CJIuFpnx6PbLWd2kkFEIaSBWKTVfbClocqdT9XRytpRBbHbMi3DRrcTVqrYAE+FzvTfaKBfmfYklD/h6usCJ6R3LCSJmoDhKaXkqDa2u40EpREO2frVxQf97vWlz4Bs9dw5lWjqSIfxc0X4jIWZw6JRdg6UKHPq99nuNAHf3JFuL8fkb7nOuyc0Mbqc+fxwg3tpHaxxxGuBMbKf1gLyFifY19tLhTG2v9jWuEO7extz4NwzBokR/3MMn2r6LZNAAAAABJRU5ErkJggg==", "type_organization.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAA7ElEQVR4nO2ZUQ6DMAxDU2vHY9I4KUjz/bYTbLQkLWnI+4Y4xslHqUiSJMlMlB5Fl+31OXqG626qXUY239NUudKApSF4MaGtV0YL9koHHk2c0YFHE2f04NVEq65q2T0Bz2m06MO7ido+HmLA+7Wpazz3VfU+Zkijpp97LfvURhZnY3XUV/xEZgMSBEgQIEGABAESBEh0IzT+72QFf/QVP5FQRuhsvPinH5ODlfZQNGS06CQVHvRRtSNXm2GF/j2W3UMqrNRtSmS0GTboNY/WKDNs1FE11eNcz5MfSrXs1ulQUS/vEL3d6iZJchO+IpVgmrlG5IwAAAAASUVORK5CYII=", "type_scenario.png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAA20lEQVR4nO2XWwqDQBAE27qsOVJy2g35CAHB+EiPmmbrU3CsglV3pU6n841heqHd1fQnDLePPwoBhYBCQCGgEFAIKAQUAgoBhYBCQCFwyFPGFhAytkNiKJ0+lS+MoWzynHRRDCVTl2QLYrBPXCtpjsE6baucMQbbpL1SphgsU36VMcQgB4/h3PvlXFp7ZQwR/pd9q5Qpoubzu1bOGFH3Q1ySNEfUblHmZAsi6jeNU+miiGO28W/5wojjDlbFES/6UfdqoBBQCCgEFAIKAYWAQkAhoBA4W6DT0bV5Am5YJVbu3pFGAAAAAElFTkSuQmCC"}, "style": {}});
 const ALL_NODES = DATA.canvas.nodes || [];
 const ALL_EDGES = DATA.canvas.edges || [];
@@ -73,431 +56,218 @@ const VAULT = DATA.vault || {};
 const ICONS = DATA.icons || {};
 const STYLE = DATA.style || {};
 
-// Separate file nodes from icon nodes
-const FILE_NODES = ALL_NODES.filter(n => n.type === 'file' && !n.id.endsWith('_icon'));
-const ICON_NODES = ALL_NODES.filter(n => n.type === 'file' && n.id.endsWith('_icon'));
+const FILE_NODES = ALL_NODES.filter(n => n.id.indexOf('_icon') === -1);
+const FILE_BY_ID = {}; FILE_NODES.forEach(n => FILE_BY_ID[n.id] = n);
 
-// Build maps
-const FILE_BY_ID = {};
-FILE_NODES.forEach(n => FILE_BY_ID[n.id] = n);
-const ICON_BY_ID = {};
-ICON_NODES.forEach(n => ICON_BY_ID[n.id] = n);
+function nodeType(n) { const f=n.file||''; const p=f.split('/')[0]; return (p&&p!==f)?p:((VAULT[f.replace('.md','').split('/').pop()]||{}).props||{}).type||'default'; }
+function nodeStem(n) { return (n.file||'').replace('.md','').split('/').pop(); }
 
-// Derive node type from file path
-function nodeType(file) {
-  const folder = (file || '').split('/')[0];
-  if (folder && folder !== file) return folder;
-  const stem = (file || '').replace('.md','').split('/').pop();
-  const v = VAULT[stem];
-  return (v && v.props && v.props.type) || 'default';
-}
-
-// ══════════════════════════════════════════════════════════
-// FILTER ENGINE (JS port of filter_sort.py)
-// ══════════════════════════════════════════════════════════
-
-function matchCondition(nodeData, key, expected) {
-  /* $or: expected is array of {key:val} objects */
-  if (key === '$or' && Array.isArray(expected)) {
-    return expected.some(cond =>
-      Object.entries(cond).every(([k, v]) => matchCondition(nodeData, k, v))
-    );
-  }
-  const stem = (nodeData.file || '').replace('.md','').split('/').pop();
-  const v = VAULT[stem];
-  if (!v) return false;
-  const actual = (v.props || {})[key];
-  if (actual === undefined || actual === null) return false;
-
-  if (Array.isArray(actual)) {
-    if (actual.includes(expected)) return true;
-    return actual.includes('[[' + expected + ']]');
-  }
-  if (Array.isArray(expected)) {
-    if (expected.includes(actual)) return true;
-    const stripped = actual.startsWith('[[') && actual.endsWith(']]') ? actual.slice(2,-2) : null;
-    return stripped !== null && expected.includes(stripped);
-  }
+// ═══════════════ FILTER ENGINE ═══════════════
+function matchCond(nd, key, expected) {
+  if (key === '$or' && Array.isArray(expected)) return expected.some(c => Object.entries(c).every(([k,v]) => matchCond(nd,k,v)));
+  const v = VAULT[nodeStem(nd)]; if (!v) return false;
+  const actual = (v.props||{})[key]; if (actual === undefined || actual === null) return false;
+  if (Array.isArray(actual)) { if (actual.includes(expected)) return true; return actual.includes('[['+expected+']]'); }
+  if (Array.isArray(expected)) { if (expected.includes(actual)) return true; const s = actual.startsWith('[[')&&actual.endsWith(']]')?actual.slice(2,-2):null; return !!s&&expected.includes(s); }
   if (actual === expected) return true;
-  if (typeof actual === 'string' && actual.startsWith('[[') && actual.endsWith(']]')) {
-    return actual.slice(2,-2) === expected;
-  }
-  if (typeof expected === 'string' && expected.startsWith('[[') && expected.endsWith(']]')) {
-    return actual === expected.slice(2,-2);
-  }
+  if (typeof actual==='string' && actual.startsWith('[[') && actual.endsWith(']]')) return actual.slice(2,-2)===expected;
+  if (typeof expected==='string' && expected.startsWith('[[') && expected.endsWith(']]')) return actual===expected.slice(2,-2);
   return false;
 }
-
-function cloneNode(n) { const stem=(n.file||'').replace('.md','').split('/').pop(); return {...n, _stem:stem}; }
-
-function applyFilter(nodes, conditions) {
-  if (!conditions || !Object.keys(conditions).length) return nodes;
-  return nodes.filter(n => Object.entries(conditions).every(([k,v]) => matchCondition(n,k,v)));
-}
-
-function applyExclude(nodes, conditions) {
-  if (!conditions || !Object.keys(conditions).length) return nodes;
-  return nodes.filter(n => !Object.entries(conditions).every(([k,v]) => matchCondition(n,k,v)));
-}
-
-function applySort(nodes, sortKey, desc) {
-  if (!sortKey) return nodes;
-  return [...nodes].sort((a,b) => {
-    const sa = VAULT[a._stem]?.props?.[sortKey] ?? '';
-    const sb = VAULT[b._stem]?.props?.[sortKey] ?? '';
-    const va = sa === '' || sa === null ? (desc ? '' : '\uffff') : sa;
-    const vb = sb === '' || sb === null ? (desc ? '' : '\uffff') : sb;
-    if (va < vb) return desc ? 1 : -1;
-    if (va > vb) return desc ? -1 : 1;
-    return 0;
-  });
-}
-
-function pruneOrphans(nodes, edges, pruneFlag) {
-  if (!pruneFlag) return nodes;
-  const connected = new Set();
-  edges.forEach(e => { connected.add(e.fromNode); connected.add(e.toNode); });
-  return nodes.filter(n => connected.has(n.id));
-}
-
-// Parse simple key=value string into dict
-function parseConditions(raw) {
-  if (!raw) return {};
-  const result = {};
-  raw.split(',').forEach(pair => {
-    const eq = pair.indexOf('=');
-    if (eq > 0) {
-      const k = pair.slice(0, eq).trim();
-      let v = pair.slice(eq+1).trim().replace(/^["']|["']$/g, '');
-      if (v.includes('|')) v = v.split('|').map(s => s.trim());
-      if (result[k] !== undefined) {
-        if (Array.isArray(result[k])) result[k].push(...(Array.isArray(v)?v:[v]));
-        else result[k] = [result[k], ...(Array.isArray(v)?v:[v])];
-      } else {
-        result[k] = v;
-      }
-    }
-  });
-  return result;
-}
-
-function runFilterPipeline(nodes, edges, config) {
+function cloneNode(n) { return Object.assign({}, n, {_stem: nodeStem(n)}); }
+function applyFilter(nodes, conds) { if (!conds||!Object.keys(conds).length) return nodes; return nodes.filter(n => Object.entries(conds).every(([k,v]) => matchCond(n,k,v))); }
+function applyExclude(nodes, conds) { if (!conds||!Object.keys(conds).length) return nodes; return nodes.filter(n => !Object.entries(conds).every(([k,v]) => matchCond(n,k,v))); }
+function applySort(nodes, key, desc) { if (!key) return nodes; return [...nodes].sort((a,b) => { const va=(VAULT[a._stem]?.props||{})[key]??''; const vb=(VAULT[b._stem]?.props||{})[key]??''; if (va<vb) return desc?1:-1; if (va>vb) return desc?-1:1; return 0; }); }
+function pruneEdgeless(nodes, edges) { const c=new Set(); edges.forEach(e => { c.add(e.fromNode); c.add(e.toNode); }); return nodes.filter(n => c.has(n.id)); }
+function parseConds(raw) { if (!raw) return {}; const r={}; raw.split(',').forEach(p => { const eq=p.indexOf('='); if (eq>0) { const k=p.slice(0,eq).trim(); let v=p.slice(eq+1).trim().replace(/^["']|["']$/g,''); if (v.includes('|')) v=v.split('|').map(s=>s.trim()); if (r[k]) { if (Array.isArray(r[k])) r[k].push(...(Array.isArray(v)?v:[v])); else r[k]=[r[k],...(Array.isArray(v)?v:[v])]; } else r[k]=v; } }); return r; }
+function runPipeline(nodes, edges, cfg) {
   let n = nodes.map(cloneNode);
-  // Filter
-  if (config.filterStr) n = applyFilter(n, parseConditions(config.filterStr));
-  // Exclude
-  if (config.excludeStr) n = applyExclude(n, parseConditions(config.excludeStr));
-  // Sort
-  n = applySort(n, config.sortKey, config.sortDesc);
-  // Prune
-  if (config.prune) n = pruneOrphans(n, edges, true);
-  // Filter edges to only those where both endpoints remain
-  const remainingIds = new Set(n.map(x => x.id));
-  const e = edges.filter(ed => remainingIds.has(ed.fromNode) && remainingIds.has(ed.toNode));
-  return { nodes: n, edges: e };
+  if (cfg.filterStr) n = applyFilter(n, parseConds(cfg.filterStr));
+  if (cfg.excludeStr) n = applyExclude(n, parseConds(cfg.excludeStr));
+  n = applySort(n, cfg.sortKey, cfg.sortDesc);
+  if (cfg.prune) n = pruneEdgeless(n, edges);
+  const ids = new Set(n.map(x => x.id));
+  return { nodes: n, edges: edges.filter(e => ids.has(e.fromNode) && ids.has(e.toNode)) };
 }
 
-// ══════════════════════════════════════════════════════════
-// SVG RENDERER
-// ══════════════════════════════════════════════════════════
-
+// ═══════════════ RENDER ═══════════════
 const graph = document.getElementById('graph');
-let svg = null;
-let currentData = { nodes: [], edges: [] };
 let expandedNode = null;
-let panX = 0, panY = 0, dragging = false, dragStart = {};
 
-function setupSvg() {
-  if (svg) svg.remove();
-  svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  graph.appendChild(svg);
-  // Pan
-  graph.onmousedown = e => {
-    if (e.target === graph || e.target === svg) {
-      dragging = true; dragStart = {x: e.clientX - panX, y: e.clientY - panY};
-      e.preventDefault();
-    }
-  };
-  window.onmousemove = e => {
-    if (!dragging) return;
-    panX = e.clientX - dragStart.x; panY = e.clientY - dragStart.y;
-    svg.setAttribute('transform', `translate(${panX},${panY})`);
-  };
-  window.onmouseup = () => dragging = false;
-  // Wheel zoom
-  graph.onwheel = e => {
-    e.preventDefault();
-    const scale = parseFloat(svg.dataset.scale || 1) + (e.deltaY > 0 ? -0.1 : 0.1);
-    const s = Math.max(0.2, Math.min(3, scale));
-    svg.dataset.scale = s;
-    svg.style.transform = `scale(${s})`;
-  };
-}
+function iconUrl(n) { const f = n.file||''; if (f.startsWith('_icons/')) { const nm = f.split('/').pop(); if (ICONS[nm]) return ICONS[nm]; } return null; }
 
-function iconUrl(node) {
-  const file = node.file || '';
-  if (file.startsWith('_icons/')) {
-    const name = file.split('/').pop();
-    if (ICONS[name]) return ICONS[name];
-  }
-  return null;
-}
+function renderGraph(nodes, edges) {
+  graph.innerHTML = '';
 
-function getTypeStyle(node) {
-  const type = nodeType(node.file);
-  const tdef = (STYLE.types || {})[type] || {};
-  const fileNode = FILE_BY_ID[node.id];
-  return {
-    color: (fileNode && fileNode.color) || tdef.bg || '#555',
-    shape: tdef.shape || 'rect',
-    textColor: tdef.textColor || '#fff',
-    font: tdef.font || STYLE.node?.font || 'sans-serif',
-  };
-}
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
 
-function renderGraph(nodes, edges, layout) {
-  setupSvg();
-  const colW = layout?.colWidth || 350;
-  const rowH = layout?.rowHeight || 250;
-  const nodeW = layout?.nodeWidth || 300;
-  const nodeH = layout?.nodeHeight || 200;
-
-  let maxX = 0, maxY = 0;
-  nodes.forEach(n => {
-    if (n.x + nodeW > maxX) maxX = n.x + nodeW;
-    if (n.y + nodeH > maxY) maxY = n.y + nodeH;
-  });
-
-  svg.setAttribute('viewBox', `0 0 ${maxX + 100} ${maxY + 100}`);
-  svg.setAttribute('width', maxX + 100);
-  svg.setAttribute('height', maxY + 100);
-  svg.innerHTML = '';
+  let maxX = 100, maxY = 100;
+  nodes.forEach(n => { const r = (n.x||0)+(n.width||200); const b = (n.y||0)+(n.height||120); if (r>maxX) maxX=r; if (b>maxY) maxY=b; });
+  maxX += 100; maxY += 100;
+  svg.setAttribute('viewBox', `0 0 ${maxX} ${maxY}`);
+  svg.style.width = maxX + 'px';
+  svg.style.height = maxY + 'px';
 
   // Edges
-  const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-  const fileIds = new Set(nodes.map(n => n.id));
-  edges.filter(e => fileIds.has(e.fromNode) && fileIds.has(e.toNode)).forEach(e => {
+  const gEdges = document.createElementNS(svgNS, 'g');
+  const nodeIds = new Set(nodes.map(n => n.id));
+  edges.filter(e => nodeIds.has(e.fromNode) && nodeIds.has(e.toNode)).forEach(e => {
     const fn = nodes.find(n => n.id === e.fromNode);
     const tn = nodes.find(n => n.id === e.toNode);
     if (!fn || !tn) return;
-    const x1 = fn.x + nodeW / 2, y1 = fn.y + nodeH / 2;
-    const x2 = tn.x + nodeW / 2, y2 = tn.y + nodeH / 2;
-    const midX = (x1 + x2) / 2, midY = (y1 + y2) / 2;
+    const fw = fn.width||200, fh = fn.height||120, tw = tn.width||200, th = tn.height||120;
+    const x1 = (fn.x||0) + fw/2, y1 = (fn.y||0) + fh/2;
+    const x2 = (tn.x||0) + tw/2, y2 = (tn.y||0) + th/2;
+    const mx = (x1+x2)/2, my = (y1+y2)/2;
 
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    const edgeColor = e.color || '#666';
-    path.setAttribute('d', `M${x1},${y1} Q${midX+30},${midY-30} ${x2},${y2}`);
-    path.setAttribute('class','edge-path');
-    path.setAttribute('stroke', edgeColor);
+    const path = document.createElementNS(svgNS, 'path');
+    const ec = e.color || '#666';
+    path.setAttribute('d', `M${x1},${y1} Q${mx+30},${my-30} ${x2},${y2}`);
+    path.setAttribute('stroke', ec);
+    path.setAttribute('class', 'edge-path');
+    gEdges.appendChild(path);
 
     if (e.label) {
-      const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
-      lbl.setAttribute('x', midX); lbl.setAttribute('y', midY - 6);
-      lbl.setAttribute('class','edge-label');
-      lbl.setAttribute('fill', edgeColor);
-      lbl.textContent = e.label;
-      edgeGroup.appendChild(lbl);
+      const txt = document.createElementNS(svgNS, 'text');
+      txt.setAttribute('x', mx); txt.setAttribute('y', my-6);
+      txt.setAttribute('fill', ec); txt.setAttribute('class', 'edge-label');
+      txt.textContent = e.label;
+      gEdges.appendChild(txt);
     }
-    edgeGroup.appendChild(path);
   });
-  svg.appendChild(edgeGroup);
+  svg.appendChild(gEdges);
 
   // Nodes
+  const gNodes = document.createElementNS(svgNS, 'g');
   nodes.forEach(n => {
-    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-    const style = getTypeStyle(n);
-    const icnUrl = iconUrl(n);
-    const stem = (n.file||'').replace('.md','').split('/').pop();
+    const g = document.createElementNS(svgNS, 'g');
+    const nw = n.width||200, nh = n.height||120;
+    const nx = n.x||0, ny = n.y||0;
+    const icn = iconUrl(n);
+    const type = nodeType(n);
+    const ts = (STYLE.types||{})[type]||{};
+    const fill = n.color || ts.bg || '#555';
+    const stem = nodeStem(n);
     const title = (VAULT[stem]?.props?.title) || stem;
 
-    const iconW = icnUrl ? 28 : 0;
-    const cx = n.x + iconW + 6, cy = n.y + 14;
-
-    if (icnUrl) {
-      const img = document.createElementNS('http://www.w3.org/2000/svg','image');
-      img.setAttribute('href', icnUrl);
-      img.setAttribute('x', n.x); img.setAttribute('y', n.y);
-      img.setAttribute('width', iconW); img.setAttribute('height', iconW);
-      img.setAttribute('class','node-icon');
+    // Icon image
+    if (icn) {
+      const sz = 28;
+      const img = document.createElementNS(svgNS, 'image');
+      img.setAttribute('href', icn);
+      img.setAttribute('x', nx); img.setAttribute('y', ny);
+      img.setAttribute('width', sz); img.setAttribute('height', sz);
       g.appendChild(img);
     }
 
-    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    rect.setAttribute('x', cx); rect.setAttribute('y', n.y);
-    rect.setAttribute('width', nodeW - iconW - 6); rect.setAttribute('height', nodeH);
-    rect.setAttribute('rx', style.shape === 'circle' ? nodeH / 2 : 4);
-    rect.setAttribute('ry', style.shape === 'circle' ? nodeH / 2 : 4);
-    rect.setAttribute('fill', style.color);
-    rect.setAttribute('stroke', '#fff');
-    rect.setAttribute('stroke-width', 1);
-    rect.setAttribute('cursor','pointer');
+    // Node rect
+    const rect = document.createElementNS(svgNS, 'rect');
+    rect.setAttribute('x', nx); rect.setAttribute('y', ny);
+    rect.setAttribute('width', nw); rect.setAttribute('height', nh);
+    const shape = ts.shape || 'rect';
+    rect.setAttribute('rx', shape==='circle' ? Math.min(nw,nh)/2 : 4);
+    rect.setAttribute('ry', shape==='circle' ? Math.min(nw,nh)/2 : 4);
+    rect.setAttribute('fill', fill);
+    rect.setAttribute('stroke', '#fff'); rect.setAttribute('stroke-width', 0.5);
+    rect.style.cursor = 'pointer';
 
-    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
-    text.setAttribute('x', cx + 8); text.setAttribute('y', n.y + nodeH / 2 + 4);
-    text.setAttribute('fill', style.textColor);
-    text.setAttribute('font-size', 12);
-    text.setAttribute('font-family', style.font);
-    text.textContent = title;
+    // Title text
+    const txt = document.createElementNS(svgNS, 'text');
+    txt.setAttribute('x', nx + 6); txt.setAttribute('y', ny + nh/2 + 4);
+    txt.setAttribute('fill', ts.textColor || '#fff');
+    txt.setAttribute('font-size', Math.max(10, Math.min(14, nh/10)));
+    txt.setAttribute('font-family', ts.font || 'sans-serif');
+    txt.textContent = title.length > 20 ? title.slice(0,18)+'..' : title;
 
-    rect.onclick = () => toggleExpand(n, cx + nodeW, n.y);
+    rect.onclick = () => toggleExpand(n);
     g.appendChild(rect);
-    g.appendChild(text);
-    svg.appendChild(g);
+    g.appendChild(txt);
+    gNodes.appendChild(g);
   });
+  svg.appendChild(gNodes);
+  graph.appendChild(svg);
 
-  updateStats(nodes.length, edges.length);
+  document.getElementById('stats').textContent = `Nodes: ${nodes.length} | Edges: ${edges.length}`;
 }
 
-function toggleExpand(node, ex, ey) {
-  const existing = document.getElementById('expanded-panel');
-  if (existing) {
-    if (existing.dataset.nodeId === node.id) { existing.remove(); expandedNode = null; return; }
-    existing.remove();
-  }
+function toggleExpand(node) {
+  const ex = document.getElementById('expanded-panel');
+  if (ex) { if (ex.dataset.nodeId === node.id) { ex.remove(); expandedNode=null; return; } ex.remove(); }
   expandedNode = node;
-  const stem = (node.file||'').replace('.md','').split('/').pop();
+  const stem = nodeStem(node);
   const v = VAULT[stem];
   const panel = document.createElement('div');
   panel.id = 'expanded-panel';
   panel.className = 'expanded';
   panel.dataset.nodeId = node.id;
-  panel.style.left = Math.min(ex + 10, window.innerWidth - 520) + 'px';
-  panel.style.top = Math.min(ey, window.innerHeight - 420) + 'px';
+  const nx = (node.x||0) + (node.width||200);
+  const ny = (node.y||0);
+  panel.style.left = Math.min(nx+10, window.innerWidth-520) + 'px';
+  panel.style.top = Math.min(ny, window.innerHeight-420) + 'px';
 
   let html = '';
   if (v?.props?.title) html += `<h2>${v.props.title}</h2>`;
-
-  // Properties
   if (v?.props) {
-    const propStyles = STYLE.properties || {};
-    Object.entries(v.props).forEach(([k, val]) => {
-      if (k === 'title') return;
-      const ps = propStyles[k] || {};
-      const color = ps.color || '#666';
-      const icon = ps.icon || '';
-      const display = Array.isArray(val) ? val.join(', ') : String(val);
-      html += `<span class="prop" style="background:${color}22;color:${color};border:1px solid ${color}44">${icon} <b>${k}</b>: ${display}</span>`;
-    });
+    Object.entries(v.props).forEach(([k,val]) => { if (k==='title') return; const display = Array.isArray(val) ? val.join(', ') : String(val); html += `<span class="prop" style="background:#333;color:#aaa;border:1px solid #555">${k}: ${display}</span>`; });
     html += '<hr style="border-color:#333;margin:8px 0">';
   }
-
-  // Body (Markdown)
-  if (v?.body && typeof marked !== 'undefined') {
-    html += marked.parse(v.body);
-  } else if (v?.body) {
-    html += `<pre>${v.body}</pre>`;
-  }
-
+  if (v?.body && typeof marked !== 'undefined') html += marked.parse(v.body);
+  else if (v?.body) html += `<pre>${v.body}</pre>`;
   panel.innerHTML = html;
   graph.appendChild(panel);
 }
 
-function updateStats(nCount, eCount) {
-  document.getElementById('stats').textContent = `Nodes: ${nCount} | Edges: ${eCount}`;
-}
-
-// ══════════════════════════════════════════════════════════
-// GUI
-// ══════════════════════════════════════════════════════════
-
-// Populate sort-key dropdown
-(function() {
-  const keys = new Set();
-  Object.values(VAULT).forEach(v => {
-    if (v.props) Object.keys(v.props).forEach(k => keys.add(k));
-  });
+// ═══════════════ GUI ═══════════════
+(function initSortKeys() {
+  const keys = new Set(); Object.values(VAULT).forEach(v => { if (v.props) Object.keys(v.props).forEach(k => keys.add(k)); });
   const sel = document.getElementById('sort-key');
-  [...keys].sort().forEach(k => {
-    const opt = document.createElement('option');
-    opt.value = k; opt.textContent = k;
-    sel.appendChild(opt);
-  });
+  [...keys].sort().forEach(k => { const o = document.createElement('option'); o.value=k; o.textContent=k; sel.appendChild(o); });
 })();
 
-function addFilterRow(containerId, prefix) {
-  const div = document.getElementById(containerId);
-  const row = document.createElement('div');
-  row.className = 'filter-row';
-
-  const logicSpan = document.createElement('span');
-  logicSpan.className = 'logic';
-  logicSpan.textContent = div.children.length === 0 ? 'WHERE' : 'AND';
-
-  const keySel = document.createElement('select');
-  const keys = new Set();
-  Object.values(VAULT).forEach(v => { if(v.props) Object.keys(v.props).forEach(k => keys.add(k)); });
-  keySel.innerHTML = '<option value="$or">$or</option>';
-  [...keys].sort().forEach(k => { keySel.innerHTML += `<option value="${k}">${k}</option>`; });
-
-  const valInput = document.createElement('input');
-  valInput.placeholder = 'value or val|val2';
-
-  const delBtn = document.createElement('button');
-  delBtn.textContent = 'x';
-  delBtn.style.background = '#533483';
-  delBtn.style.padding = '2px 6px';
-  delBtn.onclick = () => row.remove();
-
-  row.appendChild(logicSpan);
-  row.appendChild(keySel);
-  row.appendChild(valInput);
-  row.appendChild(delBtn);
+function addFilterRow(cid) {
+  const div = document.getElementById(cid);
+  const row = document.createElement('div'); row.className = 'filter-row';
+  const s = document.createElement('span'); s.className='logic'; s.textContent=div.children.length?'AND':'WHERE';
+  const k = document.createElement('select'); k.innerHTML='<option value="$or">$or</option>';
+  const keys = new Set(); Object.values(VAULT).forEach(v=>{if(v.props)Object.keys(v.props).forEach(x=>keys.add(x));});
+  [...keys].sort().forEach(x=>{k.innerHTML+=`<option value="${x}">${x}</option>`;});
+  const inp = document.createElement('input'); inp.placeholder='value or val|val2';
+  const del = document.createElement('button'); del.textContent='x'; del.style.background='#533483'; del.style.padding='2px 6px'; del.onclick=()=>row.remove();
+  row.appendChild(s); row.appendChild(k); row.appendChild(inp); row.appendChild(del);
   div.appendChild(row);
 }
 
-function addOrGroup() {
-  const div = document.getElementById('filter-rows');
-  const row = document.createElement('div');
-  row.className = 'filter-row';
-  row.innerHTML = '<span class="logic">$or</span><span style="color:#e94560;font-size:11px">ADD $or GROUP</span>';
-  const del = document.createElement('button');
-  del.textContent = 'x'; del.style.background='#533483';del.style.padding='2px 6px';
-  del.onclick = () => row.remove();
-  row.appendChild(del);
-  div.appendChild(row);
-}
-
-function buildFilterString(containerId) {
-  const rows = document.getElementById(containerId).children;
-  const pairs = [];
-  for (let r of rows) {
-    const sel = r.querySelector('select');
-    const inp = r.querySelector('input');
-    if (sel && inp && inp.value.trim()) {
-      pairs.push(sel.value + '=' + inp.value.trim());
-    }
-  }
-  return pairs.join(',');
+function buildFilterStr(cid) {
+  const pairs = []; document.getElementById(cid).querySelectorAll('.filter-row').forEach(r => {
+    const sel=r.querySelector('select'),inp=r.querySelector('input');
+    if (sel&&inp&&inp.value.trim()) pairs.push(sel.value+'='+inp.value.trim());
+  }); return pairs.join(',');
 }
 
 function applyFilters() {
-  const config = {
-    filterStr: buildFilterString('filter-rows'),
-    excludeStr: buildFilterString('exclude-rows'),
+  const cfg = {
+    filterStr: buildFilterStr('filter-rows'),
+    excludeStr: buildFilterStr('exclude-rows'),
     sortKey: document.getElementById('sort-key').value,
     sortDesc: document.getElementById('sort-desc').checked,
     prune: document.getElementById('prune-orphans').checked,
   };
-  const {nodes, edges} = runFilterPipeline(FILE_NODES, ALL_EDGES, config);
-  const rowH = parseInt(document.getElementById('row-height').value) || 250;
-  const colW = parseInt(document.getElementById('col-width').value) || 350;
-  currentData = {nodes, edges};
-  renderGraph(nodes, edges, {rowHeight: rowH, colWidth: colW});
+  const {nodes, edges} = runPipeline(FILE_NODES, ALL_EDGES, cfg);
+  renderGraph(nodes, edges);
 }
 
 function resetAll() {
-  document.getElementById('filter-rows').innerHTML = '';
-  document.getElementById('exclude-rows').innerHTML = '';
-  document.getElementById('sort-key').value = '';
-  document.getElementById('sort-desc').checked = false;
-  document.getElementById('prune-orphans').checked = false;
-  panX = 0; panY = 0;
-  renderGraph(FILE_NODES, ALL_EDGES, {});
+  document.getElementById('filter-rows').innerHTML=''; document.getElementById('exclude-rows').innerHTML='';
+  document.getElementById('sort-key').value=''; document.getElementById('sort-desc').checked=false;
+  document.getElementById('prune-orphans').checked=false;
+  const ex = document.getElementById('expanded-panel'); if (ex) ex.remove();
+  renderGraph(FILE_NODES, ALL_EDGES);
 }
 
-// Initial render
-renderGraph(FILE_NODES, ALL_EDGES, {});
-addFilterRow('filter-rows','filter');
+// Initial
+renderGraph(FILE_NODES, ALL_EDGES);
+addFilterRow('filter-rows');
 </script>
 </body>
 </html>
