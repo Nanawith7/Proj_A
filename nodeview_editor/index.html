@@ -70,12 +70,12 @@
 
   <h3>Title & Body Position</h3>
   <div class="row">
-    <label>Title X <input type="number" id="nv-tdx" value="" placeholder="auto" oninput="updatePreview()"></label>
-    <label>Title Y <input type="number" id="nv-tdy" value="" placeholder="auto" oninput="updatePreview()"></label>
+    <label>Title X <input type="number" id="nv-tdx" value="" placeholder="auto" oninput="_titlePos.x=this.value;updatePreview()"></label>
+    <label>Title Y <input type="number" id="nv-tdy" value="" placeholder="auto" oninput="_titlePos.y=this.value;updatePreview()"></label>
   </div>
   <div class="row">
-    <label>Body X <input type="number" id="nv-bdx" value="" placeholder="auto" oninput="updatePreview()"></label>
-    <label>Body Y <input type="number" id="nv-bdy" value="" placeholder="auto" oninput="updatePreview()"></label>
+    <label>Body X <input type="number" id="nv-bdx" value="" placeholder="auto" oninput="_bodyPos.x=this.value;updatePreview()"></label>
+    <label>Body Y <input type="number" id="nv-bdy" value="" placeholder="auto" oninput="_bodyPos.y=this.value;updatePreview()"></label>
   </div>
 
   <h3>Icon</h3>

@@ -34,8 +34,8 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
   if(expanded){
     const by0=_bodyPos.y||nv.layout?.bodyPosition?.y||(lp.contentY+12);
     const bx0=_bodyPos.x||nv.layout?.bodyPosition?.x||lp.contentX;
-    const ty0=_titlePos.y||nv.layout?.titlePosition?.y||by0;
-    const tx0=_titlePos.x||nv.layout?.titlePosition?.x||bx0;
+    const ty0=_titlePos.y||nv.layout?.titlePosition?.y||(lp.contentY+12);
+    const tx0=_titlePos.x||nv.layout?.titlePosition?.x||lp.contentX;
     const by=toPctY(by0,h),bx=toPctX(bx0,w),ty=toPctY(ty0,h),tx=toPctX(tx0,w);
     const t1=document.createElementNS(SVGNS,'text');t1.setAttribute('x',tx+10);t1.setAttribute('y',ty+6);t1.setAttribute('fill','#e94560');t1.setAttribute('font-size','13');t1.setAttribute('font-weight','bold');t1.textContent='Title';g.appendChild(t1);
     const t2=document.createElementNS(SVGNS,'text');t2.setAttribute('x',bx+10);t2.setAttribute('y',by+6);t2.setAttribute('fill','#aaa');t2.setAttribute('font-size','9');t2.textContent='Body text ...';g.appendChild(t2);
