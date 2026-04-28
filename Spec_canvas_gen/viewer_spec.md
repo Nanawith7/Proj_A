@@ -256,6 +256,48 @@ key選択ドロップダウンはVault内の全プロパティ名から自動生
 3. バッジは左から右にフロー配置、矩形幅を超えると次の行へ
 4. バッジ間隔 6px、行間隔はフォントサイズ+余白で自動計算
 
+### 5.5 アイコン描画
+
+ノートのfrontmatterに `icon` プロパティが設定されている場合、縮小時と展開時の両方でアイコン画像が描画される。画像は `_icons/` ディレクトリからサーバー経由で配信される。
+
+**縮小時**: `layout.iconAnchorX/Y`（デフォルト `center`）に従いノード内で配置。サイズはノード寸法の45%。
+
+**展開時**: `layout.expandedIconAnchorX/Y`（デフォルト `left/top`）に従い配置。サイズは `layout.expandedIconSize`（デフォルト 40px）。
+
+**位置指定パラメータ**:
+
+| パラメータ | 縮小時 | 展開時 | 値 |
+|---|---|---|---|
+| アンカーX | `iconAnchorX` | `expandedIconAnchorX` | `left`, `center`, `right` |
+| アンカーY | `iconAnchorY` | `expandedIconAnchorY` | `top`, `center`, `bottom` |
+| パディングX | `iconPadX` | `expandedIconPadX` | px |
+| パディングY | `iconPadY` | `expandedIconPadY` | px |
+| サイズ | ノード比45% | `expandedIconSize` | px |
+
+展開時パラメータ未指定時は縮小時の値にフォールバックする。
+
+### 5.6 背景画像
+
+nodeviewに `background` フィールド（例：`"era_bg.png"`）が指定されている場合、展開時に背景画像が描画される。画像は `_viewbg/` ディレクトリから配信され、展開rectの最背面に `preserveAspectRatio="none"` で全体に引き伸ばされる。
+
+**関連パラメータ**:
+
+| パラメータ | 説明 | デフォルト |
+|---|---|---|
+| `background` | 背景画像ファイル名 | なし（描画しない） |
+| `backgroundOpacity` | 背景画像の不透明度 | `0.15` |
+
+### 5.7 不透明度制御
+
+縮小時と展開時でノードのfill不透明度を個別に制御できる。
+
+| パラメータ | 説明 | デフォルト |
+|---|---|---|
+| `collapsedFillOpacity` | 縮小時のfill不透明度 | `1`（完全表示） |
+| `expandedFillOpacity` | 展開時のfill不透明度 | `1`（完全表示） |
+
+`applyNodeView()` 関数が状態に応じて自動的に適用する。`era_circle` の例では `collapsedFillOpacity=0.2`（薄い円）、`expandedFillOpacity=0`（完全透過＋背景画像100%）で使用している。
+
 ## 6. フィルタエンジン（サーバー側）
 
 ### 6.1 評価ルール
