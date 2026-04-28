@@ -73,6 +73,62 @@ def generate_edges(
     return list(edge_index.values())
 
 
+def prune_orphaned(
+    nodes: list[NoteNode],
+    edges: list[EdgeData],
+    prune_spec: str | None,
+    protected_conditions: dict[str, str] | None = None,
+) -> list[NoteNode]:
+    """Remove nodes with zero edges, optionally filtered by type.
+
+    Args:
+        nodes: Current canvas node list.
+        edges: Generated edge list.
+        prune_spec: Prune filter string (None=skip, "*"=all types, "type=tag"=specific).
+        protected_conditions: Nodes matching these are never pruned (e.g. --include-types).
+
+    Returns:
+        Pruned node list.
+    """
+    if prune_spec is None:
+        return nodes
+
+    from .filter_sort import _match_condition, apply_filter
+
+    # Parse prune conditions
+    prune_conditions = None
+    if prune_spec != "*":
+        prune_conditions = {}
+        for pair in prune_spec.split(","):
+            if "=" in pair:
+                k, _, v = pair.partition("=")
+                prune_conditions[k.strip()] = v.strip().strip("\"'")
+
+    connected_stems: set[str] = set()
+    for edge in edges:
+        connected_stems.add(edge.from_node)
+        connected_stems.add(edge.to_node)
+
+    # Protected nodes (e.g. from --include-types)
+    if protected_conditions:
+        for node in nodes:
+            if all(_match_condition(node, k, v) for k, v in protected_conditions.items()):
+                connected_stems.add(node.stem)
+
+    before = len(nodes)
+    if prune_conditions:
+        orphaned = [n for n in nodes if n.stem not in connected_stems]
+        pruned_stems = {n.stem for n in apply_filter(orphaned, prune_conditions) if n.stem not in connected_stems}
+        nodes = [n for n in nodes if n.stem not in pruned_stems]
+    else:
+        nodes = [n for n in nodes if n.stem in connected_stems]
+
+    pruned = before - len(nodes)
+    if pruned:
+        print(f"[INFO] Pruned {pruned} orphaned node(s).")
+    return nodes
+
+
 def _resolve_target(link: str, index: dict[str, NoteNode]) -> str | None:
     """Resolve a wiki link target string to a vault stem."""
     target = link.split("|")[0].strip()

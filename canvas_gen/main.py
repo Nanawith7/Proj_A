@@ -93,25 +93,6 @@ def _parse_conditions(raw: str) -> dict[str, Any] | None:
     return result if result else None
 
 
-def _parse_icon_size(raw: Any, default: int) -> tuple[int, int]:
-    """Parse icon_size value into (width, height).
-
-    Accepts:
-      - None / missing → (default, default)
-      - int: 80 → (80, 80)
-      - str: "80x60" → (80, 60)
-    """
-    if raw is None:
-        return (default, default)
-    if isinstance(raw, int):
-        return (raw, raw)
-    if isinstance(raw, str):
-        parts = raw.split("x")
-        if len(parts) == 2:
-            return (int(parts[0]), int(parts[1]))
-        return (int(parts[0]), int(parts[0]))
-    return (default, default)
-
 
 def _build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

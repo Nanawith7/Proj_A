@@ -30,6 +30,63 @@ from .models import (
 )
 
 
+def compute_layout_params(
+    nodes: list[NoteNode],
+    type_defs: dict[str, TypeDefinition],
+    column_width: float,
+    row_height: float,
+    node_width: float,
+    node_height: float,
+    icon_size: int,
+    icon_gap: int,
+) -> tuple[float, float]:
+    """Compute effective row/column dimensions from per-node/per-type sizes.
+
+    Parses per-node icon_size, finds max icon dimensions and type dimensions,
+    then computes effective row_height and column_width.
+    """
+    max_icon_h = icon_size
+    max_icon_w = icon_size
+    type_heights = [td.node_height for td in type_defs.values()]
+    type_widths = [td.node_width for td in type_defs.values()]
+    max_type_height = max(type_heights) if type_heights else node_height
+    max_type_width = max(type_widths) if type_widths else node_width
+
+    for node in nodes:
+        iw, ih = _parse_icon_sz(node.properties.get("icon_size"), icon_size)
+        node.icon_width = iw
+        node.icon_height = ih
+        if ih > max_icon_h:
+            max_icon_h = ih
+        if iw > max_icon_w:
+            max_icon_w = iw
+
+    eff_row = row_height
+    eff_col = column_width
+    if icon_size > 0:
+        eff_row = max(row_height, max_icon_h + icon_gap + max_type_height)
+        eff_col = max(column_width, max_icon_w, max_type_width)
+
+    print(f"[INFO] Row height: {eff_row} (max_icon_h={max_icon_h}, max_node_h={max_type_height})")
+    if eff_col != column_width:
+        print(f"[INFO] Column width: {eff_col} (max_icon_w={max_icon_w}, max_node_w={max_type_width})")
+
+    return eff_row, eff_col
+
+
+def _parse_icon_sz(raw: Any, default: int) -> tuple[int, int]:
+    if raw is None:
+        return (default, default)
+    if isinstance(raw, int):
+        return (raw, raw)
+    if isinstance(raw, str):
+        parts = raw.split("x")
+        if len(parts) == 2:
+            return (int(parts[0]), int(parts[1]))
+        return (int(parts[0]), int(parts[0]))
+    return (default, default)
+
+
 def compute_layout(
     nodes: list[NoteNode],
     x_axis_key: str | None,

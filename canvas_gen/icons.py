@@ -165,3 +165,34 @@ def generate_node_icon(
     filename = f"node_{stem}.png"
     _make_icon_png(out / filename, size, spec["outer_shape"], spec["color"], inner_shape, inner_color)
     return f"_icons/{filename}"
+
+
+def resolve_node_icons(
+    nodes: list,
+    vault_path: str,
+    icon_size: int,
+) -> int:
+    """Resolve per-node icon paths from frontmatter 'icon' property.
+
+    Supports:
+      - String: direct path ("_icons/hero.png")
+      - Dict:   shape/color spec → auto-generate PNG
+
+    Returns count of nodes with custom icons.
+    """
+    from pathlib import Path
+    icons_dir = Path(vault_path) / "_icons"
+    count = 0
+    for node in nodes:
+        icon_val = node.properties.get("icon")
+        if isinstance(icon_val, str):
+            node.icon_path = icon_val
+            count += 1
+        elif isinstance(icon_val, dict):
+            node.icon_path = generate_node_icon(
+                str(icons_dir), node.stem, node.node_type, icon_val, size=icon_size
+            )
+            count += 1
+    if count:
+        print(f"[INFO] {count} node(s) have custom icons.")
+    return count

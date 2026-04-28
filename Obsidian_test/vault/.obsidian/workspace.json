@@ -15,9 +15,9 @@
               "state": {
                 "file": "thief_era.canvas",
                 "viewState": {
-                  "x": 575.1756563470691,
-                  "y": 851.0921812024376,
-                  "zoom": -1.4648655046879253
+                  "x": 310.7449101903219,
+                  "y": 856.7680795378902,
+                  "zoom": -1.4257723072860662
                 }
               },
               "icon": "lucide-layout-dashboard",
@@ -186,8 +186,8 @@
   "active": "2ec1532ea9941862",
   "lastOpenFiles": [
     "thief_network.canvas",
-    "thief_era.canvas",
     "timeline.canvas",
+    "thief_era.canvas",
     "era_timeline.canvas",
     "event/魔法学園創設.md",
     "event/大戦争勃発.md",

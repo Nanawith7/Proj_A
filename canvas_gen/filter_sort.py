@@ -145,3 +145,24 @@ def run_filter_pipeline(
     result = apply_exclude(result, exclude_conditions)
     result = apply_sort(result, sort_by)
     return result
+
+
+def include_matching(
+    nodes: list[NoteNode],
+    vault_index: dict[str, NoteNode],
+    conditions: dict[str, Any],
+) -> list[NoteNode]:
+    """Add vault nodes matching conditions that are not already in the list."""
+    if not conditions:
+        return nodes
+    stems = {n.stem for n in nodes}
+    added = 0
+    for stem, vn in vault_index.items():
+        if stem not in stems:
+            if all(_match_condition(vn, k, v) for k, v in conditions.items()):
+                nodes.append(vn)
+                stems.add(stem)
+                added += 1
+    if added:
+        print(f"[INFO] Added {added} node(s) via --include-types.")
+    return nodes
