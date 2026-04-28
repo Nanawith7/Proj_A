@@ -80,7 +80,10 @@ function render() {
 
     // Title wrap for small shapes (era circle)
     if(nv.titleWrap) {
-      const maxW=nw-2*tpad;
+      const isCircle=nv.shape==='circle';
+      const diameter=isCircle?Math.min(nw,nh):nw;
+      const shapePad=isCircle?Math.floor((nw-diameter)/2+tpad):tpad;
+      const maxW=diameter-shapePad*2;
       let pos=0,line=0;
       while(pos<title.length){
         let len=1;
@@ -88,13 +91,24 @@ function render() {
         if(len===1&&pos+1<=title.length)len=2;
         const t2=document.createElementNS(svgNS,'text');t2.setAttribute('class','node-title');
         t2.setAttribute('font-size',fs);if(nv.boldTitle)t2.setAttribute('font-weight','bold');
-        t2.setAttribute('x',nx+tpad);t2.setAttribute('y',ny+tpad+fs+line*(fs+2));
+        t2.setAttribute('text-anchor','middle');
+        const cx=nx+shapePad+maxW/2;
+        t2.setAttribute('x',cx);
+        t2.setAttribute('y',ny+(isCircle?diameter/2+fs/3:tpad+fs)+line*(fs+2));
         t2.setAttribute('fill','#fff');t2.textContent=title.slice(pos,pos+len-1);
         g.appendChild(t2);pos+=len-1;line++;
       }
     } else {
-      txt.setAttribute('y',ty==='top'?ny+tpad+fs:(ny+nh/2+fs/3));
-      txt.setAttribute('x',nx+Math.max(tpad,6));txt.setAttribute('fill','#fff');
+      if(nv.shape==='circle'){
+        const diam=Math.min(nw,nh);
+        txt.setAttribute('text-anchor','middle');
+        txt.setAttribute('x',nx+nw/2);
+        txt.setAttribute('y',ny+diam/2+fs/3);
+      }else{
+        txt.setAttribute('y',ty==='top'?ny+tpad+fs:(ny+nh/2+fs/3));
+        txt.setAttribute('x',nx+Math.max(tpad,6));
+      }
+      txt.setAttribute('fill','#fff');
       txt.textContent=title;g.appendChild(txt);
     }
     g.appendChild(rect);mainG.appendChild(g);
