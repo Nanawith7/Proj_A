@@ -228,36 +228,25 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
     g.appendChild(txt);
   }
 
-  // Mock body text in expanded preview to match viewer layout
+  // Mock body rendering: matches viewer's buildBodyLines order
   if(expanded){
     const bodyY=nv.layout?.bodyPosition?.y||(lp.contentY+12);
+    // Title (always first in buildBodyLines)
+    let cy=bodyY+10;
     const t=document.createElementNS(SVGNS,'text');
-    t.setAttribute('x',lp.contentX);t.setAttribute('y',bodyY+10);
+    t.setAttribute('x',lp.contentX);t.setAttribute('y',cy);
     t.setAttribute('fill','#e94560');t.setAttribute('font-size','13');t.setAttribute('font-weight','bold');
-    t.textContent='Title line';
+    t.textContent='Title';
     g.appendChild(t);
-    const b=document.createElementNS(SVGNS,'text');
-    b.setAttribute('x',lp.contentX);b.setAttribute('y',bodyY+26);
-    b.setAttribute('fill','#ddd');b.setAttribute('font-size','10');
-    b.textContent='Body text ...';
-    g.appendChild(b);
-    const b2=document.createElementNS(SVGNS,'text');
-    b2.setAttribute('x',lp.contentX);b2.setAttribute('y',bodyY+40);
-    b2.setAttribute('fill','#aaa');b2.setAttribute('font-size','9');
-    b2.textContent='> quote text ...';
-    g.appendChild(b2);
-  }
 
-  // Props (expanded) + draggable markers
-  if(expanded&&propRows.length){
-    const startY=nv.layout?.bodyPosition?.y||(lp.contentY+12);
+    // Properties with position overrides (rendered before body in viewer)
+    cy+=16;
     propRows.forEach((pr,i)=>{
-      if(!pr.key)return;
-      const pctX=String(pr.px||'').endsWith('%')?parseFloat(pr.px)/100*w:parseInt(pr.px)||lp.contentX;
-      const pctY=String(pr.py||'').endsWith('%')?parseFloat(pr.py)/100*h:(parseInt(pr.py)||startY+i*22);
-      const x=pctX, y=pctY;
-
-      // Draggable marker at absolute position
+      if(!pr.key || !pr.px || !pr.py) return;
+      const pctX=String(pr.px).endsWith('%')?parseFloat(pr.px)/100*w:parseInt(pr.px);
+      const pctY=String(pr.py).endsWith('%')?parseFloat(pr.py)/100*h:parseInt(pr.py);
+      const y=pctY, x=pctX;
+      // Draggable marker
       const marker=document.createElementNS(SVGNS,'rect');
       marker.setAttribute('x',x-3);marker.setAttribute('y',y-3);
       marker.setAttribute('width',6);marker.setAttribute('height',6);
@@ -265,14 +254,31 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
       marker.setAttribute('cursor','grab');marker.setAttribute('data-pi',i);
       marker.onmousedown=e=>startDragProp(e,i,svgId);
       g.appendChild(marker);
-
       const txt=document.createElementNS(SVGNS,'text');
       txt.setAttribute('x',x+8);txt.setAttribute('y',y+4);
       txt.setAttribute('fill','#fff');txt.setAttribute('font-size','9');
-      txt.setAttribute('font-weight','bold');
       txt.textContent=pr.key;
       g.appendChild(txt);
     });
+
+    // Auto-flow properties (no position) + body
+    cy=bodyY+16;
+    let hasBody=false;
+    propRows.forEach(pr=>{
+      if(!pr.key||pr.px||pr.py)return;
+      const tt=document.createElementNS(SVGNS,'text');
+      tt.setAttribute('x',lp.contentX);tt.setAttribute('y',cy+10);
+      tt.setAttribute('fill','#ddd');tt.setAttribute('font-size','10');
+      tt.textContent=`${pr.key}: ...`;
+      g.appendChild(tt);cy+=16;hasBody=true;
+    });
+    if(!hasBody||propRows.filter(pr=>pr.key&&pr.px&&pr.py).length>0){
+      const b=document.createElementNS(SVGNS,'text');
+      b.setAttribute('x',lp.contentX);b.setAttribute('y',cy+10);
+      b.setAttribute('fill','#aaa');b.setAttribute('font-size','9');
+      b.textContent='Body text ...';
+      g.appendChild(b);
+    }
   }
 
   svg.appendChild(g);
