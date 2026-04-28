@@ -1,5 +1,6 @@
 // ═══════════ Nodeview Editor - Core (data + forms) ═══════════
 let templates={}, currentName='', propRows=[];
+let _titlePos={x:'',y:''}, _bodyPos={x:'',y:''};
 
 async function init(){
   try{const r=await fetch('/api/templates');templates=await r.json();}
@@ -26,9 +27,6 @@ async function loadTemplate(name){
 function newTemplate(){currentName='untitled'; applyToForm({shape:'rect',rx:4}); renderTemplateList(); updatePreview();}
 function importJSON(){const raw=prompt('Paste nodeview JSON:');if(!raw)return;try{applyToForm(JSON.parse(raw));updatePreview();}catch(e){alert('Invalid JSON');}}
 
-// Position state (JS-managed, not just DOM inputs)
-let _titlePos={x:'',y:''}, _bodyPos={x:'',y:''};
-
 function applyToForm(nv){
   const l=nv.layout||{};
   setVal('nv-shape',nv.shape||'rect');setVal('nv-rx',nv.rx||4);setVal('nv-sw',nv.strokeWidth||1);
@@ -38,7 +36,6 @@ function applyToForm(nv){
   setVal('nv-bgop',l.backgroundOpacity??0.15);setVal('nv-bg',nv.background||'');
   setVal('nv-ew',l.expandMinW??300);setVal('nv-eh',l.expandMinH??200);
   setVal('nv-cpx',l.contentPadX??10);setVal('nv-cpy',l.contentPadY??10);
-  // Title/Body positions (sync to JS state + DOM)
   _titlePos={x:l.titlePosition?.x??'',y:l.titlePosition?.y??''};
   _bodyPos={x:l.bodyPosition?.x??'',y:l.bodyPosition?.y??''};
   setVal('nv-tdx',_titlePos.x);setVal('nv-tdy',_titlePos.y);
@@ -79,10 +76,8 @@ function buildNV(){
   if(getNum('nv-bgop')!==0.15)layout.backgroundOpacity=getNum('nv-bgop');
   if(getNum('nv-ew')!==300)layout.expandMinW=getNum('nv-ew');if(getNum('nv-eh')!==200)layout.expandMinH=getNum('nv-eh');
   if(getNum('nv-cpx')!==10)layout.contentPadX=getNum('nv-cpx');if(getNum('nv-cpy')!==10)layout.contentPadY=getNum('nv-cpy');
-  function getRaw(id){return document.getElementById(id)?.value||'';}
-  const bdx=getRaw('nv-bdx'),bdy=getRaw('nv-bdy'),tdx=getRaw('nv-tdx'),tdy=getRaw('nv-tdy');
-  if(bdx||bdy){layout.bodyPosition={};if(bdx)layout.bodyPosition.x=bdx;if(bdy)layout.bodyPosition.y=bdy;}
-  if(tdx||tdy){layout.titlePosition={};if(tdx)layout.titlePosition.x=tdx;if(tdy)layout.titlePosition.y=tdy;}
+  if(_titlePos.x||_titlePos.y){layout.titlePosition={};if(_titlePos.x)layout.titlePosition.x=_titlePos.x;if(_titlePos.y)layout.titlePosition.y=_titlePos.y;}
+  if(_bodyPos.x||_bodyPos.y){layout.bodyPosition={};if(_bodyPos.x)layout.bodyPosition.x=_bodyPos.x;if(_bodyPos.y)layout.bodyPosition.y=_bodyPos.y;}
   if(getVal('nv-iax')!=='center')layout.iconAnchorX=getVal('nv-iax');if(getVal('nv-iay')!=='center')layout.iconAnchorY=getVal('nv-iay');
   if(getNum('nv-ipx'))layout.iconPadX=getNum('nv-ipx');if(getNum('nv-ipy'))layout.iconPadY=getNum('nv-ipy');
   if(getVal('nv-eiax'))layout.expandedIconAnchorX=getVal('nv-eiax');if(getVal('nv-eiay'))layout.expandedIconAnchorY=getVal('nv-eiay');
