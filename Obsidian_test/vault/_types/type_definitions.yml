@@ -3,39 +3,46 @@
 # centering: horizontal centering within the row
 # color: node background color (hex or preset number 1-6)
 # node_width / node_height: override default node dimensions
+# nodeview: visual template name (maps to nodeview/*.json)
 character:
   lining: 3
   centering: true
   color: "#2196F3"
   node_width: 160
   node_height: 120
+  nodeview: character_card
 scenario:
   lining: 1
   centering: true
   color: "#FF9800"
   node_width: 280
   node_height: 160
+  nodeview: scenario_card
 event:
   lining: 2
   centering: true
   color: "#E91E63"
   node_width: 220
   node_height: 140
+  nodeview: event_card
 organization:
   lining: 1
   centering: true
   color: "#4CAF50"
   node_width: 200
   node_height: 120
+  nodeview: plain
 tag:
   lining: 2
   centering: true
   color: "#607D8B"
   node_width: 100
   node_height: 80
+  nodeview: tag_bubble
 era:
   lining: 1
   centering: true
   color: "#9C27B0"
   node_width: 220
   node_height: 100
+  nodeview: era_circle

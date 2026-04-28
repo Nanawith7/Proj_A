@@ -196,6 +196,13 @@
   },
   "active": "f03cac4a8793025c",
   "lastOpenFiles": [
+    "nodeview/character_card.json",
+    "nodeview/scenario_card.json",
+    "nodeview/event_card.json",
+    "nodeview/era_circle.json",
+    "nodeview/tag_bubble.json",
+    "nodeview/plain.json",
+    "nodeview",
     "thief_era_viewer.html",
     "characters_viewer.html",
     "timeline_viewer.html",
@@ -236,7 +243,6 @@
     "scenario/王都魔法大会.md",
     "scenario/魔法学園編入.md",
     "era",
-    "tag",
     "_icons/node_四天王B.png",
     "_icons/node_盗賊.png",
     "_icons/node_元魔王.png",
@@ -245,11 +251,6 @@
     "_icons/node_騎士団長.png",
     "_icons/node_賢者.png",
     "_icons/node_王女.png",
-    "_icons/node_幼なじみ.png",
-    "_icons",
-    "organization",
-    "event",
-    "scenario",
-    "character"
+    "_icons/node_幼なじみ.png"
   ]
 }

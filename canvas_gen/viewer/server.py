@@ -210,6 +210,11 @@ class ViewerHandler(BaseHTTPRequestHandler):
             qs = parse_qs(parsed.query)
             name = qs.get("name", [""])[0]
             self._serve_icon(name)
+        elif path == "/api/typedefs":
+            self._serve_typedefs()
+        elif path.startswith("/api/nodeview/"):
+            name = path.split("/api/nodeview/", 1)[1]
+            self._serve_nodeview(name)
         else:
             self.send_error(404)
 
@@ -248,6 +253,28 @@ class ViewerHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
+
+    def _serve_nodeview(self, name):
+        nv_path = Path(VAULT_PATH) / "nodeview" / name
+        if not nv_path.is_file() or ".." in name:
+            self.send_error(404)
+            return
+        data = nv_path.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def _serve_typedefs(self):
+        import yaml
+        td_path = Path(VAULT_PATH) / "_types" / "type_definitions.yml"
+        if not td_path.is_file():
+            self._serve_json({})
+            return
+        with open(td_path, "r", encoding="utf-8") as f:
+            raw = yaml.safe_load(f) or {}
+        self._serve_json(raw)
 
     def log_message(self, format, *args):
         print(f"[Viewer] {args[0]}")
