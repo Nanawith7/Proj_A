@@ -5,19 +5,19 @@
 # node_width / node_height: override default node dimensions
 character:
   lining: 3
-  centering: false
+  centering: true
   color: "#2196F3"
   node_width: 160
   node_height: 120
 scenario:
   lining: 1
-  centering: false
+  centering: true
   color: "#FF9800"
   node_width: 280
   node_height: 160
 event:
   lining: 2
-  centering: false
+  centering: true
   color: "#E91E63"
   node_width: 220
   node_height: 140
@@ -28,7 +28,7 @@ organization:
   node_width: 200
   node_height: 120
 tag:
-  lining: 5
+  lining: 2
   centering: true
   color: "#607D8B"
   node_width: 100

@@ -4,24 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "6c86c6abfe6ea1b6",
+        "id": "79ba2aa54503da3a",
         "type": "tabs",
         "children": [
           {
-            "id": "5de152c9fde8f149",
+            "id": "2ec1532ea9941862",
             "type": "leaf",
             "state": {
-              "type": "canvas",
-              "state": {
-                "file": "characters.canvas",
-                "viewState": {
-                  "x": 605,
-                  "y": 273,
-                  "zoom": -0.6666666666666666
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "characters"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "グラフビュー"
             }
           }
         ]
@@ -183,9 +176,11 @@
       "bases:新規ベースを作成": false
     }
   },
-  "active": "5de152c9fde8f149",
+  "active": "2ec1532ea9941862",
   "lastOpenFiles": [
+    "character/主人公.md",
     "devil_timeline.canvas",
+    "characters.canvas",
     "timeline.canvas",
     "tag/demon.md",
     "characters_tags.canvas",
@@ -215,7 +210,6 @@
     "_icons/node_幼なじみ.png",
     "_icons/node_四天王A.png",
     "_icons",
-    "characters.canvas",
     "character/魔王.md",
     "character/元魔王 1.md",
     "organization/魔族連合.md",
