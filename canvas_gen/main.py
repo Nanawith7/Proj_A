@@ -5,10 +5,9 @@ Parses command-line arguments, orchestrates the pipeline:
   2. Scan vault and index all notes
   3. Optionally traverse from a base node
   4. Apply filter, exclude, and sort
-  5. Expand canvas with linked target nodes
-  6. Generate edges
-  7. Compute layout coordinates
-  8. Write JSON Canvas output file
+  5. Generate edges (only between canvas nodes)
+  6. Compute layout coordinates
+  7. Write JSON Canvas output file
 
 Usage:
     python -m canvas_gen.main --vault /path/to/vault [options]
@@ -20,7 +19,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any
+
 
 from .config import (
     load_label_mappings,
@@ -194,22 +193,6 @@ def main(argv: list[str] | None = None) -> int:
         # Still write an empty canvas file
         write_canvas(args.output, [], [])
         return 0
-
-    # --- Expand with direct link targets ---
-    # Include notes linked FROM canvas nodes so edges have valid endpoints.
-    canvas_stems = {n.stem for n in nodes}
-    extra_nodes: list[Any] = []
-    for node in nodes:
-        for links in node.wikilinks.values():
-            for link in links:
-                target = link.split("|")[0].strip()
-                target_stem = Path(target).stem
-                if target_stem in vault_index and target_stem not in canvas_stems:
-                    canvas_stems.add(target_stem)
-                    extra_nodes.append(vault_index[target_stem])
-    if extra_nodes:
-        nodes = nodes + extra_nodes
-        print(f"[INFO] Added {len(extra_nodes)} linked target nodes to canvas.")
 
     print(f"[INFO] Canvas node set: {len(nodes)} nodes.")
 

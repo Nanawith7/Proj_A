@@ -1,5 +1,9 @@
 """Edge generation from wiki links extracted from note properties.
 
+Edges are created exclusively between nodes that are present in the
+canvas node set. If a linked target is not among the canvas nodes,
+no edge is generated for that link — the canvas remains self-contained.
+
 Edges are created per unique (source, target, key_name) tuple.
 Duplicate links from the same key to the same target are collapsed.
 Links from different keys to the same target produce separate edges.
