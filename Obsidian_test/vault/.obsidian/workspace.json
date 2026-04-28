@@ -196,6 +196,9 @@
   },
   "active": "f03cac4a8793025c",
   "lastOpenFiles": [
+    "_icons/node_era_150_180.png",
+    "_icons/node_era_120_150.png",
+    "_icons/node_era_080_120.png",
     "_viewbg/tag_bg.png",
     "_viewbg/era_bg.png",
     "_viewbg/event_bg.png",
@@ -248,9 +251,6 @@
     "scenario/魔法学園編入.md",
     "_icons/node_四天王B.png",
     "_icons/node_盗賊.png",
-    "_icons/node_元魔王.png",
-    "_icons/node_予言者.png",
-    "_icons/node_魔王.png",
-    "_icons/node_騎士団長.png"
+    "_icons/node_元魔王.png"
   ]
 }

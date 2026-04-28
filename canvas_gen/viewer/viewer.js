@@ -109,9 +109,6 @@ function render() {
     rect.setAttribute('data-id',n.id);rect.setAttribute('class','node-rect');rect.style.cursor='pointer';
     rect.onclick=e=>{e.stopPropagation();toggleExpand(n,g,mainG);};
     applyNodeView(rect,n,false);
-    // Collapsed fill opacity
-    const cfOp=nv.layout?.collapsedFillOpacity;
-    if(cfOp!==undefined)rect.setAttribute('opacity',cfOp);
     g.appendChild(rect);
 
     // Collapsed icon: centered by default, overridable via layout
@@ -202,13 +199,17 @@ function applyNodeView(rect, node, expanded) {
   if(expanded) { nw=expanded.width; nh=expanded.height; }
   rect.setAttribute('x',node.x||0);rect.setAttribute('y',node.y||0);
   rect.setAttribute('width',nw);rect.setAttribute('height',nh);
-  const rx=nv.rx||4;
   const shape=nv.shape||'rect';
+  const rx=nv.rx||4;
   rect.setAttribute('rx',shape==='circle'?Math.min(nw,nh)/2:shape==='round'?18:rx);
   rect.setAttribute('ry',shape==='circle'?Math.min(nw,nh)/2:shape==='round'?18:rx);
   rect.setAttribute('fill',node.color||td.color||'#555');
   rect.setAttribute('stroke',nv.stroke||'#fff6');
   rect.setAttribute('stroke-width',nv.strokeWidth||.5);
+  // Apply opacity from nodeview based on state
+  const op=expanded?(nv.layout?.expandedFillOpacity):(nv.layout?.collapsedFillOpacity);
+  if(op!==undefined)rect.setAttribute('opacity',op);
+  else rect.removeAttribute('opacity');
 }
 
 function updateTransform(g){g.setAttribute('transform',`translate(${panX},${panY}) scale(${zoom})`);}
@@ -272,9 +273,6 @@ function toggleExpand(node, g, mainG) {
 
   const rect=g.querySelector('.node-rect');
   applyNodeView(rect,node,{width:expW,height:expH});
-  // Expanded fill opacity
-  const efOp=nv.layout?.expandedFillOpacity;
-  rect.setAttribute('opacity',efOp!==undefined?efOp:1);
 
   const nx=node.x||0,ny=node.y||0;
 
