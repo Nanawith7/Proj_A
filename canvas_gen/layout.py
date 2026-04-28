@@ -323,11 +323,17 @@ def _compute_container_layout(
             fallback_nodes, type_defs, column_width, row_height,
             node_width, node_height, y_base=fallback_y_offset
         )
-        # Center fallback area under containers
         fallback_width = max((pn.x + pn.width for pn in fallback_positions), default=0)
-        fallback_x_offset = max(0.0, (total_container_width - fallback_width) / 2)
+
+        # Mutual centering: both sections share a common vertical center
+        common_center = max(total_container_width, fallback_width) / 2
+        container_shift = common_center - total_container_width / 2
+        fallback_shift = common_center - fallback_width / 2
+
+        for pn in result:
+            pn.x += container_shift
         for pn in fallback_positions:
-            pn.x += fallback_x_offset
+            pn.x += fallback_shift
             result.append(pn)
 
     return result
