@@ -4,6 +4,13 @@ let ALL_NODES=[], ALL_EDGES=[], VAULT={}, TYPEDEFS={}, NODEVIEWS={};
 let currentNodes=[], currentEdges=[];
 let panX=0, panY=0, zoom=1, dragging=false, dsX=0, dsY=0, expandedId=null;
 
+// Offscreen canvas for text measurement
+const _measureCtx = document.createElement('canvas').getContext('2d');
+function measureText(text, fontSize, fontFamily) {
+  _measureCtx.font = `${fontSize}px ${fontFamily||'sans-serif'}`;
+  return _measureCtx.measureText(text).width;
+}
+
 // ═══════ INIT ═══════
 async function init() {
   const [d1,d2] = await Promise.all([fetch('/api/data').then(r=>r.json()),fetch('/api/typedefs').then(r=>r.json())]);
@@ -87,7 +94,7 @@ function render() {
 function applyNodeView(rect, node, expanded) {
   const type=nodeType(node),td=TYPEDEFS[type]||{},nvName=td.nodeview||'plain',nv=NODEVIEWS[nvName]||{shape:'rect',rx:4};
   let nw=node.width||200,nh=node.height||120;
-  if(expanded) { const mode=document.getElementById('expand-mode')?.value||'wrap'; nw=expanded.width; nh=expanded.height; }
+  if(expanded) { nw=expanded.width; nh=expanded.height; }
   rect.setAttribute('x',node.x||0);rect.setAttribute('y',node.y||0);
   rect.setAttribute('width',nw);rect.setAttribute('height',nh);
   const rx=nv.rx||4;
@@ -112,22 +119,30 @@ function toggleExpand(node, g, mainG) {
 
   const stem=nodeStem(node),v=VAULT[stem];if(!v)return;
   const lines=buildBodyLines(v);
-  const longest=Math.max(...lines.filter(l=>l.text).map(l=>l.text.length),0);
 
-  let expW=420,expH=340;
+  let expW=420,expH=340,fontSize=10;
   if(mode==='stretch'){
-    const fs=10;
-    expW=Math.max(420,longest*(fs*0.65)+20);
-    expH=Math.max(340,lines.filter(l=>l.text||l.t==='br'||l.t==='hr').length*14+40);
+    let maxW=0; let lineCount=0;
+    lines.forEach(l=>{
+      if(l.t==='br'){lineCount++;return;}
+      if(l.t==='hr'||l.t==='code')return;
+      const fs=l.t==='h'?14:10;
+      if(l.text){
+        const w=measureText(l.text,fs,'sans-serif');
+        if(w>maxW)maxW=w;
+        lineCount++;
+      }
+    });
+    expW=Math.max(420,maxW+24);
+    expH=Math.max(340,lineCount*16+40);
   }
 
   const rect=g.querySelector('.node-rect');
   applyNodeView(rect,node,{width:expW,height:expH});
 
-  // Displace overlapping neighbors
   const nx=node.x||0,ny=node.y||0;
-  const allNodes=currentNodes;
-  allNodes.forEach(n=>{
+  // Displace neighbors
+  currentNodes.forEach(n=>{
     if(n.id===nid)return;
     const g2=mainG.querySelector(`g[data-id="${n.id}"]`);if(!g2)return;
     const rect2=g2.querySelector('.node-rect');if(!rect2)return;
@@ -139,17 +154,31 @@ function toggleExpand(node, g, mainG) {
     }
   });
 
-  // Render body
+  // Body text
   g.querySelectorAll('.node-body').forEach(el=>el.remove());
   const svgNS='http://www.w3.org/2000/svg';
   let cy=ny+26;
   lines.forEach(ln=>{
-    if(ln.t==='br'){cy+=8;return;} if(ln.t==='hr'){cy+=4;return;} if(ln.t==='code')return;
-    let fs=10,fill='#ddd';if(ln.t==='h'){fs=14;fill='#e94560';}else if(ln.t==='q'){fill='#aaa';}
+    if(ln.t==='br'){cy+=10;return;}
+    if(ln.t==='hr'){cy+=4;return;}
+    if(ln.t==='code')return;
+    let fs=ln.t==='h'?14:10,fill=ln.t==='h'?'#e94560':ln.t==='q'?'#aaa':'#ddd';
     if(ln.text){
       let txt=ln.text;
-      if(mode==='wrap'){const wrap=Math.floor((expW-16)/(fs*.65));for(let i=0;i<txt.length;i+=wrap){if(cy>ny+expH-8)return;addBodyLine(g,svgNS,nx+8,cy,fill,fs,txt.slice(i,i+wrap));cy+=fs+4;}}
-      else {if(cy>ny+expH-8)return;addBodyLine(g,svgNS,nx+8,cy,fill,fs,txt);cy+=fs+4;}
+      if(mode==='wrap'){
+        let pos=0;
+        while(pos<txt.length){
+          if(cy>ny+expH-8)return;
+          let chunkLen=1;
+          while(pos+chunkLen<=txt.length&&measureText(txt.slice(pos,pos+chunkLen),fs,'sans-serif')<expW-16)chunkLen++;
+          if(chunkLen===1&&pos+1<=txt.length)chunkLen=2;
+          addBodyLine(g,svgNS,nx+8,cy,fill,fs,txt.slice(pos,pos+chunkLen-1));
+          pos+=chunkLen-1;cy+=fs+4;
+        }
+      }else{
+        if(cy>ny+expH-8)return;
+        addBodyLine(g,svgNS,nx+8,cy,fill,fs,txt);cy+=fs+4;
+      }
     }
   });
 }
@@ -187,7 +216,7 @@ function collapseAll(mainG){
 // ═══════ GUI ═══════
 function addRow(cid){const div=document.getElementById(cid);const row=document.createElement('div');row.className='filter-row';const logic=document.createElement('span');logic.className='logic';logic.textContent=div.children.length?'AND':'WHERE';const sel=document.createElement('select');sel.innerHTML='<option value="$or">$or</option>';const keys=new Set();Object.values(VAULT).forEach(v=>{if(v.props)Object.keys(v.props).forEach(k=>keys.add(k));});[...keys].sort().forEach(k=>{sel.innerHTML+=`<option value="${k}">${k}</option>`;});const inp=document.createElement('input');inp.placeholder='value or val1|val2';const del=document.createElement('button');del.textContent='x';del.style.background='#533483';del.style.padding='2px 6px';del.onclick=()=>row.remove();row.appendChild(logic);row.appendChild(sel);row.appendChild(inp);row.appendChild(del);div.appendChild(row);}
 function buildFilterStr(cid){const pairs=[];document.getElementById(cid).querySelectorAll('.filter-row').forEach(r=>{const s=r.querySelector('select'),i=r.querySelector('input');if(s&&i&&i.value.trim())pairs.push(s.value+'='+i.value.trim());});return pairs.join(',');}
-async function apply(){const params={filter:buildFilterStr('filter-rows'),exclude:buildFilterStr('exclude-rows'),sortKey:document.getElementById('sort-key').value,sortDesc:document.getElementById('sort-desc').checked,prune:document.getElementById('prune-orphans').checked};const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params)});const data=await res.json();currentNodes=data.nodes;currentEdges=data.edges;panX=0;panY=0;zoom=1;expandedId=null;render();}
+async function apply(){const params={filter:buildFilterStr('filter-rows'),exclude:buildFilterStr('exclude-rows'),sortKey:document.getElementById('sort-key').value,sortDesc:document.getElementById('sort-desc').checked,prune:document.getElementById('prune-orphans').checked};const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params)});const data=await res.json();currentNodes=data.nodes;currentEdges=data.edges;/* keep pan/zoom */render();}
 function reset(){document.getElementById('filter-rows').innerHTML='';document.getElementById('exclude-rows').innerHTML='';document.getElementById('sort-key').value='';document.getElementById('sort-desc').checked=false;document.getElementById('prune-orphans').checked=false;currentNodes=ALL_NODES;currentEdges=ALL_EDGES;panX=0;panY=0;zoom=1;expandedId=null;render();addRow('filter-rows');}
 
 init();
