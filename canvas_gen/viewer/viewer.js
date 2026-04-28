@@ -365,7 +365,7 @@ function toggleExpand(node, g, mainG) {
       let bx=posX>=0?nx+posX:nx+bodyPadX;
       ln.items.forEach(item=>{
         const tw=measureText(item,fs,'sans-serif')+padX*2;
-        if(ln.pos&&posX<0&&bx+tw>nx+expW-8){bx=nx+bodyPadX;cy+=fs+padY*2+4;}
+        if(posX<0&&bx+tw>nx+expW-8){bx=nx+bodyPadX;cy+=fs+padY*2+4;}
         const r=document.createElementNS(svgNS,'rect');r.setAttribute('x',bx);r.setAttribute('y',cy-fs-padY);
         r.setAttribute('width',tw);r.setAttribute('height',fs+padY*2);
         const rx=ln.shape==='diamond'?4:ln.shape==='round'?10:3;
