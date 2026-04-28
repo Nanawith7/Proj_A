@@ -196,6 +196,12 @@
   },
   "active": "f03cac4a8793025c",
   "lastOpenFiles": [
+    "bmp_test.canvas",
+    "bmptest/test.md",
+    "bmptest",
+    "nodeview/bmp_test.json",
+    "_viewbg/WS000006.BMP",
+    "_viewbg/WS000022.JPG",
     "_icons/node_era_150_180.png",
     "_icons/node_era_120_150.png",
     "_icons/node_era_080_120.png",
@@ -211,8 +217,6 @@
     "nodeview/tag_bubble.json",
     "nodeview/plain.json",
     "nodeview",
-    "thief_era_viewer.html",
-    "characters_viewer.html",
     "era/era_120_150.md",
     "era/era_080_120.md",
     "characters.canvas",
@@ -247,10 +251,6 @@
     "scenario/秘宝争奪戦.md",
     "scenario/魔族領潜入.md",
     "scenario/塔の試練.md",
-    "scenario/王都魔法大会.md",
-    "scenario/魔法学園編入.md",
-    "_icons/node_四天王B.png",
-    "_icons/node_盗賊.png",
-    "_icons/node_元魔王.png"
+    "scenario/王都魔法大会.md"
   ]
 }

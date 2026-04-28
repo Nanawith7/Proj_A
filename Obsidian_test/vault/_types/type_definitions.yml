@@ -46,3 +46,10 @@ era:
   node_width: 220
   node_height: 100
   nodeview: era_circle
+bmptest:
+  lining: 1
+  centering: true
+  color: "#607D8B"
+  node_width: 220
+  node_height: 100
+  nodeview: bmp_test

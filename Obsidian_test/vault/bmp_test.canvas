@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    {
+      "id": "test",
+      "type": "file",
+      "file": "bmptest/test.md",
+      "x": 0,
+      "y": 0,
+      "width": 220,
+      "height": 100,
+      "color": "#607D8B"
+    }
+  ],
+  "edges": []
+}
