@@ -19,6 +19,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 
 from .config import (
@@ -27,13 +28,11 @@ from .config import (
     resolve_label_mapping_path,
     resolve_type_def_path,
 )
-from .edges import generate_edges
-from .extractor import collect_related_nodes, scan_vault
-from .filter_sort import _match_condition, apply_filter, run_filter_pipeline
-from .icons import generate_type_icons, generate_node_icon
-from .layout import compute_layout
-from .models import DEFAULT_LABEL_MAPPING_PATH, DEFAULT_TYPE_DEF_PATH
+from .pipeline import run as run_pipeline
 from .writer import write_canvas
+from .icons import generate_type_icons
+from .models import DEFAULT_LABEL_MAPPING_PATH, DEFAULT_TYPE_DEF_PATH
+from .extractor import collect_related_nodes, scan_vault
 
 
 def _parse_sort_by(raw: str) -> Any:
@@ -265,15 +264,37 @@ def main(argv: list[str] | None = None) -> int:
         nodes = list(vault_index.values())
         print("[INFO] No base node specified -- using full vault.")
 
-    # --- Filter / Exclude / Sort ---
-    nodes = run_filter_pipeline(nodes, filter_conditions, exclude_conditions, sort_by)
-    print(f"[INFO] After filter/exclude/sort: {len(nodes)} nodes.")
+    # --- Execute pipeline ---
+    positioned, edges, icon_map, eff_row_h, eff_col_w, icon_sz, max_icon_h = run_pipeline(
+        nodes=nodes,
+        vault_index=vault_index,
+        type_defs=type_defs,
+        label_map=label_map,
+        include_types=args.include_types,
+        filter_conditions=filter_conditions,
+        exclude_conditions=exclude_conditions,
+        sort_by=sort_by,
+        x_axis_key=args.x_axis_key,
+        column_width=args.column_width,
+        row_height=args.row_height,
+        node_width=args.node_width,
+        node_height=args.node_height,
+        icon_size=icon_size,
+        icon_gap=args.icon_gap,
+        prune_orphans=args.prune_orphans,
+        vault_path=str(vault_path),
+    )
 
-    if not nodes:
-        print("[WARN] No nodes match the criteria. Writing empty canvas.")
-        # Still write an empty canvas file
+    if not positioned:
         write_canvas(args.output, [], [], icon_map, icon_size, args.icon_gap, icon_size)
         return 0
+
+    output_path = write_canvas(
+        args.output, positioned, edges,
+        icon_map, icon_size, args.icon_gap, max_icon_h
+    )
+    print(f"[INFO] Canvas written to: {output_path}")
+    return 0
 
     print(f"[INFO] Canvas node set: {len(nodes)} nodes.")
 

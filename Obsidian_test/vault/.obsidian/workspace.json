@@ -11,10 +11,17 @@
             "id": "2ec1532ea9941862",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "グラフビュー"
+              "type": "canvas",
+              "state": {
+                "file": "thief_era.canvas",
+                "viewState": {
+                  "x": 575.1756563470691,
+                  "y": 851.0921812024376,
+                  "zoom": -1.4648655046879253
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "thief_era"
             }
           }
         ]
@@ -178,8 +185,8 @@
   },
   "active": "2ec1532ea9941862",
   "lastOpenFiles": [
-    "thief_era.canvas",
     "thief_network.canvas",
+    "thief_era.canvas",
     "timeline.canvas",
     "era_timeline.canvas",
     "event/魔法学園創設.md",
