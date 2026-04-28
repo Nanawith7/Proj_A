@@ -334,13 +334,20 @@ function toggleExpand(node, g, mainG) {
   g.querySelectorAll('.node-body').forEach(el=>el.remove());
   const svgNS='http://www.w3.org/2000/svg';
   let cy=ny+bodyPadY+12;
+  // Body position override
+  const bodyPos=nv.layout?.bodyPosition;
+  if(bodyPos)cy=ny+(bodyPos.y||bodyPadY+12);
   lines.forEach(ln=>{
+    // Absolute position override
+    if(ln.pos){
+      cy=ny+(ln.pos.y||cy-ny);
+    }
     if(ln.t==='br'){cy+=10;return;} if(ln.t==='hr'){cy+=4;return;} if(ln.t==='code')return;
     if(ln.t==='pill'){
-      const fs=9,padX=6,padY=3; let bx=nx+bodyPadX;
+      const fs=9,padX=6,padY=3; let bx=ln.pos?nx+(ln.pos.x||bodyPadX):nx+bodyPadX;
       ln.items.forEach(item=>{
         const tw=measureText(item,fs,'sans-serif')+padX*2;
-        if(bx+tw>nx+expW-8){bx=nx+bodyPadX;cy+=fs+padY*2+4;}
+        if(!ln.pos&&bx+tw>nx+expW-8){bx=nx+bodyPadX;cy+=fs+padY*2+4;}
         const r=document.createElementNS(svgNS,'rect');r.setAttribute('x',bx);r.setAttribute('y',cy-fs-padY);
         r.setAttribute('width',tw);r.setAttribute('height',fs+padY*2);
         const rx=ln.shape==='diamond'?4:ln.shape==='round'?10:3;
@@ -358,8 +365,12 @@ function toggleExpand(node, g, mainG) {
       let txt=ln.text;
       if(mode==='wrap'){
         let pos=0;
-        while(pos<txt.length){if(cy>ny+expH-8)return;let len=1;while(pos+len<=txt.length&&measureText(txt.slice(pos,pos+len),fs,'sans-serif')<expW-16)len++;if(len===1&&pos+1<=txt.length)len=2;addBodyLine(g,svgNS,nx+bodyPadX,cy,fill,fs,txt.slice(pos,pos+len-1));pos+=len-1;cy+=fs+4;}
-      }else{if(cy>ny+expH-8)return;addBodyLine(g,svgNS,nx+bodyPadX,cy,fill,fs,txt);cy+=fs+4;}
+        const lx=ln.pos?nx+(ln.pos.x||bodyPadX):nx+bodyPadX;
+        while(pos<txt.length){if(cy>ny+expH-8)return;let len=1;while(pos+len<=txt.length&&measureText(txt.slice(pos,pos+len),fs,'sans-serif')<expW-16)len++;if(len===1&&pos+1<=txt.length)len=2;addBodyLine(g,svgNS,lx,cy,fill,fs,txt.slice(pos,pos+len-1));pos+=len-1;cy+=fs+4;}
+      }else{
+        if(cy>ny+expH-8)return;
+        addBodyLine(g,svgNS,ln.pos?nx+(ln.pos.x||bodyPadX):nx+bodyPadX,cy,fill,fs,txt);cy+=fs+4;
+      }
     }
   });
 }
@@ -374,11 +385,12 @@ function buildBodyLines(v,nv){
     Object.entries(v.props).forEach(([k,val])=>{
       if(k==='title'||k==='type')return;
       const ps=propStyles[k];
+      const pos=ps?.position||null;
       if(ps&&ps.style==='pill'){
         const items=Array.isArray(val)?val:[val];
         const cleaned=items.map(it=>typeof it==='string'?it.replace(/^\[\[|\]\]$/g,''):it);
-        lines.push({t:'pill',items:cleaned,shape:ps.shape||'round',bg:ps.bg||'#fff2',textColor:ps.textColor||'#eee',label:k});
-      }else{lines.push({t:'p',text:`${k}: ${Array.isArray(val)?val.join(', '):val}`});}
+        lines.push({t:'pill',items:cleaned,shape:ps.shape||'round',bg:ps.bg||'#fff2',textColor:ps.textColor||'#eee',label:k,pos});
+      }else{lines.push({t:'p',text:`${k}: ${Array.isArray(val)?val.join(', '):val}`,pos});}
     });
   }
   if(v.body){lines.push({t:'hr'});v.body.split('\n').forEach(l=>{const t=l.trim();if(!t){lines.push({t:'br'});return;}if(t.startsWith('#'))lines.push({t:'h',text:t.replace(/^#+\s*/,'')});else if(t.startsWith('>'))lines.push({t:'q',text:t.slice(1).trim()});else if(t.startsWith('```')){lines.push({t:'code'});return;}else lines.push({t:'p',text:t});});}
