@@ -228,6 +228,26 @@ function drawPreview(svgId,w,h,nv,lp,expanded){
     g.appendChild(txt);
   }
 
+  // Mock body text in expanded preview to match viewer layout
+  if(expanded){
+    const bodyY=nv.layout?.bodyPosition?.y||(lp.contentY+12);
+    const t=document.createElementNS(SVGNS,'text');
+    t.setAttribute('x',lp.contentX);t.setAttribute('y',bodyY+10);
+    t.setAttribute('fill','#e94560');t.setAttribute('font-size','13');t.setAttribute('font-weight','bold');
+    t.textContent='Title line';
+    g.appendChild(t);
+    const b=document.createElementNS(SVGNS,'text');
+    b.setAttribute('x',lp.contentX);b.setAttribute('y',bodyY+26);
+    b.setAttribute('fill','#ddd');b.setAttribute('font-size','10');
+    b.textContent='Body text ...';
+    g.appendChild(b);
+    const b2=document.createElementNS(SVGNS,'text');
+    b2.setAttribute('x',lp.contentX);b2.setAttribute('y',bodyY+40);
+    b2.setAttribute('fill','#aaa');b2.setAttribute('font-size','9');
+    b2.textContent='> quote text ...';
+    g.appendChild(b2);
+  }
+
   // Props (expanded) + draggable markers
   if(expanded&&propRows.length){
     const startY=nv.layout?.bodyPosition?.y||(lp.contentY+12);
