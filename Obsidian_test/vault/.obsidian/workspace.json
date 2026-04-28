@@ -11,10 +11,17 @@
             "id": "2ec1532ea9941862",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "グラフビュー"
+              "type": "canvas",
+              "state": {
+                "file": "thief_era.canvas",
+                "viewState": {
+                  "x": 2307.33596951424,
+                  "y": 1537.094322183846,
+                  "zoom": -0.9724139248688628
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "thief_era"
             }
           }
         ]

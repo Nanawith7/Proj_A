@@ -273,6 +273,19 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"[INFO] Canvas node set: {len(nodes)} nodes.")
 
+    # --- Include structural nodes for x_axis_key containers ---
+    if args.x_axis_key:
+        key = args.x_axis_key
+        stems = {n.stem for n in nodes}
+        added = 0
+        for stem, vn in vault_index.items():
+            if stem not in stems and vn.properties.get(key) is not None:
+                nodes.append(vn)
+                stems.add(stem)
+                added += 1
+        if added:
+            print(f"[INFO] Added {added} structural node(s) with '{key}' property for containers.")
+
     # --- Parse per-node icon sizes and compute effective layout params ---
     max_icon_h = icon_size
     max_icon_w = icon_size
@@ -332,9 +345,14 @@ def main(argv: list[str] | None = None) -> int:
         for edge in edges:
             connected_stems.add(edge.from_node)
             connected_stems.add(edge.to_node)
+        # Structural nodes (with x_axis_key value) are NEVER pruned
+        if args.x_axis_key:
+            xkey = args.x_axis_key
+            for node in nodes:
+                if node.properties.get(xkey) is not None:
+                    connected_stems.add(node.stem)
         before = len(nodes)
         if prune_conditions:
-            # Only prune orphans matching the type filter
             orphaned = [n for n in nodes if n.stem not in connected_stems]
             pruned_stems = {n.stem for n in apply_filter(orphaned, prune_conditions) if n.stem not in connected_stems}
             nodes = [n for n in nodes if n.stem not in pruned_stems]
