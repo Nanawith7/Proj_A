@@ -73,6 +73,8 @@ function render() {
     rect.setAttribute('data-id',n.id);rect.setAttribute('class','node-rect');rect.style.cursor='pointer';
     rect.onclick=e=>{e.stopPropagation();toggleExpand(n,g,mainG);};
     applyNodeView(rect,n,false);
+    g.appendChild(rect); // rect FIRST for z-order
+
     const txt=document.createElementNS(svgNS,'text');txt.setAttribute('class','node-title');
     const fs=Math.max(9,Math.min(14,nv.fontSize||12));
     txt.setAttribute('font-size',fs);if(nv.boldTitle)txt.setAttribute('font-weight','bold');
@@ -111,7 +113,7 @@ function render() {
       txt.setAttribute('fill','#fff');
       txt.textContent=title;g.appendChild(txt);
     }
-    g.appendChild(rect);mainG.appendChild(g);
+    mainG.appendChild(g);
   });
   svg.appendChild(mainG);graph.appendChild(svg);expandedId=null;
   // Pan/zoom
@@ -166,14 +168,19 @@ function toggleExpand(node, g, mainG) {
         lineCount++;
       }
     });
-    expW=Math.max(420,maxW+24);
-    expH=Math.max(340,lineCount*16+40);
+    expW=Math.max(420,maxW+bodyPadX*2);
+    expH=Math.max(340,lineCount*16+bodyPadY+8);
   }
 
   const rect=g.querySelector('.node-rect');
   applyNodeView(rect,node,{width:expW,height:expH});
 
   const nx=node.x||0,ny=node.y||0;
+  const nw=node.width||200,nh=node.height||120;
+  const isCircle=nv.shape==='circle';
+  const diam=isCircle?Math.min(nw,nh):0;
+  const bodyPadX=isCircle?Math.floor((nw-diam)/2)+10:8;
+  const bodyPadY=isCircle?Math.floor((nh-diam)/2)+26:26;
   // Displace neighbors
   currentNodes.forEach(n=>{
     if(n.id===nid)return;
@@ -190,15 +197,14 @@ function toggleExpand(node, g, mainG) {
   // Body text
   g.querySelectorAll('.node-body').forEach(el=>el.remove());
   const svgNS='http://www.w3.org/2000/svg';
-  let cy=ny+26;
+  let cy=ny+bodyPadY;
   lines.forEach(ln=>{
     if(ln.t==='br'){cy+=10;return;}
     if(ln.t==='hr'){cy+=4;return;}
     if(ln.t==='code')return;
     if(ln.t==='pill'){
-      // Render pill badges
       const fs=9,padX=6,padY=3;
-      let bx=nx+8;
+      let bx=nx+bodyPadX;
       ln.items.forEach(item=>{
         const tw=measureText(item,fs,'sans-serif')+padX*2;
         if(bx+tw>nx+expW-8){bx=nx+8;cy+=fs+padY*2+4;}
@@ -227,12 +233,12 @@ function toggleExpand(node, g, mainG) {
           let chunkLen=1;
           while(pos+chunkLen<=txt.length&&measureText(txt.slice(pos,pos+chunkLen),fs,'sans-serif')<expW-16)chunkLen++;
           if(chunkLen===1&&pos+1<=txt.length)chunkLen=2;
-          addBodyLine(g,svgNS,nx+8,cy,fill,fs,txt.slice(pos,pos+chunkLen-1));
+          addBodyLine(g,svgNS,nx+bodyPadX,cy,fill,fs,txt.slice(pos,pos+chunkLen-1));
           pos+=chunkLen-1;cy+=fs+4;
         }
       }else{
         if(cy>ny+expH-8)return;
-        addBodyLine(g,svgNS,nx+8,cy,fill,fs,txt);cy+=fs+4;
+        addBodyLine(g,svgNS,nx+bodyPadX,cy,fill,fs,txt);cy+=fs+4;
       }
     }
   });
