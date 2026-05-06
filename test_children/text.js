@@ -84,9 +84,11 @@ if (document.readyState === 'loading') {
     window._measureText = measureText;
     window._wrapText = wrapText;
     window._fitFontSize = fitFontSize;
+    window._measureCtx = _measureCtx;
   });
 } else {
   window._measureText = measureText;
   window._wrapText = wrapText;
   window._fitFontSize = fitFontSize;
+  window._measureCtx = _measureCtx;
 }
