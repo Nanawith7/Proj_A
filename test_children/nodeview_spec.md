@@ -143,17 +143,9 @@ function resolvePos(raw, total){
 ### plain.json
 - 最小限の設定。shape:rect, titleY:centerのみ
 
-## 6. 現状の制限（childrenシステム未実装）
+## 6. childrenシステム（実装済み）
 
-1. **再帰的ネスト**: 存在しない。propertiesは平坦な配列
-2. **背景画像**: ルートの1つだけ（nv.background）。各要素ごとに個別指定不可
-3. **テキスト描画**: propertiesベース。各プロパティが1つのテキスト/ピル要素
-4. **相対位置**: `position.x/y`はパーセントまたは絶対pxのみ。「親の左線から-10px」のような相対指定は存在しない
-5. **動的サイズ**: 展開時のみ。折りたたみ時は固定サイズ
-
-## 7. 求める機能（childrenシステム）
-
-### 7.1 children構造
+### 6.1 要素構造
 
 ```json
 {
@@ -165,7 +157,9 @@ function resolvePos(raw, total){
   "fontSize": 12,
   "textColor": "#ffffffcc",
   "text": "任意のテキスト",
-  "background": "bg_image.png",
+  "bgImage": "bg_image.png",
+  "bgImgWidth": 0,
+  "bgImgHeight": 0,
   "children": [
     {
       "shape": "rect",
@@ -181,78 +175,288 @@ function resolvePos(raw, total){
 }
 ```
 
-### 7.2 children要素の仕様
+### 6.2 children要素の全仕様
 
 | プロパティ | 型 | 既定値 | 説明 |
 |---|---|---|---|
-| `shape` | `"rect"` \| `"circle"` \| `"round"` | `"rect"` | 形状 |
-| `rx` | number | `4` | 角半径 |
+| `id` | number | 自動インクリメント | 要素一意ID |
+| `type` | `"box"` \| `"circle"` | `"box"` | 要素タイプ |
+| `shape` | `"rect"` \| `"circle"` | `"rect"` | 形状。circle=円形(rx無視) |
+| `rx` | number | 6(box) / 999(circle) | 角半径 |
 | `fill` | string (RGBA hex) | `"#ffffff22"` | 塗りつぶし色 |
-| `stroke` | string (hex) | `"#fff6"` | 枠線色 |
-| `strokeWidth` | number | `1.5` | 枠線幅 |
+| `stroke` | string (hex) | `"#ffffff88"` | 枠線色 |
+| `strokeWidth` | number | 1.5 | 枠線幅 |
 | `text` | string | `""` | この要素に表示するテキスト |
-| `fontSize` | number | `12` | フォントサイズ |
+| `fontSize` | number | 11 | フォントサイズ |
 | `textColor` | string (hex) | `"#ffffffcc"` | テキスト色 |
 | `textAlign` | `"start"` \| `"middle"` \| `"end"` | `"start"` | テキスト水平配置 |
-| `background` | string | `""` | この要素の背景画像 |
-| `w` | number \| `"auto"` | `"auto"` | 幅。数値=固定px、"auto"=コンテンツから計算 |
-| `h` | number \| `"auto"` | `"auto"` | 高さ。同上 |
-| `xRel` | string | `"center"` | X相対位置（後述） |
-| `yRel` | string | `"top-8"` | Y相対位置（後述） |
-| `gapY` | number | `5` | 兄弟要素間の垂直ギャップ |
-| `children` | array | `[]` | 子要素 |
-| `zIndex` | number | `0` | 描画順序（大きいほど前面） |
+| `bgImage` | string | `null` | 背景画像パス |
+| `bgImgWidth` | number | 0 | 背景画像実測幅 |
+| `bgImgHeight` | number | 0 | 背景画像実測高さ |
+| `w` | number \| `null` | `null` | 幅。null=auto(コンテンツ計算)、数値=固定px |
+| `h` | number \| `null` | `null` | 高さ。同上 |
+| `wRel` | string \| `null` | `null` | 相対幅（後述） |
+| `hRel` | string \| `null` | `null` | 相対高さ（後述） |
+| `xRel` | string \| `null` | `null` | X相対位置（後述）。null=中央寄せ |
+| `yRel` | string \| `null` | `null` | Y相対位置（後述）。null=自動スタック |
+| `gapY` | number | 5 | 兄弟要素間の垂直ギャック |
+| `textOverflow` | `"shrink"` \| `"clip"` | `"shrink"` | 両固定時テキストが収まらない時の動作 |
+| `children` | array | `[]` | 子要素（再帰可能） |
+| `expanded` | boolean | `true` | ツリービューの展開状態 |
+| `_cw` | number | 0 | **内部** 実測幅 |
+| `_ch` | number | 0 | **内部** 実測高さ |
+| `_ax` | number | 0 | **内部** 絶対X座標 |
+| `_ay` | number | 0 | **内部** 絶対Y座標 |
+| `_isManual` | boolean | `false` | **内部** 手動配置フラグ |
 
-### 7.3 相対位置指定（xRel/yRel）
+### 6.3 相対位置指定（xRel / yRel）
 
 ```
 親ボックス: x=0, y=0, w=400, h=300
 
-「left-N」: 親の左線から右へNpx
-「right-N」: 親の右線から左へNpx
-「top-N」: 親の上線から下へNpx
-「bottom-N」: 親の下線から上へNpx
-「-N」: 親の左/上線から左/上へNpx（外にはみ出し）
-「N」: 親の左/上線から右/下へNpx
-
-例: xRel="right-10" → x = parent.x + parent.w - 10 - child.w
-例: yRel="bottom-5" → y = parent.y + parent.h - 5 - child.h
-例: xRel="-5" → x = parent.x - 5（左にはみ出し）
+「left-N」    : 親の左線から右へ Npx（N>0）
+「right-N」   : 親の右線から左へ Npx（N>0）。親縁に固定され、親サイズに影響しない
+「top-N」     : 親の上線から下へ Npx（N>0）
+「bottom-N」  : 親の下線から上へ Npx（N>0）。親縁に固定され、親サイズに影響しない
+「left--N」   : 親の左線から左へ Npx（外にはみ出し、isOutside=true）
+「right--N」  : 親の右線から右へ Npx（外にはみ出し、isOutside=true）
+「top--N」    : 親の上線から上へ Npx（外にはみ出し）
+「bottom--N」 : 親の下線から下へ Npx（外にはみ出し）
+「-N」        : 親の左/上から左/上へ Npx（絶対座標）
+「N」         : 親の左/上から右/下へ Npx（絶対座標）
+null          : 親の中央寄せ（xRel）/ 自動垂直スタック（yRel）
 ```
 
-### 7.4 動的サイズ計算アルゴリズム
-
-**Pass 1（下位互換測定）**: 葉ノードから再帰的にサイズを測定
-- テキスト長を`measureText()`で測定
-- childrenがあればその最大幅/合計高さを計算
-- `w="auto"`または`h="auto"`の場合はコンテンツサイズを使用
-
-**Pass 2（相対位置解決）**: ルートから再帰的に位置を計算
-- `xRel/yRel`を親の座標に解決
-- `w/h="auto"`の場合はchildrenのサイズに基づいて親のサイズを決定
-
-**Pass 3（アスペクト比維持）**: 必要に応じて親のサイズを拡大
-- 元のアスペクト比を維持しつつ、全てのchildrenが収まるサイズに拡大
-
-### 7.5 既存propertiesとのマッピング
-
-既存の`properties`オブジェクトは自動的に`children[]`に変換される：
-
-```json
-// 旧形式
-{ "properties": { "tags": { "style": "pill", "position": {"x": 10, "y": 8} } } }
-
-// → 新形式に変換
-{ "children": [
-  { "shape": "rect", "rx": 3, "fill": "#fff2", "stroke": "#eee", "text": "tags",
-    "xRel": "left-10", "yRel": "top-8", "style": "pill" }
-]}
+**計算式:**
+```
+xRel="right-10" → x = parent.w - 10 - child.w（親右縁から10px内側）
+xRel="right--20" → x = parent.w + 20（親右縁から20px外側）
+yRel="bottom-5" → y = parent.h - 5 - child.h（親下縁から5px内側）
+yRel=null → y = curY（自動スタック、gapY適用）
+xRel=null → x = (parent.w - child.w) / 2（中央寄せ）
 ```
 
-## 8. テスト用HTMLの要件
+### 6.4 相対サイズ指定（wRel / hRel）
 
-1. **既存ファイルに一切触れない** - test_children/配下の独立したHTMLファイル
-2. **nodeviewシステムと互換性がある** - 同じJSONスキーマを使用
-3. **インタラクティブなエディタ** - ドラッグ&ドロップで要素配置
-4. **リアルタイムプレビュー** - JSON変更と同時にSVG描画が更新
-5. **ツリー表示** - 階層構造を視覚的に表示・編集
+```
+"parent"        : 親と同じサイズ
+"parent-N%"     : 親の N%（例: "parent-50%" → 親の半分）
+"child-ラベル"   : ラベル一致要素と同じサイズ（親スコープ内検索）
+"sibling-ラベル" : 同上（エイリアス）
+```
+
+**検索スコープ:** `findElementByLabel()` は `parent` 配下の `children` から検索（`root` 全体ではない）。これにより兄弟要素間の相対サイズ指定が可能。
+
+### 6.5 レイアウト計算アルゴリズム
+
+**computeLayout()** — 最大5イテレーションの収束チェック付き:
+
+```
+for (iter = 0; iter < 5; iter++) {
+  measureElement(root);       // Pass 1: 下位互換測定（ボトムアップ）
+  resolvePositionsTree(root); // Pass 2: 相対位置解決（トップダウン）
+  if (rootサイズが不変) break;
+}
+```
+
+#### Pass 1: measureElement（ボトムアップ、葉→根）
+
+各要素の `_cw` / `_ch` をコンテンツサイズから計算:
+
+1. **両固定** (`w`, `h` 数値): `_cw=w`, `_ch=h`。テキストは `textOverflow` モードで描画
+2. **auto**:
+   - children があれば: `maxChildW`（最大幅）, `maxChildHForHeight`（最大高さ、合計ではない）
+   - テキスト: `measureText()` で幅測定
+   - `w = max(maxChildW, textW) + 20`（padX=10×2）
+   - `h = max(maxChildHForHeight + 16, textH)`（padY=8×2）
+3. **固定幅 + auto高さ**: テキスト折り返し → `lines.length * (fontSize+4) + 16`
+4. **auto幅 + 固定高さ**: テキスト折り返しなし → 全幅測定
+5. **両auto**: 全幅測定、`lineHeight + 16`
+
+**テキスト折り返し（wrapText）:**
+- ワード単位で折り返し。単語が maxWidth を超える場合は文字単位で分割
+- `lineHeight = fontSize + 4`（ヒューリスティック）
+
+**フォント縮小（fitFontSize）:**
+- 両固定で `textOverflow="shrink"` の場合
+- バイナリサーチ（6px〜72px）でボックスに収まる最大フォントサイズを探索
+- `textOverflow="clip"` の場合はフォントサイズ固定、テキスト切り捨て（`...`）
+
+#### Pass 2: resolvePositions（トップダウン、根→葉）
+
+各親要素の children を2パスで配置:
+
+**Pass 2a — "inside" 子要素（正のオフセット / auto）:**
+1. `_isManual=true` の子をスキップ（ドラッグ済み）
+2. `xRel=null` → 中央寄せ、`yRel=null` → 自動スタック（`curY` 位置に gapY 適用）
+3. `xRel="left-N"` → 左から Npx
+4. `xRel="right-N"` → `parent.w - N - child.w`（**親サイズに影響しない**）
+5. `yRel="top-N"` → 上から Npx
+6. `yRel="bottom-N"` → `parent.h - N - child.h`（**親サイズに影響しない**）
+7. `maxRight` / `maxBottom` を追跡
+
+**親サイズ再計算:**
+```
+parent._cw = max(maxRight, maxChildW, parentTextW) + 20（w=null の場合）
+parent._ch = max(maxBottom, 1) + 16（h=null の場合）
+```
+
+**相対サイズ解決:** `wRel` / `hRel` を親サイズに基づいて解決し、子要素の `w` / `h` を上書き
+
+**Pass 2b — "outside" 子要素（負のオフセット）:**
+- `isOutside=true` のみを対象
+- Pass 2a で確定した親サイズを使用
+- 親サイズ計算から除外
+
+### 6.6 _isManual フラグの仕様
+
+| 状態 | `_isManual` | 挙動 |
+|---|---|---|
+| 初期 | `false` | `resolvePositions()` で自動配置される |
+| ドラッグ開始（mousedown） | 設定しない | クリックのみの場合、自動配置維持 |
+| ドラッグ中（mousemove） | 変更しない | 座標のみ更新 |
+| ドラッグ終了（mouseup） | 実移動量>1px のみ `true` | 移動あり → 手動配置固定。移動なし → 自動配置継続 |
+| 相対入力変更 | `false` にリセット | xRel/yRel 変更で自動配置に戻る |
+
+**重要:** `resolvePositions()` は `_isManual=true` の子を配置から除外し、座標のみ `maxRight`/`maxBottom` に反映する。これによりドラッグ位置を維持しつつ親サイズを再計算できる。
+
+### 6.7 テキスト描画
+
+**パディング:** `padX=10`, `padY=8`（要素両端）
+
+**Y座標計算:**
+```
+y + padY + lineHeight * (i + 1)  // i=0,1,2...（行インデックス）
+lineHeight = fontSize + 4
+```
+
+**3つのモード:**
+1. **両固定** (`w`,`h` 数値): `textOverflow` で shrink/clip 制御
+2. **固定幅** (`w` 数値): テキスト折り返し、高さは自動
+3. **両auto**: 折り返しなし、単一行
+
+### 6.8 背景画像
+
+- 各要素に個別に指定可能（`bgImage`）
+- 形状描画の前に描画（形状が上に重なる）
+- `pointerEvents=none` でクリック透過
+
+## 7. テストエディタ（children_layout.html）
+
+### 7.1 UI構成
+
+```
+┌──────── sidebar (340px) ────────┬────────── canvas-wrap ─────────┐
+│  h2: Recursive NodeView Layout  │                                 │
+│  tree-container (flex:1)        │  SVG canvas (responsive)        │
+│  ├─ Root Canvas                 │  ├─ el-group (各要素の<g>)      │
+│  │  ├─ Auto-Size Container      │  │  ├─ rect/ellipse (形状)      │
+│  │  │  ├─ Centered Child        │  │  ├─ text (テキスト)          │
+│  │  │  │  └─ Small Circle       │  │  └─ rect (選択枠+リサイズ)   │
+│  │  │  └─ Right-Aligned Child   │  └─ viewBox: root._cw x root._ch│
+│  │  └─ ...                      │                                 │
+│  toolbar: [+ Box] [+ Circle]    │  hover-info: 座標/サイズ表示     │
+│  props-panel: 属性編集           │  info-bar: ヘルプテキスト        │
+└─────────────────────────────────┴─────────────────────────────────┘
+```
+
+### 7.2 インタラクション
+
+| アクション | 動作 |
+|---|---|
+| **クリック** | 要素選択（tree + props 更新）。`_isManual` は設定しない |
+| **ドラッグ** | 座標更新（`_ax`/`_ay`）。`render(true)` でレイアウトスキップ |
+| **ドラッグ解放** | 実移動量>1px → `_isManual=true`。`render()` で再レイアウト |
+| **Deleteキー** | 選択要素を削除（root以外） |
+| **Escapeキー** | 選択解除 |
+| **+ Box / + Circle** | 選択要素に子要素を追加 |
+| **ツリー▼** | 展開/折りたたみ |
+| **ツリー✕** | 要素削除 |
+| **プロパティ編集** | 即座に `render()` で反映 |
+
+### 7.3 プロパティエディタ
+
+選択要素の全プロパティを編集可能:
+- `label`, `shape`, `rx`, `fill`, `stroke`, `strokeWidth`
+- `text`, `fontSize`, `textColor`, `textAlign`
+- `w`, `h`, `xRel`, `yRel`, `wRel`, `hRel`
+- `gapY`, `textOverflow`
+- `bgImage`（ファイル選択）
+
+### 7.4 SVG描画
+
+```
+各要素の <g> グループ:
+  1. <image> (bgImageがある場合、pointerEvents=none)
+  2. <rect> (形状。circleならrx=999)
+     - 選択時は stroke=#e94560, strokeWidth=2.5
+  3. <text> (1〜n行。textAlign対応)
+     - 両固定 + shrink: fitFontSize バイナリサーチ
+     - 両固定 + clip: 切り捨て + "..."
+  4. <rect> (選択枠。hs=6のリサイズハンドル4つ)
+```
+
+### 7.5 ユニットテスト（runPositionTests()）
+
+ブラウザコンソールで実行:
+- `parseRelative()` — 全位置指定パターン（正/負/abs/null）
+- `resolveRelX/Y()` — 座標解決計算
+- 2パス配置 — inside/outside子要素の分離検証
+- テキスト測定 — wrapText, fitFontSize, measureElement
+- 全レイアウト — 実データでの最終検証
+
+## 8. 既知のバグと回避策（Critical Pitfalls）
+
+### 8.1 二重パディング（修正済み）
+
+**症状:** テキスト幅が `+ padX*2` 二重カウントされ、右端でテキストがはみ出る
+**原因:** `textW = measureText() + 20` → `w = textW + 20`
+**修正:** `textW = measureText()`（パディングなし）、`w = textW + 20`（1回のみ）
+
+### 8.2 _cw 上書きバグ（修正済み）
+
+**症状:** `resolvePositions` が親のテキスト幅を無視し `_cw` を小さくする
+**原因:** `maxRight` のみ考慮、`parentTextW` が含まれていない
+**修正:** `childContentW = max(maxRight, maxChildW, parentTextW)`
+
+### 8.3 縦幅計算バグ（修正済み）
+
+**症状:** `autoStackY - gap` で gap が未定義変数、plus 合計高さ方式
+**原因:** gap 変数のスコープエラー、子の重なりを考慮していない
+**修正:** `parent._ch = max(maxBottom) + padY*2`（子 bottom edge の最大値）
+
+### 8.4 _isManual 即時設定バグ（修正済み）
+
+**症状:** 子要素クリックで親接続が切り、レイアウトが破綻
+**原因:** `mousedown` で即時 `_isManual=true` → ドラッグなしクリックでも自動配置がスキップされる
+**修正:** `mouseup` で実移動量>1px の場合のみ `_isManual=true` を設定
+
+### 8.5 right-N / bottom-N 循環依存
+
+**症状:** `right-10` 子 → `childRight = parent.w - 10` → `parent.w = childRight + 20` → 無限ループ
+**回避策:** `right-N`(正) / `bottom-N`(正) の子は親サイズ計算から除外（`continue`）
+
+### 8.6 外部子要素（isOutside）
+
+**症状:** `right--20` などが親サイズに含まれ、親が過大化
+**回避策:** `isOutside=true` の子は `maxRight`/`maxBottom` 計算から完全に除外
+
+### 8.7 findElementByLabel スコープ
+
+**症状:** `wRel: "sibling-Label"` で親スコープ外の要素が検索される
+**回避策:** `findElementByLabel(label, parent)` — `parent` 配下の children のみ検索
+
+## 9. デバッグ手法（Critical Rules）
+
+### 数値計算
+- **常に** bash/python/node スクリプトを使用。暗算禁止。
+- 中間値は `console.log` またはブラウザ eval で確認。
+
+### 停滞ルール
+- 15分以上解決できない場合はユーザーに相談。
+
+### デバッグ優先事項
+1. **バグの再現** — 具体的な数値测量で現象を特定
+2. **計算経路の検証** — 間違った値を生む計算パスを追跡
+3. **中間値の検査** — ブラウザeval/console.log/shellスクリプト
+4. **暗算による修正禁止** — 測定値に基づいた修正のみ
