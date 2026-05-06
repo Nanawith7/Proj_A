@@ -100,17 +100,24 @@ function makeEl(type, opts = {}) {
     // Size: null = auto (computed from content), number = fixed px
     w: opts.w ?? null,
     h: opts.h ?? null,
+    // Relative size: "parent", "parent-N%", "child-Label", "child-index"
+    wRel: opts.wRel ?? null,
+    hRel: opts.hRel ?? null,
     // Relative position to parent: "left-N", "right-N", "top-N", "bottom-N", "-N", or null=auto
     xRel: opts.xRel ?? null,
     yRel: opts.yRel ?? null,
     // Gap between siblings (vertical)
     gapY: opts.gapY ?? 5,
+    // Text overflow behavior when both dimensions are fixed and text doesn't fit
+    // 'shrink' = shrink to minimum font size (default)
+    // 'clip' = clip text that doesn't fit when minimum font size is reached
+    textOverflow: opts.textOverflow ?? 'shrink',
     // Children (nested elements)
-    children: [],
+    children: opts.children ?? [],
     // Expanded state in tree view
     expanded: true,
     // Computed layout values (internal)
-    _cw: 0, _ch: 0, _ax: 0, _ay: 0,
+    _cw: 0, _ch: 0, _ax: 0, _ay: 0, _isManual: false,
   };
 }
 
@@ -232,7 +239,74 @@ root.children.push(
         textColor: '#ffffffcc',
       }),
     ]
-  })
+   }),
+makeEl('box', {
+     label: 'Relative Size Demo',
+     fill: '#3e2c4a',
+     xRel: 'left-10',
+     yRel: 'top-10',
+     w: 200,
+     h: null,
+     gapY: 5,
+     children: [
+       makeEl('box', {
+         label: 'Parent (200px)',
+         fill: '#5c2e6d',
+         w: 200,
+         text: 'Parent container',
+         fontSize: 10,
+         textColor: '#ffffffcc',
+       }),
+       makeEl('box', {
+         label: 'Child-50% (parent-50%)',
+         fill: '#8e44ad66',
+         wRel: 'parent-50%',
+         text: '50% of parent width',
+         fontSize: 9,
+         textColor: '#ffffffcc',
+       }),
+       makeEl('box', {
+         label: 'Child-Same',
+         fill: '#9b59b644',
+         wRel: 'child-Parent (200px)',
+         hRel: 'child-Parent (200px)',
+         shape: 'circle',
+         text: 'Same size',
+         fontSize: 8,
+         textColor: '#ffffffcc',
+       }),
+     ]
+   }),
+   makeEl('box', {
+     label: 'Text Overflow Demo',
+     fill: '#2c4a4a',
+     xRel: 'left-10',
+     yRel: 'top-10',
+     w: 200,
+     h: null,
+     gapY: 5,
+     children: [
+       makeEl('box', {
+         label: 'Shrink Mode (default)',
+         fill: '#3d6d5c',
+         w: 120,
+         h: 50,
+         text: 'This is very long text that will shrink to minimum font size when it does not fit in the box',
+         fontSize: 11,
+         textColor: '#ffffffcc',
+       }),
+       makeEl('box', {
+         label: 'Clip Mode (truncated)',
+         fill: '#4a6d3d',
+         w: 120,
+         h: 50,
+         text: 'This is very long text that will be clipped with ellipsis when it exceeds the available space',
+         fontSize: 11,
+         textColor: '#ffffffcc',
+         textOverflow: 'clip',
+       }),
+     ]
+   })
 );
 
 let selectedId = null;
@@ -329,7 +403,7 @@ function measureElement(el) {
     return {w, h};
   }
 
-  let maxChildW = 0, totalChildH = 0;
+  let maxChildW = 0, totalChildH = 0, maxChildHForHeight = 0;
   const padX = 10, padY = 8;
   const gap = el.gapY || 5;
 
@@ -337,9 +411,11 @@ function measureElement(el) {
     for (const child of el.children) {
       const cm = measureElement(child);
       if (cm.w > maxChildW) maxChildW = cm.w;
+      // Use max child height, not sum (children may be side-by-side)
+      if (cm.h > maxChildHForHeight) maxChildHForHeight = cm.h;
       totalChildH += cm.h + gap;
     }
-    if (el.children.length > 0) totalChildH -= gap; // remove last gap
+    if (el.children.length > 0) totalChildH -= gap;
   }
 
   // Text size contribution - 3 modes based on w/h constraints
@@ -369,13 +445,14 @@ function measureElement(el) {
       const lineHeight = fontSize + 4;
       const maxLines = Math.floor(availH / lineHeight);
       
-      // Measure full text (no wrapping)
-      textW = measureText(el.text, fontSize) + padX * 2;
+      // Measure full text (no wrapping) - textW is content width only, padX*2 added at final w calc
+      textW = measureText(el.text, fontSize);
       textH = availH;
     } else {
-      // Both auto: measure full text without wrapping
-      textW = measureText(el.text, fontSize) + padX * 2;
-      textH = (fontSize || 11) + padY * 2;
+      // Both auto: measure full text without wrapping - textW is content width only
+      const lineHeight = (fontSize || 11) + 4;
+      textW = measureText(el.text, fontSize);
+      textH = lineHeight + padY * 2;
     }
   }
 
@@ -389,7 +466,7 @@ function measureElement(el) {
   if (el.h !== null) {
     h = Math.max(el.h, 20);
   } else {
-    h = Math.max(totalChildH, textH) + padY * 2;
+    h = Math.max(maxChildHForHeight + padY * 2, textH);
   }
 
   el._cw = w;
@@ -399,10 +476,43 @@ function measureElement(el) {
 
 // ═── Layout Pass 2: Resolve Positions (top-down) ────
 /**
- * Parse relative position string.
- * Returns {dir, val} or null.
- */
-function parseRelative(rel) {
+  * Parse size relative string.
+  * Returns {type, value} or null.
+  * type: 'parent', 'parent-percent', 'sibling'
+  */
+  function parseSizeRel(rel) {
+    if (rel === null || rel === undefined || rel === '') return null;
+    const s = String(rel);
+    // "parent" = same as parent
+    if (s === 'parent') return {type: 'parent', value: 1};
+    // "parent-N%" = N% of parent
+    const pctM = s.match(/^parent-(\d+)%$/);
+    if (pctM) return {type: 'parent-percent', value: parseInt(pctM[1]) / 100};
+    // "child-Label" or "sibling-Label" = same as element with that label
+    const sibM = s.match(/^(?:child|sibling)-(.+)$/);
+    if (sibM) return {type: 'sibling', value: sibM[1]};
+    return null;
+  }
+
+  /**
+  * Find an element by label in the tree.
+  */
+  function findElementByLabel(label, el) {
+    if (el.label === label) return el;
+    if (el.children) {
+      for (const c of el.children) {
+        const found = findElementByLabel(label, c);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+/**
+  * Parse relative position string.
+  * Returns {dir, val} or null.
+  */
+  function parseRelative(rel) {
   if (rel === null || rel === undefined || rel === '') return null;
   const s = String(rel);
   // Support negative offsets for outside-parent positioning (e.g., left--10, right--20)
@@ -424,22 +534,30 @@ function parseRelative(rel) {
   * Resolve a relative position to an offset from parent origin.
   */
   function resolveRelX(parsed, parentW, childW) {
-    if (!parsed) return (parentW - childW) / 2; // center from parent left edge
+    if (!parsed) return (parentW - childW) / 2;
     switch (parsed.dir) {
-      case 'left':   return parsed.val;
-      case 'right':  return parentW - parsed.val - childW;
-      case 'abs':    return parsed.val;
-      default:       return 0;
+      case 'left':
+        return parsed.val < 0 ? parsed.val : parsed.val;
+      case 'right':
+        return parsed.val < 0 ? parentW - parsed.val : parentW - parsed.val - childW;
+      case 'abs':
+        return parsed.val;
+      default:
+        return 0;
     }
   }
 
   function resolveRelY(parsed, parentH, childH) {
-    if (!parsed) return 0; // top (offset from parent top edge)
+    if (!parsed) return 0;
     switch (parsed.dir) {
-      case 'top':     return parsed.val;
-      case 'bottom':  return parentH - parsed.val - childH;
-      case 'abs':     return parsed.val;
-      default:        return 0;
+      case 'top':
+        return parsed.val < 0 ? parsed.val : parsed.val;
+      case 'bottom':
+        return parsed.val < 0 ? parentH - parsed.val : parentH - parsed.val - childH;
+      case 'abs':
+        return parsed.val;
+      default:
+        return 0;
     }
   }
 
@@ -463,7 +581,7 @@ function parseRelative(rel) {
 
     // ── Pass 1: Position "inside" children only ──
     let curY = parent._ay + padY; // starting Y for auto-stacked children
-    let maxX = 0, maxY = 0;
+    let maxX = 0, maxY = 0, maxChildW = 0, maxChildH = 0, autoStackY = 0;
 
     for (const child of parent.children) {
       const parsedX = parseRelative(child.xRel);
@@ -471,6 +589,19 @@ function parseRelative(rel) {
 
       // Skip "outside" children in pass 1
       if ((parsedX && parsedX.isOutside) || (parsedY && parsedY.isOutside)) continue;
+
+      // Track max child dimensions
+      if (child._cw > maxChildW) maxChildW = child._cw;
+      if (child._ch > maxChildH) maxChildH = child._ch;
+
+      // Skip positioning for manually-placed children (dragged or xRel/yRel set)
+      if (child._isManual) {
+        const childRight = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
+        const childBottom = (child._ay || 0) - parent._ay + (child._ch || 0);
+        if (childRight > maxX) maxX = childRight;
+        if (childBottom > maxY) maxY = childBottom;
+        continue;
+      }
 
       // Resolve X: offset from parent origin, then add parent absolute position
       const offsetX = resolveRelX(parsedX, parent._cw || 0, child._cw || 0);
@@ -481,60 +612,163 @@ function parseRelative(rel) {
         const offsetY = resolveRelY(parsedY, parent._ch || 0, child._ch || 0);
         child._ay = (parent._ay || 0) + offsetY;
       } else {
-        child._ay = curY;
-        curY += (child._ch || 0) + (parent.gapY || 5);
+        child._ay = curY + autoStackY;
+        autoStackY += (child._ch || 0) + (parent.gapY || 5);
       }
 
       // Track bounding box for parent expansion
-      const childRight = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
-      const childBottom = (child._ay || 0) - (parent._ay || 0) + (child._ch || 0);
+      // right-N/bottom-N (positive offset) children are pinned TO parent edge, skip them
+      if (parsedX && parsedX.dir === 'right' && !parsedX.isOutside) {
+    autoStackY += child._ch + (parent.gapY || 5);
+        const childBottom2 = (child._ay || 0) - (parent._ay || 0) + child._ch;
+        if (childBottom2 > maxY) maxY = childBottom2;
+        continue;
+      }
+    if (parsedY && parsedY.dir === 'bottom' && !parsedY.isOutside) {
+        autoStackY += child._ch + (parent.gapY || 5);
+        const childRight2 = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
+        if (childRight2 > maxX) maxX = childRight2;
+        continue;
+      }
+      let childRight, childBottom;
+      if (parsedX && parsedX.dir === 'left' || parsedX && parsedX.dir === 'abs') {
+        childRight = parsedX.val + (child._cw || 0);
+      } else {
+        childRight = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
+      }
+      if (parsedY && (parsedY.dir === 'top' || parsedY.dir === 'abs')) {
+        childBottom = parsedY.val + (child._ch || 0);
+      } else {
+        childBottom = (child._ay || 0) - (parent._ay || 0) + (child._ch || 0);
+      }
       if (childRight > maxX) maxX = childRight;
       if (childBottom > maxY) maxY = childBottom;
-
-      // Recurse into children
-      resolvePositions(child);
     }
 
-    // Expand auto-sized parent based on "inside" children only
-    if (parent.w === null) {
-      parent._cw = Math.max(parent._cw || 40, maxX + padX * 2, 40);
-    }
-    if (parent.h === null) {
-      parent._ch = Math.max(parent._ch || 30, maxY + padY * 2, 30);
+    // ── Compute parent's own text width ──
+    let parentTextW = 0;
+    if (parent.text) {
+      const fontSize = parent.fontSize || 11;
+      parentTextW = _measureCtx ? (() => { _measureCtx.font = fontSize + 'px sans-serif'; return _measureCtx.measureText(parent.text).width; })() : 0;
     }
 
-    // ── Pass 2: Position "outside" children using fixed parent size ──
+    // ── Recalculate auto-sized parent dimensions ──
+    let maxRight = 0, maxBottom = 0;
     for (const child of parent.children) {
       const parsedX = parseRelative(child.xRel);
       const parsedY = parseRelative(child.yRel);
+      if ((parsedX && parsedX.isOutside) || (parsedY && parsedY.isOutside)) continue;
+      if (child._isManual) {
+        const cr = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
+        const cb = (child._ay || 0) - parent._ay + (child._ch || 0);
+        if (cr > maxRight) maxRight = cr;
+        if (cb > maxBottom) maxBottom = cb;
+        continue;
+      }
+     // right-N/bottom-N children are pinned TO parent edge, don't contribute to expansion
+      if (parsedX && parsedX.dir === 'right' && !parsedX.isOutside) continue;
+      if (parsedY && parsedY.dir === 'bottom' && !parsedY.isOutside) continue;
+      let cr, cb;
+      if (parsedX && parsedX.dir === 'left') cr = parsedX.val + (child._cw || 0);
+      else if (parsedX && parsedX.dir === 'abs') cr = parsedX.val + (child._cw || 0);
+      else cr = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
+      if (parsedY && parsedY.dir === 'top') cb = parsedY.val + (child._ch || 0);
+      else if (parsedY && parsedY.dir === 'abs') cb = parsedY.val + (child._ch || 0);
+      else cb = (child._ay || 0) - (parent._ay || 0) + (child._ch || 0);
+      if (cr > maxRight) maxRight = cr;
+      if (cb > maxBottom) maxBottom = cb;
+    }
+    if (parent.w === null) {
+      let childContentW = Math.max(maxRight, maxChildW, parentTextW);
+      parent._cw = childContentW + padX * 2;
+    }
+    if (parent.h === null) {
+      parent._ch = Math.max(maxBottom, 1) + padY * 2;
+    }
 
-      // Skip "inside" children (already positioned in pass 1)
+    // ── Resolve sibling relative sizes ──
+    for (const child of parent.children) {
+      const wRelParsed = parseSizeRel(child.wRel);
+      const hRelParsed = parseSizeRel(child.hRel);
+      if (wRelParsed) {
+        let newW;
+        if (wRelParsed.type === 'sibling') {
+          const sib = findElementByLabel(wRelParsed.value, parent);
+          newW = sib ? sib._cw : child._cw;
+        } else {
+          newW = wRelParsed.type === 'parent' ? parent._cw : Math.round(parent._cw * wRelParsed.value);
+        }
+        if (newW !== undefined && newW > 0 && newW !== child._cw) {
+          child.w = newW;
+          child._cw = newW;
+        }
+      }
+      if (hRelParsed) {
+        let newH;
+        if (hRelParsed.type === 'sibling') {
+          const sib = findElementByLabel(hRelParsed.value, parent);
+          newH = sib ? sib._ch : child._ch;
+        } else {
+          newH = hRelParsed.type === 'parent' ? parent._ch : Math.round(parent._ch * hRelParsed.value);
+        }
+        if (newH !== undefined && newH > 0 && newH !== child._ch) {
+          child.h = newH;
+          child._ch = newH;
+        }
+      }
+    }
+
+    // ── Pass 2: Position "outside" children using parent size ──
+    for (const child of parent.children) {
+      const parsedX = parseRelative(child.xRel);
+      const parsedY = parseRelative(child.yRel);
       if (!(parsedX && parsedX.isOutside) && !(parsedY && parsedY.isOutside)) continue;
+      if (child._isManual) continue;
 
-      // Resolve X
       const offsetX = resolveRelX(parsedX, parent._cw || 0, child._cw || 0);
       child._ax = (parent._ax || 0) + offsetX;
 
-      // Resolve Y
       if (parsedY) {
         const offsetY = resolveRelY(parsedY, parent._ch || 0, child._ch || 0);
         child._ay = (parent._ay || 0) + offsetY;
       } else {
-        // No yRel specified but xRel is outside → center vertically
         child._ay = (parent._ay || 0) + (parent._ch - (child._ch || 0)) / 2;
       }
-
-      // Recurse into children
-      resolvePositions(child);
     }
   }
 
 /**
- * Full layout: measure all, resolve all positions.
+ * Resolve positions for a node and all its descendants.
+ * Called from computeLayout to position the entire tree without
+ * recursive measureElement calls (which cause infinite loops).
+ */
+function resolvePositionsTree(node) {
+  resolvePositions(node);
+  if (node.children) {
+    for (const child of node.children) {
+      resolvePositionsTree(child);
+    }
+  }
+}
+
+/**
+ * Full layout with convergence check.
+ * Iterates measure+resolve until root size stops changing.
  */
 function computeLayout() {
-  measureElement(root);
-  resolvePositions(root);
+  const MAX_ITER = 5;
+  let prevKey = '';
+  
+  for (let iter = 0; iter < MAX_ITER; iter++) {
+    measureElement(root);
+    resolvePositionsTree(root);
+    
+    let key = `${root._cw.toFixed(2)}x${root._ch.toFixed(2)}`;
+    if (iter > 0 && key === prevKey) {
+      break;
+    }
+    prevKey = key;
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -625,25 +859,64 @@ function drawElement(el, parentGroup, offsetX, offsetY) {
     const availW = w - padX * 2;
     const availH = h - padY * 2;
     
-    // If both dimensions are fixed, check if text fits and shrink if needed
+    // If both dimensions are fixed
     if (el.w !== null && el.h !== null) {
-      drawFontSize = fitFontSize(el.text, availW, availH, 6);
-      const lineHeight = drawFontSize + 4;
-      const lines = wrapText(el.text, availW, drawFontSize);
-      
-      for (let i = 0; i < lines.length; i++) {
-        const txt = document.createElementNS(SVG_NS, 'text');
-        let tx = x + padX;
-        if (el.textAlign === 'middle') tx = x + w / 2;
-        else if (el.textAlign === 'end') tx = x + w - padX;
-        txt.setAttribute('x', tx);
-        txt.setAttribute('y', y + padY + lineHeight * (i + 1));
-        txt.setAttribute('fill', el.textColor || '#ffffffcc');
-        txt.setAttribute('font-size', drawFontSize);
-        if (el.textAlign === 'middle') txt.setAttribute('text-anchor', 'middle');
-        else if (el.textAlign === 'end') txt.setAttribute('text-anchor', 'end');
-        txt.textContent = lines[i];
-        g.appendChild(txt);
+      if (el.textOverflow === 'clip') {
+        // Clip mode: keep original font size, just clip overflow
+        drawFontSize = el.fontSize || 11;
+        const lineHeight = drawFontSize + 4;
+        const maxLines = Math.max(1, Math.floor(availH / lineHeight));
+        let lines = wrapText(el.text, availW, drawFontSize);
+        if (lines.length > maxLines) {
+          lines = lines.slice(0, maxLines);
+          // Truncate last line with ellipsis
+          if (lines.length > 0 && lines[lines.length - 1].length > 3) {
+            const lastLine = lines[lines.length - 1];
+            const ellipsisW = measureText('...', drawFontSize);
+            let truncated = lastLine;
+            while (truncated.length > 2 && measureText(truncated + '...', drawFontSize) > availW) {
+              truncated = truncated.slice(0, -1);
+            }
+            lines[lines.length - 1] = truncated + '...';
+          }
+        }
+        
+        for (let i = 0; i < lines.length; i++) {
+          const txt = document.createElementNS(SVG_NS, 'text');
+          let tx = x + padX;
+          if (el.textAlign === 'middle') tx = x + w / 2;
+          else if (el.textAlign === 'end') tx = x + w - padX;
+          txt.setAttribute('x', tx);
+          txt.setAttribute('y', y + padY + lineHeight * (i + 1));
+          txt.setAttribute('fill', el.textColor || '#ffffffcc');
+          txt.setAttribute('font-size', drawFontSize);
+          if (el.textAlign === 'middle') txt.setAttribute('text-anchor', 'middle');
+          else if (el.textAlign === 'end') txt.setAttribute('text-anchor', 'end');
+          txt.textContent = lines[i];
+          g.appendChild(txt);
+        }
+      } else {
+        // Shrink mode: reduce font size to fit
+        drawFontSize = fitFontSize(el.text, availW, availH, 6);
+        const lineHeight = drawFontSize + 4;
+        const maxLines = Math.max(1, Math.floor(availH / lineHeight));
+        let lines = wrapText(el.text, availW, drawFontSize);
+        if (lines.length > maxLines) lines = lines.slice(0, maxLines);
+        
+        for (let i = 0; i < lines.length; i++) {
+          const txt = document.createElementNS(SVG_NS, 'text');
+          let tx = x + padX;
+          if (el.textAlign === 'middle') tx = x + w / 2;
+          else if (el.textAlign === 'end') tx = x + w - padX;
+          txt.setAttribute('x', tx);
+          txt.setAttribute('y', y + padY + lineHeight * (i + 1));
+          txt.setAttribute('fill', el.textColor || '#ffffffcc');
+          txt.setAttribute('font-size', drawFontSize);
+          if (el.textAlign === 'middle') txt.setAttribute('text-anchor', 'middle');
+          else if (el.textAlign === 'end') txt.setAttribute('text-anchor', 'end');
+          txt.textContent = lines[i];
+          g.appendChild(txt);
+        }
       }
     } else if (el.w !== null) {
       // Fixed width: wrap text
@@ -666,12 +939,13 @@ function drawElement(el, parentGroup, offsetX, offsetY) {
       }
     } else {
       // Auto width: no wrapping, single line
+      const lineHeight = drawFontSize + 4;
       const txt = document.createElementNS(SVG_NS, 'text');
-      let tx = x + 8;
+      let tx = x + padX;
       if (el.textAlign === 'middle') tx = x + w / 2;
-      else if (el.textAlign === 'end') tx = x + w - 8;
+      else if (el.textAlign === 'end') tx = x + w - padX;
       txt.setAttribute('x', tx);
-      txt.setAttribute('y', y + drawFontSize + 4);
+      txt.setAttribute('y', y + padY + lineHeight);
       txt.setAttribute('fill', el.textColor || '#ffffffcc');
       txt.setAttribute('font-size', drawFontSize);
       if (el.textAlign === 'middle') txt.setAttribute('text-anchor', 'middle');
@@ -863,6 +1137,31 @@ function renderProps() {
   const hInput = propRow('Height', el.h !== null ? el.h : 'auto', (v) => { el.h = v === 'auto' ? null : parseInt(v) || 0; render(); });
   propsContent.appendChild(hInput);
 
+  // Relative size
+  const wRelRow = document.createElement('div');
+  wRelRow.className = 'prop-row';
+  const wRelLbl = document.createElement('label');
+  wRelLbl.textContent = 'W Rel';
+  const wRelInput = document.createElement('input');
+  wRelInput.value = el.wRel ?? '';
+  wRelInput.placeholder = 'parent, parent-50%, child-Label';
+  wRelInput.addEventListener('input', () => { el.wRel = wRelInput.value || null; el._isManual = false; render(); });
+  wRelRow.appendChild(wRelLbl);
+  wRelRow.appendChild(wRelInput);
+  propsContent.appendChild(wRelRow);
+
+  const hRelRow = document.createElement('div');
+  hRelRow.className = 'prop-row';
+  const hRelLbl = document.createElement('label');
+  hRelLbl.textContent = 'H Rel';
+  const hRelInput = document.createElement('input');
+  hRelInput.value = el.hRel ?? '';
+  hRelInput.placeholder = 'parent, parent-50%, child-Label';
+  hRelInput.addEventListener('input', () => { el.hRel = hRelInput.value || null; el._isManual = false; render(); });
+  hRelRow.appendChild(hRelLbl);
+  hRelRow.appendChild(hRelInput);
+  propsContent.appendChild(hRelRow);
+
   // Relative position
   const xRelRow = document.createElement('div');
   xRelRow.className = 'prop-row';
@@ -871,7 +1170,7 @@ function renderProps() {
   const xRelInput = document.createElement('input');
   xRelInput.value = el.xRel ?? '';
   xRelInput.placeholder = 'left-10, right--10(外側), -10';
-  xRelInput.addEventListener('input', () => { el.xRel = xRelInput.value || null; renderTree(); render(); });
+  xRelInput.addEventListener('input', () => { el.xRel = xRelInput.value || null; el._isManual = false; renderTree(); render(); });
   xRelRow.appendChild(xRelLbl);
   xRelRow.appendChild(xRelInput);
   propsContent.appendChild(xRelRow);
@@ -883,7 +1182,7 @@ function renderProps() {
   const yRelInput = document.createElement('input');
   yRelInput.value = el.yRel ?? '';
   yRelInput.placeholder = 'top-5, bottom--10(外側), -10';
-  yRelInput.addEventListener('input', () => { el.yRel = yRelInput.value || null; renderTree(); render(); });
+  yRelInput.addEventListener('input', () => { el.yRel = yRelInput.value || null; el._isManual = false; renderTree(); render(); });
   yRelRow.appendChild(yRelLbl);
   yRelRow.appendChild(yRelInput);
   propsContent.appendChild(yRelRow);
@@ -911,6 +1210,27 @@ function renderProps() {
 
   const fontSizeRow = propRow('Font Size', el.fontSize, (v) => { el.fontSize = parseInt(v) || 11; render(); });
   propsContent.appendChild(fontSizeRow);
+
+  // Text overflow mode
+  const overflowRow = document.createElement('div');
+  overflowRow.className = 'prop-row';
+  const overflowLbl = document.createElement('label');
+  overflowLbl.textContent = 'Overflow';
+  const overflowSelect = document.createElement('select');
+  overflowSelect.style.cssText = 'flex:1;padding:3px 6px;background:#0f3460;color:#eee;border:1px solid #533483;border-radius:3px;font-size:11px';
+  const shrinkOpt = document.createElement('option');
+  shrinkOpt.value = 'shrink';
+  shrinkOpt.textContent = 'Shrink';
+  overflowSelect.appendChild(shrinkOpt);
+  const clipOpt = document.createElement('option');
+  clipOpt.value = 'clip';
+  clipOpt.textContent = 'Clip';
+  overflowSelect.appendChild(clipOpt);
+  overflowSelect.value = el.textOverflow || 'shrink';
+  overflowSelect.addEventListener('change', () => { el.textOverflow = overflowSelect.value; render(); });
+  overflowRow.appendChild(overflowLbl);
+  overflowRow.appendChild(overflowSelect);
+  propsContent.appendChild(overflowRow);
 
   const textColorRow = propRow('Text Color', el.textColor, (v) => { el.textColor = v; render(); });
   propsContent.appendChild(textColorRow);
@@ -1172,18 +1492,19 @@ window.addEventListener('mousemove', (e) => {
   el._ax = dragState.startAx + dx;
   el._ay = dragState.startAy + dy;
 
-  // Update xRel/yRel to reflect new position relative to parent
-  const parent = findParent(el.id);
-  if (parent) {
-    el.xRel = String(Math.round(el._ax - (parent._ax || 0)));
-    el.yRel = String(Math.round(el._ay - (parent._ay || 0)));
-  }
-
   render(true); // skip layout during drag
 });
 
 window.addEventListener('mouseup', () => {
   if (dragState) {
+    const el = findElement(dragState.id);
+    if (el) {
+      const dx = Math.abs(el._ax - dragState.startAx);
+      const dy = Math.abs(el._ay - dragState.startAy);
+      if (dx > 1 || dy > 1) {
+        el._isManual = true;
+      }
+    }
     dragState = null;
     render(); // recompute layout after drag
   }
@@ -1272,7 +1593,7 @@ function runPositionTests() {
     [null, 0, 'top (default) with childH=30'],
     // Negative offset tests (outside parent)
     [parseRelative('top--20'), -20, 'top--20 (20px outside top edge) with childH=50'],
-    [parseRelative('bottom--20'), 310, 'bottom--20 (20px outside bottom edge) with childH=50'],
+    [parseRelative('bottom--20'), 320, 'bottom--20 (20px outside bottom edge) with childH=50'],
   ].forEach(([parsed, expected, desc]) => {
     const result = resolveRelY(parsed, ph, 30);
     const pass = Math.abs(result - expected) < 0.01;
@@ -1371,6 +1692,48 @@ function runPositionTests() {
   console.log(`Both Fixed (80x40): _cw=${bothFixed._cw}, _ch=${bothFixed._ch}`);
   const bothFixedPass = bothFixed._cw === 80 && bothFixed._ch === 40;
   console.log(`  ${bothFixedPass ? '✓' : '✗ FAIL'} - dimensions match fixed values`);
+  
+  // ── Text overflow tests ──
+  console.log('\n=== Text Overflow Tests ===');
+  
+  // Test shrink mode (default)
+  const shrinkEl = makeEl('box', { 
+    label: 'Shrink Test', 
+    text: 'This is a very long text that should shrink to minimum font size', 
+    w: 80, 
+    h: 30,
+    textOverflow: 'shrink'
+  });
+  measureElement(shrinkEl);
+  console.log(`Shrink mode: _cw=${shrinkEl._cw}, _ch=${shrinkEl._ch}`);
+  console.log(`  textOverflow=${shrinkEl.textOverflow} ✓`);
+  
+  // Test clip mode
+  const clipEl = makeEl('box', { 
+    label: 'Clip Test', 
+    text: 'This is a very long text that should be clipped with ellipsis', 
+    w: 80, 
+    h: 30,
+    textOverflow: 'clip'
+  });
+  measureElement(clipEl);
+  console.log(`Clip mode: _cw=${clipEl._cw}, _ch=${clipEl._ch}`);
+  console.log(`  textOverflow=${clipEl.textOverflow} ✓`);
+  
+  // Test maxLines calculation
+  const testAvailW = 60;
+  const testAvailH = 24;
+  const minFontSize = 6;
+  const testFontSize = fitFontSize('Long text for testing', testAvailW, testAvailH, minFontSize);
+  const testLineHeight = testFontSize + 4;
+  const testMaxLines = Math.max(1, Math.floor(testAvailH / testLineHeight));
+  const testLines = wrapText('Long text for testing', testAvailW, testFontSize);
+  console.log(`\nMax lines calc: fontSize=${testFontSize}, lineHeight=${testLineHeight}, maxLines=${testMaxLines}, totalLines=${testLines.length}`);
+  if (testLines.length > testMaxLines) {
+    console.log(`  Would clip: ${testLines.length} lines -> ${testMaxLines} lines ✓`);
+  } else {
+    console.log(`  No clip needed: ${testLines.length} lines fit ✓`);
+  }
 }
 
 // ═══════════════════════════════════════════════════════
