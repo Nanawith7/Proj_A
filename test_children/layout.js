@@ -191,18 +191,13 @@ function resolvePositions(parent) {
   let curY = parent._ay + padY;
   let maxX = 0, maxY = 0, maxChildW = 0, maxChildH = 0, autoStackY = 0;
 
- for (const child of parent.children) {
+   for (const child of parent.children) {
     const parsedX = parseRelative(child.xRel);
     const parsedY = parseRelative(child.yRel);
 
     if ((parsedX && parsedX.isOutside) || (parsedY && parsedY.isOutside)) continue;
-    if (child._isManual) {
-      const childRight = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
-      const childBottom = (child._ay || 0) - parent._ay + (child._ch || 0);
-      if (childRight > maxX) maxX = childRight;
-      if (childBottom > maxY) maxY = childBottom;
-      continue;
-    }
+    // _isManual children (dragged/placed by user) don't affect layout
+    if (child._isManual) continue;
 
     // Resolve X: offset from parent origin, then add parent absolute position
     const offsetX = resolveRelX(parsedX, parent._cw || 0, child._cw || 0);
