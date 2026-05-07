@@ -105,52 +105,157 @@ function render() {
     const nw=n.width||200,nh=n.height||120,nx=n.x||0,ny=n.y||0,fill=n.color||td.color||'#555',title=nodeTitle(n);
     const stem=nodeStem(n),v=VAULT[stem];
     const g=document.createElementNS(svgNS,'g');g.setAttribute('data-id',n.id);
-    const rect=document.createElementNS(svgNS,'rect');
-    rect.setAttribute('data-id',n.id);rect.setAttribute('class','node-rect');rect.style.cursor='pointer';
-    rect.onclick=e=>{e.stopPropagation();toggleExpand(n,g,mainG);};
-    applyNodeView(rect,n,false);
-    g.appendChild(rect);
 
-    // Collapsed icon: centered by default, overridable via layout
-    const iconPath=v?.props?.icon;
-    if(iconPath){
-      const isz=Math.min(nw,nh)*0.45;
-      const anchorX=nv.layout?.iconAnchorX||'center';
-      const anchorY=nv.layout?.iconAnchorY||'center';
-      const ipx=nv.layout?.iconPadX||0, ipy=nv.layout?.iconPadY||0;
-      let ix,iy;
-      if(anchorX==='left')ix=nx+ipx;
-      else if(anchorX==='right')ix=nx+nw-isz-ipx;
-      else ix=nx+(nw-isz)/2;
-      if(anchorY==='top')iy=ny+ipy;
-      else if(anchorY==='bottom')iy=ny+nh-isz-ipy;
-      else iy=ny+(nh-isz)/2;
-      const img=document.createElementNS(svgNS,'image');
-      img.setAttribute('href','/_icons/'+iconPath.split('/').pop());
-      img.setAttribute('x',ix);img.setAttribute('y',iy);
-      img.setAttribute('width',isz);img.setAttribute('height',isz);
-      img.setAttribute('class','node-icon-img');
-      img.style.pointerEvents='none';
-      g.appendChild(img);
+    // ── Check if node has properties to render as children ──
+    const children = nodeViewToChildren(nv, v || {});
+
+    if (children && children.children.length > 0) {
+      // ── New children rendering path ──
+      children._ax = nx, children._ay = ny;
+      children._cw = null, children._ch = null;
+      computeChildrenLayout(children);
+
+      // Update node size from layout
+      children._cw = nw || children._cw || 200;
+      children._ch = nh || children._ch || 120;
+
+      // Draw parent rect
+      const pRect = document.createElementNS(svgNS, 'rect');
+      pRect.setAttribute('data-id', n.id);
+      pRect.setAttribute('class', 'node-rect');
+      pRect.style.cursor = 'pointer';
+      pRect.setAttribute('x', children._ax);
+      pRect.setAttribute('y', children._ay);
+      pRect.setAttribute('width', children._cw);
+      pRect.setAttribute('height', children._ch);
+      const shape = nv.shape || 'rect';
+      const rx = nv.rx || 4;
+      pRect.setAttribute('rx', shape === 'circle' ? Math.min(children._cw, children._ch) / 2 : shape === 'round' ? 18 : rx);
+      pRect.setAttribute('ry', shape === 'circle' ? Math.min(children._cw, children._ch) / 2 : shape === 'round' ? 18 : rx);
+      const op = nv.layout?.collapsedFillOpacity;
+      if (op !== undefined) pRect.setAttribute('opacity', op);
+      pRect.setAttribute('fill', n.color || td.color || '#555');
+      pRect.setAttribute('stroke', nv.stroke || '#fff6');
+      pRect.setAttribute('stroke-width', nv.strokeWidth || 0.5);
+      pRect.onclick = e => { e.stopPropagation(); toggleExpand(n, g, mainG); };
+      g.appendChild(pRect);
+
+      // Title
+      const lp = layoutParams(nv, children._cw, children._ch);
+      const fs = Math.max(9, Math.min(14, nv.fontSize || 12));
+      const tText = truncateTitle(title, fs, lp);
+      if (lp.titleWrap) {
+        drawWrappedTitle(g, svgNS, title, fs, lp, children._ax, children._ay, nv);
+      } else {
+        const txt = document.createElementNS(svgNS, 'text');
+        txt.setAttribute('class', 'node-title');
+        txt.setAttribute('font-size', fs);
+        if (nv.boldTitle) txt.setAttribute('font-weight', 'bold');
+        txt.setAttribute('text-anchor', lp.titleAnchor);
+        txt.setAttribute('x', children._ax + (lp.titleAnchor === 'middle' ? lp.titleX : lp.titleX));
+        txt.setAttribute('y', children._ay + lp.titleY);
+        txt.setAttribute('fill', '#fff');
+        txt.textContent = tText || title;
+        g.appendChild(txt);
+      }
+
+      // Icon
+      const iconPath = v?.props?.icon;
+      if (iconPath) {
+        const isz = Math.min(children._cw, children._ch) * 0.45;
+        const anchorX = nv.layout?.iconAnchorX || 'center';
+        const anchorY = nv.layout?.iconAnchorY || 'center';
+        const ipx = nv.layout?.iconPadX || 0, ipy = nv.layout?.iconPadY || 0;
+        let ix, iy;
+        if (anchorX === 'left') ix = children._ax + ipx;
+        else if (anchorX === 'right') ix = children._ax + children._cw - isz - ipx;
+        else ix = children._ax + (children._cw - isz) / 2;
+        if (anchorY === 'top') iy = children._ay + ipy;
+        else if (anchorY === 'bottom') iy = children._ay + children._ch - isz - ipy;
+        else iy = children._ay + (children._ch - isz) / 2;
+        const img = document.createElementNS(svgNS, 'image');
+        img.setAttribute('href', '/_icons/' + iconPath.split('/').pop());
+        img.setAttribute('x', ix); img.setAttribute('y', iy);
+        img.setAttribute('width', isz); img.setAttribute('height', isz);
+        img.setAttribute('class', 'node-icon-img');
+        img.style.pointerEvents = 'none';
+        g.appendChild(img);
+      }
+
+      // Draw children rects
+      for (const child of children.children) {
+        const childRect = document.createElementNS(svgNS, 'rect');
+        childRect.setAttribute('class', 'node-body');
+        childRect.setAttribute('x', child._ax || children._ax);
+        childRect.setAttribute('y', child._ay || children._ay);
+        childRect.setAttribute('width', child._cw || 0);
+        childRect.setAttribute('height', child._ch || 0);
+        childRect.setAttribute('rx', child.rx || 3);
+        childRect.setAttribute('ry', child.rx || 3);
+        childRect.setAttribute('fill', child.fill || '#fff2');
+        childRect.setAttribute('stroke', child.stroke || '#fff2');
+        childRect.setAttribute('stroke-width', 0.5);
+        g.appendChild(childRect);
+
+        // Child text
+        if (child.text) {
+          const cTxt = document.createElementNS(svgNS, 'text');
+          cTxt.setAttribute('class', 'node-body');
+          cTxt.setAttribute('x', (child._ax || children._ax) + (child._cw || 0) / 2);
+          cTxt.setAttribute('y', (child._ay || children._ay) + (child._ch || 0) / 2 + 3);
+          cTxt.setAttribute('text-anchor', 'middle');
+          cTxt.setAttribute('fill', child.textColor || '#eee');
+          cTxt.setAttribute('font-size', child.fontSize || 12);
+          cTxt.textContent = child.text;
+          g.appendChild(cTxt);
+        }
+      }
+
+      mainG.appendChild(g);
+    } else {
+      // ── Existing rendering path (unchanged) ──
+      const iconPath = v?.props?.icon;
+      if (iconPath) {
+        const isz = Math.min(nw, nh) * 0.45;
+        const anchorX = nv.layout?.iconAnchorX || 'center';
+        const anchorY = nv.layout?.iconAnchorY || 'center';
+        const ipx = nv.layout?.iconPadX || 0, ipy = nv.layout?.iconPadY || 0;
+        let ix, iy;
+        if (anchorX === 'left') ix = nx + ipx;
+        else if (anchorX === 'right') ix = nx + nw - isz - ipx;
+        else ix = nx + (nw - isz) / 2;
+        if (anchorY === 'top') iy = ny + ipy;
+        else if (anchorY === 'bottom') iy = ny + nh - isz - ipy;
+        else iy = ny + (nh - isz) / 2;
+        const img = document.createElementNS(svgNS, 'image');
+        img.setAttribute('href', '/_icons/' + iconPath.split('/').pop());
+        img.setAttribute('x', ix); img.setAttribute('y', iy);
+        img.setAttribute('width', isz); img.setAttribute('height', isz);
+        img.setAttribute('class', 'node-icon-img');
+        img.style.pointerEvents = 'none';
+        g.appendChild(img);
+      }
+
+      const lp = layoutParams(nv, nw, nh);
+      const fs = Math.max(9, Math.min(14, nv.fontSize || 12));
+      const tText = truncateTitle(title, fs, lp);
+
+      if (lp.titleWrap) {
+        drawWrappedTitle(g, svgNS, title, fs, lp, nx, ny, nv);
+      } else {
+        const txt = document.createElementNS(svgNS, 'text');
+        txt.setAttribute('class', 'node-title');
+        txt.setAttribute('font-size', fs);
+        if (nv.boldTitle) txt.setAttribute('font-weight', 'bold');
+        txt.setAttribute('text-anchor', lp.titleAnchor);
+        txt.setAttribute('x', nx + (lp.titleAnchor === 'middle' ? lp.titleX : lp.titleX));
+        txt.setAttribute('y', ny + lp.titleY);
+        txt.setAttribute('fill', '#fff');
+        txt.textContent = tText || title;
+        g.appendChild(txt);
+      }
+      mainG.appendChild(g);
     }
-
-    const lp=layoutParams(nv,nw,nh);
-    const fs=Math.max(9,Math.min(14,nv.fontSize||12));
-    const tText=truncateTitle(title,fs,lp);
-
-    if(lp.titleWrap){
-      drawWrappedTitle(g,svgNS,title,fs,lp,nx,ny,nv);
-    }else{
-      const txt=document.createElementNS(svgNS,'text');txt.setAttribute('class','node-title');
-      txt.setAttribute('font-size',fs);if(nv.boldTitle)txt.setAttribute('font-weight','bold');
-      txt.setAttribute('text-anchor',lp.titleAnchor);
-      txt.setAttribute('x',nx+(lp.titleAnchor==='middle'?lp.titleX:lp.titleX));
-      txt.setAttribute('y',ny+lp.titleY);
-      txt.setAttribute('fill','#fff');
-      txt.textContent=tText||title;
-      g.appendChild(txt);
-    }
-    mainG.appendChild(g);
   });
 
   svg.appendChild(mainG);graph.appendChild(svg);expandedId=null;
@@ -447,7 +552,330 @@ function collapseAll(mainG){
   expandedId=null;
 }
 
-// ═══════ GUI ═══════
+// ═══════ NodeView → Children Conversion (Stage 5) ═══════
+// Converts existing nodeview properties into new children format.
+
+function nodeViewToChildren(nv, nodeData) {
+  if (!nv.properties || typeof nv.properties !== 'object') return null;
+  const hasProps = Object.keys(nv.properties).some(k => nodeData.props && k in nodeData.props);
+  if (!hasProps) return null;
+
+  const padX = 10, padY = 8, gap = 5;
+  const cpX = nv.layout?.contentPadX ?? padX;
+  const cpY = nv.layout?.contentPadY ?? padY;
+
+  // Build children array from properties
+  const rootLabel = nodeData.props?.title || '';
+  const rootFontSize = nv.fontSize || 12;
+  const root = {
+    label: rootLabel,
+    shape: nv.shape || 'rect',
+    rx: nv.rx || 4,
+    stroke: nv.stroke || '#fff6',
+    strokeWidth: nv.strokeWidth ?? 0.5,
+    fill: '#ffffff22',
+    text: rootLabel,
+    fontSize: rootFontSize,
+    textColor: '#ffffffcc',
+    w: null, h: null, gapY: gap,
+    children: []
+  };
+
+  for (const [key, propDef] of Object.entries(nv.properties)) {
+    const rawVal = nodeData.props[key];
+    if (rawVal === undefined || rawVal === null) continue;
+
+    const items = Array.isArray(rawVal)
+      ? rawVal.map(v => String(v).replace(/^\[\[|\]\]$/g, ''))
+      : [String(rawVal).replace(/^\[\[|\]\]$/g, '')];
+
+    if (propDef.style === 'pill' && items.length > 0) {
+      const pillY = typeof propDef.position?.y === 'string' && propDef.position.y.endsWith('%')
+        ? Math.round(parseFloat(propDef.position.y))
+        : (Number(propDef.position?.y) ?? 0) + cpY;
+      const pillX = typeof propDef.position?.x === 'string' && propDef.position.x.endsWith('%')
+        ? 'center'
+        : (Number(propDef.position?.x) ?? null);
+
+      const pill = {
+        label: key,
+        shape: propDef.shape === 'diamond' ? 'rect' : (propDef.shape === 'round' ? 'rect' : 'rect'),
+        rx: propDef.shape === 'diamond' ? 4 : (propDef.shape === 'round' ? 10 : 3),
+        fill: propDef.bg || '#fff2',
+        stroke: '#0000',
+        strokeWidth: 0,
+        text: items[0],
+        textColor: propDef.textColor || '#eee',
+        fontSize: propDef.fontSize ?? 12,
+        w: null, h: null,
+        xRel: pillX === 'center' ? null : ('left-' + (pillX !== null ? (pillX + cpX) : 10)),
+        yRel: 'top-' + Math.max(pillY, cpY)
+      };
+
+      // If no x position, center it
+      if (!!propDef.position?.x === false) {
+        pill.xRel = null;
+      }
+
+      root.children.push(pill);
+    } else if (propDef.style === 'text') {
+      const text = typeof rawVal === 'string' ? rawVal : JSON.stringify(rawVal);
+      root.children.push({
+        label: key,
+        shape: 'rect',
+        fill: '#000000',
+        stroke: '#0000',
+        strokeWidth: 0,
+        text: text,
+        textColor: propDef.textColor || '#eee',
+        fontSize: propDef.fontSize ?? 12,
+        w: null, h: null,
+        xRel: null,
+        yRel: 'top-' + (cpY + 16)
+      });
+    }
+  }
+
+  if (root.children.length === 0) return null;
+  return root;
+}
+
+// ═══════ Children Layout Engine (integrated from test_children) ═══════
+
+function resolvePosChild(raw, total, defaultVal) {
+  if (raw === null || raw === undefined || raw === '') return defaultVal;
+  if (typeof raw === 'string' && raw.endsWith('%')) return parseFloat(raw) / 100 * total;
+  return parseFloat(raw);
+}
+
+/**
+ * Measure element's natural size based on its content.
+ */
+function measureElement(el) {
+  if (el._cw > 0 && el._ch > 0) return;
+  const padX = 10, padY = 8;
+  const gap = el.gapY || 5;
+
+  // Both fixed dimensions
+  if (el.w !== null && el.h !== null) {
+    el._cw = Math.max(el.w, 20);
+    el._ch = Math.max(el.h, 20);
+    return;
+  }
+
+  let maxChildW = 0, totalChildH = 0, maxChildHForHeight = 0;
+  if (el.children && el.children.length > 0) {
+    for (const child of el.children) {
+      measureElement(child);
+      const cw = child._cw || 0;
+      const ch = child._ch || 0;
+      if (cw > maxChildW) maxChildW = cw;
+      if (ch > maxChildHForHeight) maxChildHForHeight = ch;
+      totalChildH += ch + gap;
+    }
+    if (el.children.length > 0) totalChildH -= gap;
+  }
+
+  // Text size contribution
+  let textW = 0, textH = 0;
+  if (el.text) {
+    const fontSize = el.fontSize || 12;
+    let tw = _measureText(el.text, fontSize);
+
+    if (el.w !== null && el.h !== null) {
+      textW = Math.min(tw + padX * 2, Math.max(el.w - padX * 2, 20));
+    } else if (el.w !== null) {
+      const availW = Math.max(el.w - padX * 2, 20);
+      const lines = _wrapText(el.text, availW, fontSize);
+      textW = availW;
+      textH = lines.length * (fontSize + 4) + padY * 2;
+    } else {
+      textW = tw;
+      textH = (fontSize + 4) + padY * 2;
+    }
+  }
+
+  // Compute size
+  const w = el.w !== null ? Math.max(el.w, 20) : Math.max(maxChildW, textW) + padX * 2;
+  const h = el.h !== null ? Math.max(el.h, 20) : Math.max(maxChildHForHeight + padY * 2, textH);
+  el._cw = w;
+  el._ch = h;
+}
+
+/**
+ * Resolve positions for children.
+ */
+function resolvePositions(el) {
+  if (!el.children || el.children.length === 0) return;
+
+  const padX = 10, padY = 8;
+
+  // Measure all children
+  for (const child of el.children) {
+    if (child._cw <= 0 && child._ch <= 0) {
+      measureElement(child);
+    }
+  }
+
+  // Position inside children
+  let curY = el._ay !== undefined ? el._ay + padY : padY;
+  for (const child of el.children) {
+    // Position X
+    if (child.xRel) {
+      if (child.xRel === 'center') {
+        child._ax = (el._cw - (child._cw || 0)) / 2;
+      } else {
+        child._ax = resolvePosChild(child.xRel, el._cw, 10);
+      }
+    } else {
+      child._ax = (el._cw - (child._cw || 0)) / 2;
+    }
+
+    // Position Y
+    if (child.yRel) {
+      const val = resolvePosChild(child.yRel, el._ch, undefined);
+      if (val !== undefined && !isNaN(val)) {
+        child._ay = el._ay !== undefined ? el._ay + val : val;
+      } else {
+        child._ay = curY;
+        curY += (child._ch || 0) + (el.gapY || 5);
+      }
+    } else {
+      child._ay = curY;
+      curY += (child._ch || 0) + (el.gapY || 5);
+    }
+  }
+
+  // Expand parent to fit children
+  let maxBottom = 0;
+  for (const child of el.children) {
+    const cb = child._ay + (child._ch || 0);
+    if (cb > maxBottom) maxBottom = cb;
+  }
+  if (el.w === null) {
+    let maxRight = 0;
+    for (const child of el.children) {
+      const cr = child._ax + (child._cw || 0);
+      if (cr > maxRight) maxRight = cr;
+    }
+    el._cw = Math.max(maxRight, el._cw) + padX * 2;
+  }
+  if (el.h === null) {
+    el._ch = Math.max(maxBottom, 1) + padY * 2;
+  }
+
+  // Resolve sizes if wRel/hRel used
+  for (const child of el.children) {
+    if (child.wRel) {
+      const match = /(?:child|sibling)-(.+)$/.exec(child.wRel);
+      if (match && el.children) {
+        const sib = findElementByLabel(match[1], el);
+        if (sib) child.w = sib._cw;
+      }
+    }
+    if (child.hRel) {
+      const match = /(?:child|sibling)-(.+)$/.exec(child.hRel);
+      if (match && el.children) {
+        const sib = findElementByLabel(match[1], el);
+        if (sib) child.h = sib._ch;
+      }
+    }
+  }
+}
+
+function findElementByLabel(label, el) {
+  if (el.label === label) return el;
+  if (el.children) {
+    for (const c of el.children) {
+      const found = findElementByLabel(label, c);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+/**
+ * Compute layout for a children tree.
+ */
+function computeChildrenLayout(el) {
+  const MAX_ITER = 3;
+  for (let iter = 0; iter < MAX_ITER; iter++) {
+    measureElement(el);
+    resolvePositions(el);
+  }
+}
+
+/**
+ * Draw a child element recursively to SVG group.
+ */
+function drawElement(parentEl, parentGroup, ox, oy) {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const px = (ox || 0) + (parentEl._ax || 0);
+  const py = (oy || 0) + (parentEl._ay || 0);
+  const cw = parentEl._cw || 0;
+  const ch = parentEl._ch || 0;
+  const padX = 10, padY = 8;
+
+  const g = document.createElementNS(svgNS, 'g');
+  g.classList.add('el-group');
+  g.dataset.id = parentEl.label || parentEl.id;
+
+  // Background image (if it's the root of a nodeView)
+  if (parentEl.bgImage && cw > 0 && ch > 0) {
+    const img = document.createElementNS(svgNS, 'image');
+    img.setAttribute('x', px); img.setAttribute('y', py);
+    img.setAttribute('width', cw); img.setAttribute('height', ch);
+    img.style.pointerEvents = 'none';
+    g.appendChild(img);
+  }
+
+  // Shape
+  const isCircle = parentEl.shape === 'circle';
+  const size = isCircle ? Math.max(cw, ch) : null;
+  const rect = document.createElementNS(svgNS, 'rect');
+  rect.setAttribute('x', px); rect.setAttribute('y', py);
+  rect.setAttribute('width', isCircle ? size : cw); rect.setAttribute('height', isCircle ? size : ch);
+  rect.setAttribute('rx', isCircle ? 999 : (parentEl.rx || 4));
+  rect.setAttribute('ry', isCircle ? 999 : (parentEl.rx || 4));
+  rect.setAttribute('fill', parentEl.fill || '#ffffff22');
+  rect.setAttribute('stroke', parentEl.stroke || '#fff6');
+  rect.setAttribute('stroke-width', parentEl.strokeWidth ?? 1.5);
+  g.appendChild(rect);
+
+  // Text
+  if (parentEl.text && (parentEl.w === null || !parentEl.children)) {
+    const lineHeight = (parentEl.fontSize || 12) + 4;
+    const txt = document.createElementNS(svgNS, 'text');
+    txt.setAttribute('x', px + padX);
+    txt.setAttribute('y', py + padY + lineHeight);
+    txt.setAttribute('fill', parentEl.textColor || '#ffffffcc');
+    txt.setAttribute('font-size', parentEl.fontSize || 12);
+    txt.textContent = parentEl.text;
+    g.appendChild(txt);
+  }
+
+  // Recursively draw children
+  if (parentEl.children && parentEl.children.length > 0) {
+    for (const child of parentEl.children) {
+      drawElement(child, g, px, py);
+    }
+  }
+
+  parentGroup.appendChild(g);
+}
+
+/**
+ * Render a node with children (new layout system).
+ */
+function renderNodeWithChildren(node, nv, mainG, svgNS) {
+  computeChildrenLayout(node);
+  // Update node dimensions from layout
+  node.width = node._cw;
+  node.height = node._ch;
+  // Draw using new renderer
+  drawElement(node, mainG, 0, 0);
+}
+
 function addRow(cid){const div=document.getElementById(cid);const row=document.createElement('div');row.className='filter-row';const logic=document.createElement('span');logic.className='logic';logic.textContent=div.children.length?'AND':'WHERE';const sel=document.createElement('select');sel.innerHTML='<option value="$or">$or</option>';const keys=new Set();Object.values(VAULT).forEach(v=>{if(v.props)Object.keys(v.props).forEach(k=>keys.add(k));});[...keys].sort().forEach(k=>{sel.innerHTML+=`<option value="${k}">${k}</option>`;});const inp=document.createElement('input');inp.placeholder='value or val1|val2';const del=document.createElement('button');del.textContent='x';del.style.background='#533483';del.style.padding='2px 6px';del.onclick=()=>row.remove();row.appendChild(logic);row.appendChild(sel);row.appendChild(inp);row.appendChild(del);div.appendChild(row);}
 function buildFilterStr(cid){const pairs=[];document.getElementById(cid).querySelectorAll('.filter-row').forEach(r=>{const s=r.querySelector('select'),i=r.querySelector('input');if(s&&i&&i.value.trim())pairs.push(s.value+'='+i.value.trim());});return pairs.join(',');}
 async function apply(){const params={filter:buildFilterStr('filter-rows'),exclude:buildFilterStr('exclude-rows'),include:document.getElementById('include-types').value||'',sortKey:document.getElementById('sort-key').value,sortDesc:document.getElementById('sort-desc').checked,prune:document.getElementById('prune-orphans').checked,baseNode:document.getElementById('base-node').value||'',depth:document.getElementById('depth').value||''};const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params)});const data=await res.json();currentNodes=data.nodes;currentEdges=data.edges;render();}
