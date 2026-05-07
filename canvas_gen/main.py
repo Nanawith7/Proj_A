@@ -190,6 +190,11 @@ Example:
         "--prune-orphans", nargs="?", const="*", default=None,
         help="Remove zero-edge nodes. No arg = all types. 'type=tag' or 'type=tag|character' for specific.",
     )
+    p.add_argument(
+        "--node-views",
+        action="store_true",
+        help="Load and embed nodeview templates for children layout computation.",
+    )
 
     return p
 
@@ -272,6 +277,19 @@ def main(argv: list[str] | None = None) -> int:
         nodes = list(vault_index.values())
         print("[INFO] No base node specified -- using full vault.")
 
+    # --- Load nodeviews for children layout (if requested) ---
+    node_views: dict[str, dict[str, Any]] | None = None
+    if args.node_views:
+        nv_dir = vault_path / "nodeview"
+        if nv_dir.is_dir():
+            node_views = {}
+            for fpath in nv_dir.glob("*.json"):
+                if fpath.is_file():
+                    name = fpath.stem
+                    with open(fpath, encoding="utf-8") as f:
+                        node_views[name] = json.load(f)
+            print(f"[INFO] Loaded {len(node_views)} nodeview template(s) for children layout.")
+
     # --- Execute pipeline ---
     positioned, edges, icon_map, eff_row_h, eff_col_w, icon_sz, max_icon_h = run_pipeline(
         nodes=nodes,
@@ -291,6 +309,7 @@ def main(argv: list[str] | None = None) -> int:
         icon_gap=args.icon_gap,
         prune_orphans=args.prune_orphans,
         vault_path=str(vault_path),
+        node_views=node_views,
     )
 
     if not positioned:

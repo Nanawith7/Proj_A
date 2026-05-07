@@ -55,6 +55,7 @@ class TypeDefinition:
     color: str = ""
     node_width: int = DEFAULT_NODE_WIDTH
     node_height: int = DEFAULT_NODE_HEIGHT
+    nodeview: str = ""
 
 
 @dataclass
@@ -93,6 +94,7 @@ class PositionedNode:
     icon_path: str = ""
     icon_width: int = 50
     icon_height: int = 50
+    children: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def node_id(self) -> str:

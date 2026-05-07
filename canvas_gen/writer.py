@@ -55,7 +55,23 @@ def _make_file_node(node: PositionedNode, node_id: str) -> dict[str, Any]:
     }
     if node.color:
         obj["color"] = node.color
+    if node.children:
+        obj["children"] = _serialize_children(node.children)
     return obj
+
+
+def _serialize_children(children: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Serialize children list, removing internal _* prefixed keys."""
+    result: list[dict[str, Any]] = []
+    for c in children:
+        clean: dict[str, Any] = {}
+        for k, v in c.items():
+            if k == k.lstrip('_'):
+                clean[k] = v
+            else:
+                clean[k.lstrip('_')] = v
+        result.append(clean)
+    return result
 
 
 def _make_edge_object(

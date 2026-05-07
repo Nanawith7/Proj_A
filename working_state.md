@@ -3,7 +3,7 @@
 ## 概要
 既存canvas viewer（HTML + Pythonサーバー）のレンダリングに、test_childrenの新childrenシステムを後方互換性を持って統合
 
-## 全10段階計画
+## 全11段階計画
 | 段階 | 内容 | 状態 |
 |------|------|------|
 | 0 | 計画立案 | ✅ 完了 |
@@ -16,20 +16,28 @@
 | 5.1-B | template.html修正 | ✅ 完了 |
 | 6 | レンダリングエンジン検証 | ✅ 完了 |
 | 7 | テンプレートロード実装 | ✅ 完了 |
-| 8 | pipeline.py統合 | 🔴 次 |
-| 9 | 統合テスト | - |
+| 8 | pipeline.py統合（children server-side計算） | ✅ 完了 |
+| 9 | 統合テスト | 🔴 次 |
 | 10 | ドキュメント最適化 | - |
+
+## 新規ファイル
+- `canvas_gen/children.py` (419行) - Python版childrenレイアウトエンジン
+
+## pipeline.py修正項目
+| 修正 | 状態 |
+|------|------|
+| node_viewsパラメータ追加 | ✅ |
+| TypeDefinition.nodeview使用でchildren計算 | ✅ |
+| --node-views CLI引数追加 | ✅ |
+| 58ノード→children付き72ノード出力 | ✅ |
 
 ## viewer.js修正項目
 | 修正 | 状態 |
 |------|------|
-| children描画パスのリファクタリング(drawElementベース) | ✅ |
-| computeChildrenLayout結果の上書き防止 | ✅ |
-| _wrapText/_measureText関数の追加 | ✅ |
-| renderNodeWithChildren関数の更新 | ✅ |
-| const→let修正（childW/childH） | ✅ |
-| window.VAULT/TYPEDEFIES/NODEVIESへのバインド | ✅ |
-| JS構文バリデーション | ✅ 合格 |
+| pre-computed children描画Path A | ✅ |
+| fallback dynamic children Path B | ✅ |
+| drawElement() ax/ay/cw/ch両対応 | ✅ |
+| 58rects + 166 el-groups描画 OK | ✅ |
 
 ## template.html修正項目
 | 修正 | 状態 |
@@ -37,7 +45,6 @@
 | drawElement()関数の追加 | ✅ |
 | _wrapText/_measureText関数の追加 | ✅ |
 | renderGraph()のchildren描画パスをdrawElement()ベースに | ✅ |
-| _cw/_ch上書き防止 | ✅ |
 | loadNodeViewsAsync()関数の追加 | ✅ |
 | 初期実行をasyncに書き換え | ✅ |
 | JS構文バリデーション | ✅ 合格 |
@@ -45,25 +52,29 @@
 ## 検証結果
 | パス | rect数 | 子要素数 | state |
 |------|-------|---------|------|
-| viewer.js (index.html) | 37 | 118 | ✅ 正常 |
-| template.html | 37+ | 100+ | ✅ 正常 |
+| viewer.js (index.html) | 58 | 166 | ✅ 正常 |
+| template.html | 37+ | 100+ | ✅ 正常（Phase 6検証） |
 
 ## 重要な設計要素
-1. 既存描画を維持（propertiesなしノードは既存パス、propertiesありは新childrenパス）
-2. children._ax/_ayを0にリセット後drawElement(child, g, nx, ny)で相対位置計算
-3. template.htmlはサーバー埋め込み + loadNodeViewsAsync()のハイブリッド対応
-4. viewer.jsはinit()内でwindow.VAULT/TYPEDEFS/NODEVIESにバインド
-5. 1秒timeoutフォールバックで描画失敗防止
-6. 両描画パスが正常に混在して動作（118個の子要素がdrawElementで描画済み）
+1. **サーバーサイド計算**: pipeline.py（Python）でlayout計算 → canvas JSONにax/ay/cw/chを埋め込む
+2. **クライアントSide描画**: viewer.jsでpre-computed childrenを直接描画
+3. **後方互換性**: pre-computed children無→fallback dynamic計算
+4. **Type定義→ノードビューテンプレート**: nodeviewフィールドで紐付け
+5. **childrenシリアライズ**: `_ax`/`_aw`/`_ch`/`_ay` → `ax`/`aw`/`ch`/`ay`（アンダーストリップ）
 
 ## 既存の課題
-- `window._svgCanvas_get` はtest_children由来のエラー（無害、viewer.jsの描画には影響なし）
-- バリデーション用スクリプト`_validate.js.py`は削除済み
+- テキスト幅推定がブラウザ実測と異なる場合あり（近似値に基づく）
+- _svgCanvas_getエラーは未対応（無害）
+- gapX（横間隔）は未実装
 
 ## 現在の作業ファイル
-- `canvas_gen/viewer/viewer.js` ← 修正済み（886行）
-- `canvas_gen/viewer/template.html` ← 修正済み（403行）
-- `test_children/layout.js` ← 参照用
-- `test_children/render.js` ← 参照用
+- `canvas_gen/children.py` ← 新規作成（419行）
+- `canvas_gen/models.py` ← 修正（PositionedNode.children追加、TypeDefinition.nodeview追加）
+- `canvas_gen/pipeline.py` ← 修正（node_views追加、children計算接続）
+- `canvas_gen/config.py` ← 修正（nodeviewフィールド読み込み）
+- `canvas_gen/writer.py` ← 修正（childrenシリアライズ）
+- `canvas_gen/main.py` ← 修正（--node-views引数追加）
+- `canvas_gen/viewer/viewer.js` ← 修正（pre-computed children対応）
+- `canvas_gen/viewer/template.html` ← 修正済み（Phase 7）
 - `Obsidian_test/vault/nodeview/*.json` ← テンプレート
-- `test.canvas` ← テストボルト生成済み
+- `test_children.canvas` ← children付きテストボルト

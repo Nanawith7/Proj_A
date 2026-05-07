@@ -127,20 +127,14 @@ function render() {
     const g=document.createElementNS(svgNS,'g');g.setAttribute('data-id',n.id);
     let childW = nw, childH = nh; // mutable for children layout
 
-    // ── Check if node has properties to render as children ──
-    const children = nodeViewToChildren(nv, v || {});
+    // ── Render children ──
+    const canvasChildren = n.children; // Pre-computed from canvas file
+    const usePrecomputed = canvasChildren && Array.isArray(canvasChildren) && canvasChildren.length > 0;
 
-    if (children && children.children.length > 0) {
-      // ── New children rendering path ──
-      children._ax = nx, children._ay = ny;
-      children._cw = null, children._ch = null;
-      computeChildrenLayout(children);
-
-      // Update node dimensions from computed layout (never increase from original)
-      if (!childW || childW <= 0) childW = children._cw || 200;
-      if (!childH || childH <= 0) childH = children._ch || 120;
-      if (children._cw > 0 && children._cw < childW) childW = children._cw;
-      if (children._ch > 0 && children._ch < childH) childH = children._ch;
+    if (usePrecomputed) {
+      // ── Path A: Pre-computed children from pipeline ──
+      childW = n.width || childW;
+      childH = n.height || childH;
       n.width = childW; n.height = childH;
 
       // Draw parent rect
@@ -148,14 +142,14 @@ function render() {
       pRect.setAttribute('data-id', n.id);
       pRect.setAttribute('class', 'node-rect');
       pRect.style.cursor = 'pointer';
-      pRect.setAttribute('x', children._ax);
-      pRect.setAttribute('y', children._ay);
-      pRect.setAttribute('width', children._cw);
-      pRect.setAttribute('height', children._ch);
+      pRect.setAttribute('x', nx);
+      pRect.setAttribute('y', ny);
+      pRect.setAttribute('width', childW);
+      pRect.setAttribute('height', childH);
       const shape = nv.shape || 'rect';
       const rx = nv.rx || 4;
-      pRect.setAttribute('rx', shape === 'circle' ? Math.min(children._cw, children._ch) / 2 : shape === 'round' ? 18 : rx);
-      pRect.setAttribute('ry', shape === 'circle' ? Math.min(children._cw, children._ch) / 2 : shape === 'round' ? 18 : rx);
+      pRect.setAttribute('rx', shape === 'circle' ? Math.min(childW, childH) / 2 : shape === 'round' ? 18 : rx);
+      pRect.setAttribute('ry', shape === 'circle' ? Math.min(childW, childH) / 2 : shape === 'round' ? 18 : rx);
       const op = nv.layout?.collapsedFillOpacity;
       if (op !== undefined) pRect.setAttribute('opacity', op);
       pRect.setAttribute('fill', n.color || td.color || '#555');
@@ -165,85 +159,9 @@ function render() {
       g.appendChild(pRect);
 
       // Title
-      const lp = layoutParams(nv, children._cw, children._ch);
+      const lp = layoutParams(nv, childW, childH);
       const fs = Math.max(9, Math.min(14, nv.fontSize || 12));
       const tText = truncateTitle(title, fs, lp);
-      if (lp.titleWrap) {
-        drawWrappedTitle(g, svgNS, title, fs, lp, children._ax, children._ay, nv);
-      } else {
-        const txt = document.createElementNS(svgNS, 'text');
-        txt.setAttribute('class', 'node-title');
-        txt.setAttribute('font-size', fs);
-        if (nv.boldTitle) txt.setAttribute('font-weight', 'bold');
-        txt.setAttribute('text-anchor', lp.titleAnchor);
-        txt.setAttribute('x', children._ax + (lp.titleAnchor === 'middle' ? lp.titleX : lp.titleX));
-        txt.setAttribute('y', children._ay + lp.titleY);
-        txt.setAttribute('fill', '#fff');
-        txt.textContent = tText || title;
-        g.appendChild(txt);
-      }
-
-      // Icon
-      const iconPath = v?.props?.icon;
-      if (iconPath) {
-        const isz = Math.min(children._cw, children._ch) * 0.45;
-        const anchorX = nv.layout?.iconAnchorX || 'center';
-        const anchorY = nv.layout?.iconAnchorY || 'center';
-        const ipx = nv.layout?.iconPadX || 0, ipy = nv.layout?.iconPadY || 0;
-        let ix, iy;
-        if (anchorX === 'left') ix = children._ax + ipx;
-        else if (anchorX === 'right') ix = children._ax + children._cw - isz - ipx;
-        else ix = children._ax + (children._cw - isz) / 2;
-        if (anchorY === 'top') iy = children._ay + ipy;
-        else if (anchorY === 'bottom') iy = children._ay + children._ch - isz - ipy;
-        else iy = children._ay + (children._ch - isz) / 2;
-        const img = document.createElementNS(svgNS, 'image');
-        img.setAttribute('href', '/_icons/' + iconPath.split('/').pop());
-        img.setAttribute('x', ix); img.setAttribute('y', iy);
-        img.setAttribute('width', isz); img.setAttribute('height', isz);
-        img.setAttribute('class', 'node-icon-img');
-        img.style.pointerEvents = 'none';
-        g.appendChild(img);
-      }
-
-      // Draw children rects via drawElement()
-      // children._ax/_ay are relative to the children root; set them to 0
-      // so that drawElement adds (nx, ny) from ox/oy for correct absolute positioning.
-      children._ax = 0;
-      children._ay = 0;
-      for (const child of children.children) {
-        drawElement(child, g, nx, ny);
-      }
-
-      mainG.appendChild(g);
-    } else {
-      // ── Existing rendering path (unchanged) ──
-      const iconPath = v?.props?.icon;
-      if (iconPath) {
-        const isz = Math.min(nw, nh) * 0.45;
-        const anchorX = nv.layout?.iconAnchorX || 'center';
-        const anchorY = nv.layout?.iconAnchorY || 'center';
-        const ipx = nv.layout?.iconPadX || 0, ipy = nv.layout?.iconPadY || 0;
-        let ix, iy;
-        if (anchorX === 'left') ix = nx + ipx;
-        else if (anchorX === 'right') ix = nx + nw - isz - ipx;
-        else ix = nx + (nw - isz) / 2;
-        if (anchorY === 'top') iy = ny + ipy;
-        else if (anchorY === 'bottom') iy = ny + nh - isz - ipy;
-        else iy = ny + (nh - isz) / 2;
-        const img = document.createElementNS(svgNS, 'image');
-        img.setAttribute('href', '/_icons/' + iconPath.split('/').pop());
-        img.setAttribute('x', ix); img.setAttribute('y', iy);
-        img.setAttribute('width', isz); img.setAttribute('height', isz);
-        img.setAttribute('class', 'node-icon-img');
-        img.style.pointerEvents = 'none';
-        g.appendChild(img);
-      }
-
-      const lp = layoutParams(nv, nw, nh);
-      const fs = Math.max(9, Math.min(14, nv.fontSize || 12));
-      const tText = truncateTitle(title, fs, lp);
-
       if (lp.titleWrap) {
         drawWrappedTitle(g, svgNS, title, fs, lp, nx, ny, nv);
       } else {
@@ -258,7 +176,160 @@ function render() {
         txt.textContent = tText || title;
         g.appendChild(txt);
       }
+
+         // Draw children directly (positions are relative to parent origin)
+      for (const child of canvasChildren) {
+        drawElement(child, g, nx + (child.ax || 0), ny + (child.ay || 0));
+      }
+
       mainG.appendChild(g);
+    } else {
+      // ── Path B: Existing rendering path (no pre-computed children) ──
+      const children = nodeViewToChildren(nv, v || {});
+      let rendered = false;
+
+      if (children && children.children && children.children.length > 0) {
+        // ── Dynamic children rendering path (fallback) ──
+        children._ax = nx, children._ay = ny;
+        children._cw = null; children._ch = null;
+        computeChildrenLayout(children);
+
+        childW = !childW || childW <= 0 ? children._cw || 200 : children._cw < childW ? children._cw : childW;
+        childH = !childH || childH <= 0 ? children._ch || 120 : children._ch < childH ? children._ch : childH;
+        n.width = childW; n.height = childH;
+
+        // Draw parent rect
+        const pRect = document.createElementNS(svgNS, 'rect');
+        pRect.setAttribute('data-id', n.id);
+        pRect.setAttribute('class', 'node-rect');
+        pRect.style.cursor = 'pointer';
+        pRect.setAttribute('x', children._ax);
+        pRect.setAttribute('y', children._ay);
+        pRect.setAttribute('width', children._cw);
+        pRect.setAttribute('height', children._ch);
+        const shape = nv.shape || 'rect';
+        const rx = nv.rx || 4;
+        pRect.setAttribute('rx', shape === 'circle' ? Math.min(children._cw, children._ch) / 2 : shape === 'round' ? 18 : rx);
+        pRect.setAttribute('ry', shape === 'circle' ? Math.min(children._cw, children._ch) / 2 : shape === 'round' ? 18 : rx);
+        const op = nv.layout?.collapsedFillOpacity;
+        if (op !== undefined) pRect.setAttribute('opacity', op);
+        pRect.setAttribute('fill', n.color || td.color || '#555');
+        pRect.setAttribute('stroke', nv.stroke || '#fff6');
+        pRect.setAttribute('stroke-width', nv.strokeWidth || 0.5);
+        pRect.onclick = e => { e.stopPropagation(); toggleExpand(n, g, mainG); };
+        g.appendChild(pRect);
+
+        // Title
+        const lp = layoutParams(nv, children._cw, children._ch);
+        const fs = Math.max(9, Math.min(14, nv.fontSize || 12));
+        const tText = truncateTitle(title, fs, lp);
+        if (lp.titleWrap) {
+          drawWrappedTitle(g, svgNS, title, fs, lp, children._ax, children._ay, nv);
+        } else {
+          const txt = document.createElementNS(svgNS, 'text');
+          txt.setAttribute('class', 'node-title');
+          txt.setAttribute('font-size', fs);
+          if (nv.boldTitle) txt.setAttribute('font-weight', 'bold');
+          txt.setAttribute('text-anchor', lp.titleAnchor);
+          txt.setAttribute('x', children._ax + (lp.titleAnchor === 'middle' ? lp.titleX : lp.titleX));
+          txt.setAttribute('y', children._ay + lp.titleY);
+          txt.setAttribute('fill', '#fff');
+          txt.textContent = tText || title;
+          g.appendChild(txt);
+        }
+
+        // Icon
+        const iconPath = v?.props?.icon;
+        if (iconPath) {
+          const isz = Math.min(children._cw, children._ch) * 0.45;
+          const anchorX = nv.layout?.iconAnchorX || 'center';
+          const anchorY = nv.layout?.iconAnchorY || 'center';
+          const ipx = nv.layout?.iconPadX || 0, ipy = nv.layout?.iconPadY || 0;
+          let ix, iy;
+          if (anchorX === 'left') ix = children._ax + ipx;
+          else if (anchorX === 'right') ix = children._ax + children._cw - isz - ipx;
+          else ix = children._ax + (children._cw - isz) / 2;
+          if (anchorY === 'top') iy = children._ay + ipy;
+          else if (anchorY === 'bottom') iy = children._ay + children._ch - isz - ipy;
+          else iy = children._ay + (children._ch - isz) / 2;
+          const img = document.createElementNS(svgNS, 'image');
+          img.setAttribute('href', '/_icons/' + iconPath.split('/').pop());
+          img.setAttribute('x', ix); img.setAttribute('y', iy);
+          img.setAttribute('width', isz); img.setAttribute('height', isz);
+          img.setAttribute('class', 'node-icon-img');
+          img.style.pointerEvents = 'none';
+          g.appendChild(img);
+        }
+
+        // Children via drawElement()
+        children._ax = 0;
+        children._ay = 0;
+        for (const child of children.children) {
+          drawElement(child, g, nx, ny);
+        }
+        rendered = true;
+      }
+
+      if (!rendered) {
+        // ── Existing path (no children at all) ──
+        const iconPath = v?.props?.icon;
+        const pRect = document.createElementNS(svgNS, 'rect');
+        pRect.setAttribute('data-id', n.id);
+        pRect.setAttribute('class', 'node-rect');
+        pRect.setAttribute('x', nx);
+        pRect.setAttribute('y', ny);
+        pRect.setAttribute('width', nw);
+        pRect.setAttribute('height', nh);
+        const shape = nv.shape || 'rect';
+        const rx = nv.rx || 4;
+        pRect.setAttribute('rx', shape === 'circle' ? Math.min(nw, nh) / 2 : shape === 'round' ? 18 : rx);
+        pRect.setAttribute('ry', shape === 'circle' ? Math.min(nw, nh) / 2 : shape === 'round' ? 18 : rx);
+        pRect.setAttribute('fill', n.color || td.color || '#555');
+        pRect.setAttribute('stroke', nv.stroke || '#fff6');
+        pRect.setAttribute('stroke-width', nv.strokeWidth || 0.5);
+        pRect.onclick = e => { e.stopPropagation(); toggleExpand(n, g, mainG); };
+        g.appendChild(pRect);
+
+        const lp = layoutParams(nv, nw, nh);
+        const fs = Math.max(9, Math.min(14, nv.fontSize || 12));
+        const tText = truncateTitle(title, fs, lp);
+
+        if (lp.titleWrap) {
+          drawWrappedTitle(g, svgNS, title, fs, lp, nx, ny, nv);
+        } else {
+          const txt = document.createElementNS(svgNS, 'text');
+          txt.setAttribute('class', 'node-title');
+          txt.setAttribute('font-size', fs);
+          if (nv.boldTitle) txt.setAttribute('font-weight', 'bold');
+          txt.setAttribute('text-anchor', lp.titleAnchor);
+          txt.setAttribute('x', nx + (lp.titleAnchor === 'middle' ? lp.titleX : lp.titleX));
+          txt.setAttribute('y', ny + lp.titleY);
+          txt.setAttribute('fill', '#fff');
+          txt.textContent = tText || title;
+          g.appendChild(txt);
+        }
+        if (iconPath) {
+          const isz = Math.min(nw, nh) * 0.45;
+          const anchorX = nv.layout?.iconAnchorX || 'center';
+          const anchorY = nv.layout?.iconAnchorY || 'center';
+          const ipx = nv.layout?.iconPadX || 0, ipy = nv.layout?.iconPadY || 0;
+          let ix, iy;
+          if (anchorX === 'left') ix = nx + ipx;
+          else if (anchorX === 'right') ix = nx + nw - isz - ipx;
+          else ix = nx + (nw - isz) / 2;
+          if (anchorY === 'top') iy = ny + ipy;
+          else if (anchorY === 'bottom') iy = ny + nh - isz - ipy;
+          else iy = ny + (nh - isz) / 2;
+          const img = document.createElementNS(svgNS, 'image');
+          img.setAttribute('href', '/_icons/' + iconPath.split('/').pop());
+          img.setAttribute('x', ix); img.setAttribute('y', iy);
+          img.setAttribute('width', isz); img.setAttribute('height', isz);
+          img.setAttribute('class', 'node-icon-img');
+          img.style.pointerEvents = 'none';
+          g.appendChild(img);
+        }
+          mainG.appendChild(g);
+      }
     }
   });
 
@@ -814,10 +885,14 @@ function computeChildrenLayout(el) {
  */
 function drawElement(parentEl, parentGroup, ox, oy) {
   const svgNS = 'http://www.w3.org/2000/svg';
-  const px = (ox || 0) + (parentEl._ax || 0);
-  const py = (oy || 0) + (parentEl._ay || 0);
-  const cw = parentEl._cw || 0;
-  const ch = parentEl._ch || 0;
+  const elAx = (parentEl._ax !== undefined && parentEl._ax !== null) ? parentEl._ax : (parentEl.ax || 0);
+  const elAy = (parentEl._ay !== undefined && parentEl._ay !== null) ? parentEl._ay : (parentEl.ay || 0);
+  const elCw = (parentEl._cw !== undefined && parentEl._cw !== null) ? parentEl._cw : (parentEl.cw || 0);
+  const elCh = (parentEl._ch !== undefined && parentEl._ch !== null) ? parentEl._ch : (parentEl.ch || 0);
+  const px = (ox || 0) + elAx;
+  const py = (oy || 0) + elAy;
+  const cw = elCw;
+  const ch = elCh;
   const padX = 10, padY = 8;
 
   const g = document.createElementNS(svgNS, 'g');

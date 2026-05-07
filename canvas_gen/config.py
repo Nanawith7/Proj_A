@@ -54,6 +54,7 @@ def load_type_definitions(path: Optional[str]) -> dict[str, TypeDefinition]:
                 color=str(config.get("color", "")),
                 node_width=int(config.get("node_width", DEFAULT_NODE_WIDTH)),
                 node_height=int(config.get("node_height", DEFAULT_NODE_HEIGHT)),
+                nodeview=str(config.get("nodeview", "")),
             )
         else:
             result[str(type_name)] = TypeDefinition()

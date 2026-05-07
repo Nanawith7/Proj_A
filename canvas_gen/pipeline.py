@@ -17,6 +17,7 @@ from typing import Any
 from .edges import generate_edges, prune_orphaned
 from .filter_sort import include_matching, run_filter_pipeline
 from .icons import resolve_node_icons
+from .children import compute_children, nodeViewToChildren
 from .layout import compute_layout, compute_layout_params
 from .models import EdgeData, LabelInfo, NoteNode, PositionedNode, TypeDefinition
 
@@ -40,6 +41,7 @@ def run(
     icon_gap: int = 4,
     prune_orphans: str | None = None,
     vault_path: str = "",
+    node_views: dict[str, dict[str, Any]] | None = None,
 ) -> tuple[list[PositionedNode], list[EdgeData], dict[str, str], int, int, int, int]:
     """Execute full pipeline, returning positioned nodes + edges + metadata."""
 
@@ -76,6 +78,21 @@ def run(
         column_width=eff_col, row_height=eff_row,
         node_width=node_width, node_height=node_height,
     )
+
+    # 7b. Compute children positions for nodes with nodeview templates
+    if node_views:
+        for pn in positioned:
+            td = type_defs.get(pn.node_type)
+            nv_key = td.nodeview if td else ""
+            nv = node_views.get(nv_key)
+            if nv and 'properties' in nv and nv['properties']:
+                try:
+                    ch_root = nodeViewToChildren(nv, pn.properties)
+                    ch_root = compute_children(ch_root, pn.width, pn.height)
+                    pn.children = ch_root.get('children', [])
+                except Exception:
+                    pass
+
     print(f"[INFO] Layout computed: {len(positioned)} positioned nodes.")
 
     max_icon_h = max((n.icon_height for n in nodes), default=icon_size)
