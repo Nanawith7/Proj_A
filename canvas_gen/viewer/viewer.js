@@ -3,6 +3,8 @@ const API = '/api/filter';
 let ALL_NODES=[], ALL_EDGES=[], VAULT={}, TYPEDEFS={}, NODEVIEWS={};
 let currentNodes=[], currentEdges=[];
 let panX=0, panY=0, zoom=1, dragging=false, dsX=0, dsY=0, expandedId=null;
+// Allow debugging
+window.NODEVIEWS = NODEVIEWS;
 
 const _measureCtx = document.createElement('canvas').getContext('2d');
 function measureText(text, fontSize, fontFamily) {
@@ -67,6 +69,10 @@ async function init() {
   ALL_NODES=d1.nodes; ALL_EDGES=d1.edges; VAULT=d1.vault; TYPEDEFS=d2;
   NODEVIEWS = await loadNodeViews();
   currentNodes=ALL_NODES; currentEdges=ALL_EDGES;
+  // Expose to window for debugging
+  window.VAULT = VAULT;
+  window.TYPEDEFS = TYPEDEFS;
+  window.NODEVIEWS = NODEVIEWS;
   const keys=new Set(); Object.values(VAULT).forEach(v=>{if(v.props)Object.keys(v.props).forEach(k=>keys.add(k));});
   const sel=document.getElementById('sort-key');
   [...keys].sort().forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;sel.appendChild(o);});
@@ -119,6 +125,7 @@ function render() {
     const nw=n.width||200,nh=n.height||120,nx=n.x||0,ny=n.y||0,fill=n.color||td.color||'#555',title=nodeTitle(n);
     const stem=nodeStem(n),v=VAULT[stem];
     const g=document.createElementNS(svgNS,'g');g.setAttribute('data-id',n.id);
+    let childW = nw, childH = nh; // mutable for children layout
 
     // ── Check if node has properties to render as children ──
     const children = nodeViewToChildren(nv, v || {});
@@ -129,12 +136,12 @@ function render() {
       children._cw = null, children._ch = null;
       computeChildrenLayout(children);
 
-      // Update node dimensions from computed layout
-      if (!nw || nw <= 0) nw = children._cw || 200;
-      if (!nh || nh <= 0) nh = children._ch || 120;
-      if (children._cw > 0 && children._cw < nw) nw = children._cw;
-      if (children._ch > 0 && children._ch < nh) nh = children._ch;
-      n.width = nw; n.height = nh;
+      // Update node dimensions from computed layout (never increase from original)
+      if (!childW || childW <= 0) childW = children._cw || 200;
+      if (!childH || childH <= 0) childH = children._ch || 120;
+      if (children._cw > 0 && children._cw < childW) childW = children._cw;
+      if (children._ch > 0 && children._ch < childH) childH = children._ch;
+      n.width = childW; n.height = childH;
 
       // Draw parent rect
       const pRect = document.createElementNS(svgNS, 'rect');

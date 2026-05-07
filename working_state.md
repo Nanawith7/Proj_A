@@ -15,8 +15,8 @@
 | 5.1-A | viewer.js修正 | ✅ 完了 |
 | 5.1-B | template.html修正 | ✅ 完了 |
 | 6 | レンダリングエンジン検証 | ✅ 完了 |
-| 7 | テンプレートロード実装 | 🔴 次 |
-| 8 | pipeline.py統合 | - |
+| 7 | テンプレートロード実装 | ✅ 完了 |
+| 8 | pipeline.py統合 | 🔴 次 |
 | 9 | 統合テスト | - |
 | 10 | ドキュメント最適化 | - |
 
@@ -28,6 +28,7 @@
 | _wrapText/_measureText関数の追加 | ✅ |
 | renderNodeWithChildren関数の更新 | ✅ |
 | const→let修正（childW/childH） | ✅ |
+| window.VAULT/TYPEDEFIES/NODEVIESへのバインド | ✅ |
 | JS構文バリデーション | ✅ 合格 |
 
 ## template.html修正項目
@@ -42,8 +43,8 @@
 | JS構文バリデーション | ✅ 合格 |
 
 ## 検証結果
-| パス | 親rect数 | 子要素数 | 状態 |
-|------|---------|---------|------|
+| パス | rect数 | 子要素数 | state |
+|------|-------|---------|------|
 | viewer.js (index.html) | 37 | 118 | ✅ 正常 |
 | template.html | 37+ | 100+ | ✅ 正常 |
 
@@ -51,15 +52,16 @@
 1. 既存描画を維持（propertiesなしノードは既存パス、propertiesありは新childrenパス）
 2. children._ax/_ayを0にリセット後drawElement(child, g, nx, ny)で相対位置計算
 3. template.htmlはサーバー埋め込み + loadNodeViewsAsync()のハイブリッド対応
-4. 1秒timeoutフォールバックで描画失敗防止
-5. 両描画パスが正常に混在して動作（118個の子要素がdrawElementで描画済み）
+4. viewer.jsはinit()内でwindow.VAULT/TYPEDEFS/NODEVIESにバインド
+5. 1秒timeoutフォールバックで描画失敗防止
+6. 両描画パスが正常に混在して動作（118個の子要素がdrawElementで描画済み）
 
 ## 既存の課題
-- `window._svgCanvas_get` エラーはtest_children由来（無害、viewer.jsの描画には影響なし）
+- `window._svgCanvas_get` はtest_children由来のエラー（無害、viewer.jsの描画には影響なし）
 - バリデーション用スクリプト`_validate.js.py`は削除済み
 
 ## 現在の作業ファイル
-- `canvas_gen/viewer/viewer.js` ← 修正済み（884行）
+- `canvas_gen/viewer/viewer.js` ← 修正済み（886行）
 - `canvas_gen/viewer/template.html` ← 修正済み（403行）
 - `test_children/layout.js` ← 参照用
 - `test_children/render.js` ← 参照用
