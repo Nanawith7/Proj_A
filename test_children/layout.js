@@ -190,58 +190,40 @@ function resolvePositions(parent) {
   const padX = 10, padY = 8;
 
   // ── Pass 1: Position "inside" children only ──
-  let curY = parent._ay + padY;
-  let maxX = 0, maxY = 0, maxChildW = 0, maxChildH = 0, autoStackY = 0;
+ let curY = parent._ay + padY;
+  let autoStackY = 0;
 
    for (const child of parent.children) {
-    const parsedX = parseRelative(child.xRel);
-    const parsedY = parseRelative(child.yRel);
+     const parsedX = parseRelative(child.xRel);
+     const parsedY = parseRelative(child.yRel);
 
-    if ((parsedX && parsedX.isOutside) || (parsedY && parsedY.isOutside)) continue;
-    // _isManual children (dragged/placed by user) don't affect layout
-    if (child._isManual) continue;
+     if ((parsedX && parsedX.isOutside) || (parsedY && parsedY.isOutside)) continue;
+     // _isManual children (dragged/placed by user) don't affect layout
+     if (child._isManual) continue;
 
-    // Resolve X: offset from parent origin, then add parent absolute position
-    const offsetX = resolveRelX(parsedX, parent._cw || 0, child._cw || 0);
-    child._ax = (parent._ax || 0) + offsetX;
+     // Resolve X: offset from parent origin, then add parent absolute position
+     const offsetX = resolveRelX(parsedX, parent._cw || 0, child._cw || 0);
+     child._ax = (parent._ax || 0) + offsetX;
 
-    // Resolve Y: if yRel is specified, use it; otherwise stack vertically
-    if (parsedY) {
-      const offsetY = resolveRelY(parsedY, parent._ch || 0, child._ch || 0);
-      child._ay = (parent._ay || 0) + offsetY;
-    } else {
-      child._ay = curY + autoStackY;
-      autoStackY += (child._ch || 0) + (parent.gapY || 5);
-    }
+     // Resolve Y: if yRel is specified, use it; otherwise stack vertically
+     if (parsedY) {
+       const offsetY = resolveRelY(parsedY, parent._ch || 0, child._ch || 0);
+       child._ay = (parent._ay || 0) + offsetY;
+     } else {
+       child._ay = curY + autoStackY;
+       autoStackY += (child._ch || 0) + (parent.gapY || 5);
+     }
 
-    // Track bounding box for parent expansion
-    // right-N/bottom-N (positive offset) children are pinned TO parent edge, skip them
-    if (parsedX && parsedX.dir === 'right' && !parsedX.isOutside) {
-      autoStackY += child._ch + (parent.gapY || 5);
-      const childBottom2 = (child._ay || 0) - (parent._ay || 0) + child._ch;
-      if (childBottom2 > maxY) maxY = childBottom2;
-      continue;
-    }
-    if (parsedY && parsedY.dir === 'bottom' && !parsedY.isOutside) {
-      autoStackY += child._ch + (parent.gapY || 5);
-      const childRight2 = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
-      if (childRight2 > maxX) maxX = childRight2;
-      continue;
-    }
-    let childRight, childBottom;
-    if (parsedX && parsedX.dir === 'right' || parsedX && parsedX.dir === 'abs') {
-      childRight = (parent._cw || 0) - parsedX.val;
-    } else {
-      childRight = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
-    }
-      if (parsedY && parsedY.dir === 'top') {
-      childBottom = parsedY.val + (child._ch || 0);
-    } else {
-      childBottom = (child._ay || 0) - (parent._ay || 0) + (child._ch || 0);
-    }
-    if (childRight > maxX) maxX = childRight;
-    if (childBottom > maxY) maxY = childBottom;
-  }
+     // right-N/bottom-N (positive offset) children are pinned TO parent edge, skip auto-stack
+     if (parsedX && parsedX.dir === 'right' && !parsedX.isOutside) {
+       autoStackY += child._ch + (parent.gapY || 5);
+       continue;
+     }
+     if (parsedY && parsedY.dir === 'bottom' && !parsedY.isOutside) {
+       autoStackY += child._ch + (parent.gapY || 5);
+       continue;
+     }
+   }
 
   // ── Compute parent's own text width ──
   let parentTextW = 0;
@@ -271,7 +253,7 @@ function resolvePositions(parent) {
     if (cb > maxBottom) maxBottom = cb;
   }
   if (parent.w === null) {
-    let childContentW = Math.max(maxRight, maxChildW, parentTextW);
+    let childContentW = Math.max(maxRight, parentTextW);
     parent._cw = childContentW + padX * 2;
   }
   if (parent.h === null) {
