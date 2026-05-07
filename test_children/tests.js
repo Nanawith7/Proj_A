@@ -16,11 +16,12 @@ function runPositionTests() {
     [null, null],
     ['', null],
     ['invalid', null],
-    // Negative offset tests (outside parent)
-    ['left--10', {dir: 'left', val: -10, isOutside: true}],
-    ['right--10', {dir: 'right', val: -10, isOutside: true}],
-    ['top--5', {dir: 'top', val: -5, isOutside: true}],
-    ['bottom--8', {dir: 'bottom', val: -8, isOutside: true}],
+    ['--10', {dir: 'abs', val: -10, isOutside: false}],
+    // Double-dash outside tests
+    ['left--10', {dir: 'left', val: 10, isOutside: true}],
+    ['right--10', {dir: 'right', val: 10, isOutside: true}],
+    ['top--5', {dir: 'top', val: 5, isOutside: true}],
+    ['bottom--8', {dir: 'bottom', val: 8, isOutside: true}],
   ];
 
   for (const [input, expected] of tests) {
@@ -33,13 +34,13 @@ function runPositionTests() {
   console.log('\n=== resolveRelX Tests (parentW=400) ===');
   const pw = 400;
   [
-    [window._parseRelative('left-10'), -90, 'left-10 (child right edge at 10) with childW=100'],
-    [window._parseRelative('right-10'), 290, 'right-10 with childW=100'],
+    [window._parseRelative('left-10'), 10, 'left-10 (child LEFT edge at parent+10) with childW=100'],
+    [window._parseRelative('right-10'), 290, 'right-10 (child RIGHT edge at parentW-10) with childW=100'],
     [window._parseRelative('-5'), -5, '-5 (abs) with childW=100'],
     [null, 150, 'center with childW=100'],
-    // Negative offset tests (outside parent)
-    [window._parseRelative('left--20'), -120, 'left--20 (child right edge at -20) with childW=100'],
-    [window._parseRelative('right--20'), 320, 'right--20 (child left edge at 420) with childW=100'],
+    // Double-dash outside tests
+    [window._parseRelative('left--10'), -110, 'left--10 (child RIGHT edge 10px left of parent.left) with childW=100'],
+    [window._parseRelative('right--10'), 410, 'right--10 (child LEFT edge 10px right of parent.right) with childW=100'],
   ].forEach(([parsed, expected, desc]) => {
     const result = window._resolveRelX(parsed, pw, 100);
     const pass = Math.abs(result - expected) < 0.01;
@@ -50,12 +51,12 @@ function runPositionTests() {
   console.log('\n=== resolveRelY Tests (parentH=300) ===');
   const ph = 300;
   [
-    [window._parseRelative('top-5'), 5, 'top-5 with childH=30'],
+   [window._parseRelative('top-5'), 5, 'top-5 with childH=30'],
     [window._parseRelative('bottom-10'), 260, 'bottom-10 with childH=30'],
     [null, 0, 'null (default vertical stack)'],
- // Negative offset tests (outside parent)
-    [window._parseRelative('top--20'), -20, 'top--20 with childH=50'],
-    [window._parseRelative('bottom--20'), 270, 'bottom--20 with childH=50'],
+    // Double-dash outside tests
+    [window._parseRelative('top--20'), -70, 'top--20 (child BOTTOM edge 20px above parent.top) with childH=50'],
+    [window._parseRelative('bottom--20'), 320, 'bottom--20 (child TOP edge 20px below parent.bottom) with childH=20'],
   ].forEach(([parsed, expected, desc]) => {
     const result = window._resolveRelY(parsed, ph, desc.includes('childH=50') ? 50 : 30);
     const pass = Math.abs(result - expected) < 0.01;

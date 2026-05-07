@@ -73,14 +73,14 @@ children_layout.html AGENTS.md に「固定w/hの子は親サイズに影響し�
 | `''` | `null` | ✓ |
 | `'invalid'` | `null` | ✓ |
 
-### TC002: ParseRelative (negative offset = outside) — PASS ✓
+### TC002: ParseRelative (double-dash = outside) — PASS ✓
 
 | 入力 | 期待値 | 結果 |
 |------|--------|------|
-| `left--10` | `{dir:'left', val:-10, isOutside:true}` | ✓ |
-| `right--10` | `{dir:'right', val:-10, isOutside:true}` | ✓ |
-| `top--5` | `{dir:'top', val:-5, isOutside:true}` | ✓ |
-| `bottom--8` | `{dir:'bottom', val:-8, isOutside:true}` | ✓ |
+| `left--10` | `{dir:'left', val:10, isOutside:true}` | ✓ |
+| `right--10` | `{dir:'right', val:10, isOutside:true}` | ✓ |
+| `top--5` | `{dir:'top', val:5, isOutside:true}` | ✓ |
+| `bottom--8` | `{dir:'bottom', val:8, isOutside:true}` | ✓ |
 
 ### TC003: ResolveRelX (parentW=400) — PASS ✓
 
@@ -90,8 +90,8 @@ children_layout.html AGENTS.md に「固定w/hの子は親サイズに影響し�
 | `right-10` + childW=100 | 290 | ✓ |
 | `-5` + childW=100 | -5 | ✓ |
 | `null` + childW=100 (center) | 150 | ✓ |
-| `left--20` + childW=100 | -20 | ✓ |
-| `right--20` + childW=100 | 420 | ✓ |
+| `left--10` + childW=100 | -110 | ✓ |
+| `right--10` + childW=100 | 410 | ✓ |
 
 ### TC004: ResolveRelY (parentH=300) — PASS ✓
 
@@ -100,8 +100,8 @@ children_layout.html AGENTS.md に「固定w/hの子は親サイズに影響し�
 | `top-5` + childH=30 | 5 | ✓ |
 | `bottom-10` + childH=30 | 260 | ✓ |
 | `null` + childH=30 | 0 | ✓ |
-| `top--20` + childH=50 | -20 | ✓ |
-| `bottom--20` + childH=50 | 320 | ✓ |
+| `top--20` + childH=50 | -70 | ✓ |
+| `bottom--20` + childH=20 | 320 | ✓ |
 
 ### TC005: Two-Pass Positioning (inside vs outside) — PASS ✓
 
