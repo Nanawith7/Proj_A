@@ -154,46 +154,51 @@ function renderGraph(nodes, edges) {
     const children = nodeViewToChildren(nv, VAULT[stem] || {});
 
     if (children && children.children.length > 0) {
-      // ── New children rendering path ──
-      children._ax = nx, children._ay = ny;
-      children._cw = nw, children._ch = nh;
+      // ── New children rendering path (drawElement-based) ──
+      children._ax = nx; children._ay = ny;
+      children._cw = null; children._ch = null;
       computeChildrenLayout(children);
 
-      const cx = children._ax, cy = children._ay, cw = children._cw, ch = children._ch;
-      const shape = nv.shape || 'rect';
-      const rRect = document.createElementNS(svgNS, 'rect');
-      rRect.setAttribute('x', cx); rRect.setAttribute('y', cy);
-      rRect.setAttribute('width', cw); rRect.setAttribute('height', ch);
-      rRect.setAttribute('rx', 4); rRect.setAttribute('ry', 4);
-      rRect.setAttribute('fill', fill); rRect.setAttribute('stroke', '#fff'); rRect.setAttribute('stroke-width', 0.5);
-      rRect.style.cursor = 'pointer';
-      rRect.onclick = () => toggleExpand(n);
-      g.appendChild(rRect);
+      // Update node dimensions from computed layout (don't override if computed is bigger)
+      if (!nw || nw <= 0) nw = children._cw || 200;
+      if (!nh || nh <= 0) nh = children._ch || 120;
+      if (children._cw > 0 && children._cw < nw) nw = children._cw;
+      if (children._ch > 0 && children._ch < nh) nh = children._ch;
 
-      const fontSize = nv.fontSize || 12;
+      const childrenW = children._cw || nw, childrenH = children._ch || nh;
+      const shape = nv.shape || 'rect';
+      const parentRect = document.createElementNS(svgNS, 'rect');
+      parentRect.setAttribute('x', nx); parentRect.setAttribute('y', ny);
+      parentRect.setAttribute('width', childrenW); parentRect.setAttribute('height', childrenH);
+      parentRect.setAttribute('rx', shape === 'circle' ? Math.min(childrenW, childrenH) / 2 : 4);
+      parentRect.setAttribute('ry', shape === 'circle' ? Math.min(childrenW, childrenH) / 2 : 4);
+      parentRect.setAttribute('fill', fill); parentRect.setAttribute('stroke', '#fff6');
+      parentRect.setAttribute('stroke-width', 0.5);
+      parentRect.style.cursor = 'pointer';
+      parentRect.onclick = () => toggleExpand(n);
+      g.appendChild(parentRect);
+
+      // Title
       const tTxt = document.createElementNS(svgNS, 'text');
-      tTxt.setAttribute('x', cx + 6); tTxt.setAttribute('y', cy + ch/2 + 4);
+      tTxt.setAttribute('x', nx + 6); tTxt.setAttribute('y', ny + childrenH / 2 + 4);
       tTxt.setAttribute('fill', ts.textColor || '#fff');
-      tTxt.setAttribute('font-size', Math.max(10, Math.min(14, ch/10)));
-      tTxt.textContent = title.length > 20 ? title.slice(0,18)+'..' : title;
+      tTxt.setAttribute('font-size', Math.max(10, Math.min(14, childrenH / 10)));
+      tTxt.textContent = title.length > 20 ? title.slice(0, 18) + '..' : title;
       g.appendChild(tTxt);
 
-      if (icn) { const img = document.createElementNS(svgNS, 'image'); img.setAttribute('href', icn); img.setAttribute('x', cx); img.setAttribute('y', cy); img.setAttribute('width', 28); img.setAttribute('height', 28); g.appendChild(img); }
+      // Icon
+      if (icn) {
+        const img = document.createElementNS(svgNS, 'image');
+        img.setAttribute('href', icn);
+        img.setAttribute('x', nx); img.setAttribute('y', ny);
+        img.setAttribute('width', 28); img.setAttribute('height', 28);
+        g.appendChild(img);
+      }
+
+      // Draw children rects via drawElement()
+      children._ax = 0; children._ay = 0;
       for (const child of children.children) {
-        const chRect = document.createElementNS(svgNS, 'rect');
-        chRect.setAttribute('x', child._ax || cx); chRect.setAttribute('y', child._ay || cy);
-        chRect.setAttribute('width', child._cw || 0); chRect.setAttribute('height', child._ch || 0);
-        chRect.setAttribute('rx', child.rx || 3); chRect.setAttribute('ry', child.rx || 3);
-        chRect.setAttribute('fill', child.fill || '#fff2'); chRect.setAttribute('stroke', child.stroke || '#fff2'); chRect.setAttribute('stroke-width', 0.5);
-        g.appendChild(chRect);
-        if (child.text) {
-          const ctTxt = document.createElementNS(svgNS, 'text');
-          ctTxt.setAttribute('x', (child._ax || cx) + (child._cw || 0) / 2);
-          ctTxt.setAttribute('y', (child._ay || cy) + (child._ch || 0) / 2 + 3);
-          ctTxt.setAttribute('text-anchor', 'middle'); ctTxt.setAttribute('fill', child.textColor || '#eee');
-          ctTxt.setAttribute('font-size', child.fontSize || 11); ctTxt.textContent = child.text;
-          g.appendChild(ctTxt);
-        }
+        drawElement(child, g, nx, ny);
       }
       gNodes.appendChild(g);
     } else {
@@ -338,6 +343,22 @@ function resolvePosChild(raw, total, defaultVal) {
   return parseFloat(raw);
 }
 
+const _measureText = function(text, fontSize) { return window._measureCtx ? (window._measureCtx.font = fontSize + 'px sans-serif', window._measureCtx.measureText(text).width) : text.length * fontSize * 0.6; };
+window._measureCtx = document.createElement('canvas').getContext('2d');
+
+function _wrapText(text, maxW, fontSize) {
+  const lines = []; let pos = 0;
+  while (pos < text.length) {
+    let len = 1;
+    const ctx = window._measureCtx; ctx.font = fontSize + 'px sans-serif';
+    while (pos + len <= text.length && ctx.measureText(text.slice(pos, pos + len)).width < maxW) len++;
+    if (len === 1 && pos + 1 <= text.length) len = 2;
+    lines.push(text.slice(pos, pos + len - 1));
+    pos += len - 1;
+  }
+  return lines;
+}
+
 function measureElement(el) {
   if (el._cw > 0 && el._ch > 0) return;
   const padX = 10, padY = 8, gap = el.gapY || 5;
@@ -375,6 +396,42 @@ function computeChildrenLayout(el) {
   for (let i = 0; i < 3; i++) { measureElement(el); resolvePositions(el); }
 }
 
+function drawElement(parentEl, parentGroup, ox, oy) {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const px = (ox || 0) + (parentEl._ax || 0);
+  const py = (oy || 0) + (parentEl._ay || 0);
+  const cw = parentEl._cw || 0;
+  const ch = parentEl._ch || 0;
+  const padX = 10, padY = 8;
+  const g = document.createElementNS(svgNS, 'g');
+  g.classList.add('el-group');
+  g.dataset.id = parentEl.label || parentEl.id;
+  const rect = document.createElementNS(svgNS, 'rect');
+  rect.setAttribute('x', px); rect.setAttribute('y', py);
+  rect.setAttribute('width', cw); rect.setAttribute('height', ch);
+  rect.setAttribute('rx', parentEl.shape === 'circle' ? 999 : (parentEl.rx || 4));
+  rect.setAttribute('ry', parentEl.shape === 'circle' ? 999 : (parentEl.rx || 4));
+  rect.setAttribute('fill', parentEl.fill || '#ffffff22');
+  rect.setAttribute('stroke', parentEl.stroke || '#fff6');
+  rect.setAttribute('stroke-width', parentEl.strokeWidth ?? 1.5);
+  g.appendChild(rect);
+  if (parentEl.text && (parentEl.w === null || !parentEl.children)) {
+    const txt = document.createElementNS(svgNS, 'text');
+    txt.setAttribute('x', px + padX);
+    txt.setAttribute('y', py + padY + ((parentEl.fontSize || 12) + 4));
+    txt.setAttribute('fill', parentEl.textColor || '#ffffffcc');
+    txt.setAttribute('font-size', parentEl.fontSize || 12);
+    txt.textContent = parentEl.text;
+    g.appendChild(txt);
+  }
+  if (parentEl.children && parentEl.children.length > 0) {
+    for (const child of parentEl.children) {
+      drawElement(child, g, px, py);
+    }
+  }
+  parentGroup.appendChild(g);
+}
+
 function applyFilters() {
   const cfg = {
     filterStr: buildFilterStr('filter-rows'),
@@ -395,9 +452,41 @@ function resetAll() {
   renderGraph(FILE_NODES, ALL_EDGES);
 }
 
+// ═══ NodeView Loading ═══
+async function loadNodeViewsAsync() {
+  const allNodeviews = {};
+  const typeDef = DATA.style?.types || {};
+  const names = Object.values(typeDef).map(t => t.nodeview).filter(Boolean);
+  for (const name of [...new Set(names)]) {
+    try {
+      const resp = await fetch('nodeview/' + name + '.json');
+      if (resp.ok) allNodeviews[name] = await resp.json();
+      else {
+        const fallback = await fetch('/api/nodeview/' + name + '.json');
+        if (fallback.ok) allNodeviews[name] = await fallback.json();
+        else allNodeviews[name] = { shape: 'rect', rx: 4 };
+      }
+    } catch (e) { allNodeviews[name] = { shape: 'rect', rx: 4 }; }
+  }
+  return allNodeviews;
+}
+
 // Initial
-renderGraph(FILE_NODES, ALL_EDGES);
-addFilterRow('filter-rows');
+(function init() {
+  loadNodeViewsAsync().then(nv => {
+    window._allNodeviews = nv;
+    renderGraph(FILE_NODES, ALL_EDGES);
+    addFilterRow('filter-rows');
+  });
+  // Fallback: render without nodeviews
+  setTimeout(() => {
+    if (!window._allNodeviews) {
+      window._allNodeviews = {};
+      renderGraph(FILE_NODES, ALL_EDGES);
+      addFilterRow('filter-rows');
+    }
+  }, 1000);
+})();
 </script>
 </body>
 </html>
