@@ -146,7 +146,7 @@ function resolveRelX(parsed, parentW, childW) {
   const cw = childW || 0;
   switch (parsed.dir) {
     case 'left':
-      return parsed.val;
+      return parsed.val - cw;
     case 'right':
       return parentW - parsed.val - cw;
     case 'abs':
@@ -158,11 +158,12 @@ function resolveRelX(parsed, parentW, childW) {
 
 function resolveRelY(parsed, parentH, childH) {
   if (!parsed) return 0;
+  const ch = childH || 0;
   switch (parsed.dir) {
     case 'top':
-      return parsed.val < 0 ? parsed.val : parsed.val;
+      return parsed.val;
     case 'bottom':
-      return parentH - parsed.val - childH;
+      return parentH - parsed.val - ch;
     case 'abs':
       return parsed.val;
     default:
@@ -228,12 +229,12 @@ function resolvePositions(parent) {
       continue;
     }
     let childRight, childBottom;
-    if (parsedX && parsedX.dir === 'left' || parsedX && parsedX.dir === 'abs') {
-      childRight = parsedX.val + (child._cw || 0);
+    if (parsedX && parsedX.dir === 'right' || parsedX && parsedX.dir === 'abs') {
+      childRight = (parent._cw || 0) - parsedX.val;
     } else {
       childRight = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
     }
-    if (parsedY && (parsedY.dir === 'top' || parsedY.dir === 'abs')) {
+      if (parsedY && parsedY.dir === 'top') {
       childBottom = parsedY.val + (child._ch || 0);
     } else {
       childBottom = (child._ay || 0) - (parent._ay || 0) + (child._ch || 0);
@@ -260,8 +261,8 @@ function resolvePositions(parent) {
     if (parsedX && parsedX.dir === 'right' && !parsedX.isOutside) continue;
     if (parsedY && parsedY.dir === 'bottom' && !parsedY.isOutside) continue;
     let cr, cb;
-    if (parsedX && parsedX.dir === 'left') cr = parsedX.val + (child._cw || 0);
-    else if (parsedX && parsedX.dir === 'abs') cr = parsedX.val + (child._cw || 0);
+    if (parsedX && parsedX.dir === 'right') cr = (parent._cw || 0) - parsedX.val;
+    else if (parsedX && parsedX.dir === 'abs') cr = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
     else cr = (child._ax || 0) - (parent._ax || 0) + (child._cw || 0);
     if (parsedY && parsedY.dir === 'top') cb = parsedY.val + (child._ch || 0);
     else if (parsedY && parsedY.dir === 'abs') cb = parsedY.val + (child._ch || 0);
