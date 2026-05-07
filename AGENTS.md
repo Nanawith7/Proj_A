@@ -15,15 +15,18 @@ Canvas generator + NodeView editor for Obsidian vaults. **No build system.** All
 
 ## Canvas Generator (Python)
 ```bash
-# Generate canvas file
+# Generate canvas file (without children layout)
 python -m canvas_gen.main --vault Obsidian_test/vault --output out.canvas
+
+# Generate canvas file WITH children layout (new system)
+python -m canvas_gen.main --vault Obsidian_test/vault --output out.canvas --node-views
 
 # Start viewer server (port 8765 by default)
 python -m canvas_gen.main --vault Obsidian_test/vault --serve-viewer timeline.canvas:8765
 ```
 
 Pipeline order (`canvas_gen/pipeline.py` — changing it breaks output):
-1. `include-matching` → 2. `filter/exclude/sort` → 3. `layout-params` → 4. `icons` → 5. `edges` → 6. `prune-orphans` → 7. `layout`
+1. `include-matching` → 2. `filter/exclude/sort` → 3. `layout-params` → 4. `icons` → 5. `edges` → 6. `prune-orphans` → 7. `layout` → 7b. `children-calculate`
 
 Vault structure: `_types/` (YAML type defs), `_config/` (label mappings), `_icons/`, `_viewbg/`, `{type}/`, `nodeview/*.json`
 
@@ -34,6 +37,40 @@ python -m canvas_gen.main --vault "Obsidian_test/vault" --serve-viewer "timeline
 cd nodeview_editor && python server.py
 ```
 Open `http://127.0.0.1:8766/`. Editor proxies to viewer server for template loading.
+
+## Children Layout System (Server-Side)
+The `canvas_gen/children.py` module provides server-side children positioning logic, generating `ax/ay/cw/ch` fields in canvas JSON.
+
+### How it works
+1. **Type Definition** (`_types/type_definitions.yml`): `nodeview: character_card` maps types to NodeView templates
+2. **NodeView Template** (`nodeview/character_card.json`): defines `properties` → pill elements
+3. **Pipeline Step 7b**: `nodeViewToChildren()` converts properties to children, `compute_children()` calculates positions
+4. **Canvas JSON**: Each node with a template has a `children` array with pre-computed positions
+
+### Canvas JSON Format
+```json
+{
+  "id": "protagonist",
+  "x": 0, "y": 0, "width": 160, "height": 120,
+  "children": [
+    {"label": "tags", "text": "...", "ax": 10, "ay": 8, "cw": 160, "ch": 22},
+    {"label": "ally", "text": "...", "ax": 10, "ay": 30, "cw": 157, "ch": 22}
+  ]
+}
+```
+- `ax/ay`: absolute X/Y position within the parent node (in pixels)
+- `cw/ch`: computed width/height of each child element
+- `pill`/`rx`/`fill`/`textColor`: pill rendering properties
+
+### Browser Rendering
+`canvas_gen/viewer/viewer.js` has two rendering paths:
+- **Path A** (pre-computed): When `n.children` exists → uses `drawElement(child, g, nx+ax, ny+ay)`
+- **Path B** (fallback): Dynamic layout calculation via `nodeViewToChildren() + computeChildrenLayout()`
+
+### Critical Children Pitfalls
+- **Text width estimation**: Python `_estimate_text_w()` uses `font_size * 0.55` per char approximation — may differ from browser `measureText()`
+- **% position** (`position.x: "10%"`): Simplified to `xRel: "left-10"` — not accurate percentage
+- **GapX**: Not implemented for children (fixed 5px gapY only)
 
 ## Layout Engine (`test_children/children_layout.html`)
 Open in browser: `file:///.../test_children/children_layout.html`. Run `runPositionTests()` in console for unit tests.
