@@ -16,9 +16,9 @@ function getSVGPoint(e) {
 }
 
 function findElementAt(x, y, el) {
-  // Check children first (top-most element wins)
+  // Check children first (first data-tree child = on-top in SVG render order)
   if (el.children) {
-    for (let i = el.children.length - 1; i >= 0; i--) {
+    for (let i = 0; i < el.children.length; i++) {
       const child = el.children[i];
       if (child._ax !== undefined && x >= child._ax && x <= child._ax + (child._cw || 0) &&
           child._ay !== undefined && y >= child._ay && y <= child._ay + (child._ch || 0)) {
@@ -27,7 +27,7 @@ function findElementAt(x, y, el) {
       }
     }
   }
-  // Check this element
+  // Check this element only if no child matched
   if (el._ax !== undefined && x >= el._ax && x <= el._ax + (el._cw || 0) &&
       el._ay !== undefined && y >= el._ay && y <= el._ay + (el._ch || 0)) {
     return el;
