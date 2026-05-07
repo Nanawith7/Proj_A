@@ -37,9 +37,9 @@ function runPositionTests() {
     [window._parseRelative('right-10'), 290, 'right-10 with childW=100'],
     [window._parseRelative('-5'), -5, '-5 (overflow left) with childW=100'],
     [null, 150, 'center with childW=100'],
-    // Negative offset tests (outside parent)
+     // Negative offset tests (outside parent)
     [window._parseRelative('left--20'), -20, 'left--20 (20px outside left edge) with childW=100'],
-    [window._parseRelative('right--20'), 420, 'right--20 (20px outside right edge) with childW=100'],
+    [window._parseRelative('right--20'), 320, 'right--20 (20px outside right edge) with childW=100'],
   ].forEach(([parsed, expected, desc]) => {
     const result = window._resolveRelX(parsed, pw, 100);
     const pass = Math.abs(result - expected) < 0.01;
@@ -55,9 +55,9 @@ function runPositionTests() {
     [null, 0, 'top (default) with childH=30'],
     // Negative offset tests (outside parent)
     [window._parseRelative('top--20'), -20, 'top--20 (20px outside top edge) with childH=50'],
-    [window._parseRelative('bottom--20'), 320, 'bottom--20 (20px outside bottom edge) with childH=50'],
+    [window._parseRelative('bottom--20'), 270, 'bottom--20 (20px outside bottom edge) with childH=50'],
   ].forEach(([parsed, expected, desc]) => {
-    const result = window._resolveRelY(parsed, ph, 30);
+    const result = window._resolveRelY(parsed, ph, desc.includes('childH=50') ? 50 : 30);
     const pass = Math.abs(result - expected) < 0.01;
     console.log(`${desc}: ${result} ${pass ? '\u2713' : '\u2717 FAIL (expected ' + expected + ')'}`);
   });

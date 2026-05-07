@@ -143,11 +143,12 @@ function parseRelative(rel) {
 
 function resolveRelX(parsed, parentW, childW) {
   if (!parsed) return (parentW - childW) / 2;
+  const cw = childW || 0;
   switch (parsed.dir) {
     case 'left':
-      return parsed.val < 0 ? parsed.val : parsed.val;
+      return parsed.val;
     case 'right':
-      return parsed.val < 0 ? parentW - parsed.val : parentW - parsed.val - childW;
+      return parentW - parsed.val - cw;
     case 'abs':
       return parsed.val;
     default:
@@ -161,7 +162,7 @@ function resolveRelY(parsed, parentH, childH) {
     case 'top':
       return parsed.val < 0 ? parsed.val : parsed.val;
     case 'bottom':
-      return parsed.val < 0 ? parentH - parsed.val : parentH - parsed.val - childH;
+      return parentH - parsed.val - childH;
     case 'abs':
       return parsed.val;
     default:
