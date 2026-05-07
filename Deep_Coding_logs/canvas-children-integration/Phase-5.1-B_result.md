@@ -112,7 +112,7 @@ if (children._ch > 0 && children._ch < nh) nh = children._ch;
 2. `_ax = 0, _ay = 0` にリセット後 drawElement(child, g, nx, ny) で相対位置計算
 3. loadNodeViewsAsync() はローカルファイル /api/nodeview の両方から試行
 4. 1秒timeoutで描画失敗を防ぐフォールバック実装
-5. template.htmlはserver-side埋め込みデータ + nodeview APIのハイブリッド対応
+5. template.htmlはサーバー側埋め込みデータ + nodeview APIのハイブリッド対応
 
 ## 既知の課題
 - viewer/server.py は /template.html を提供していない（現状ではindex.htmlのみ配信）

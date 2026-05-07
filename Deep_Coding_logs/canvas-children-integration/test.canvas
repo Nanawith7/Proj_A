@@ -1,0 +1,1750 @@
+{
+  "nodes": [
+    {
+      "id": "test",
+      "type": "file",
+      "file": "bmptest/test.md",
+      "x": 2100,
+      "y": 0,
+      "width": 220,
+      "height": 100,
+      "color": "#607D8B"
+    },
+    {
+      "id": "主人公_icon",
+      "type": "file",
+      "file": "_icons/node_主人公.png",
+      "x": 1575,
+      "y": 176,
+      "width": 80,
+      "height": 60
+    },
+    {
+      "id": "主人公",
+      "type": "file",
+      "file": "character/主人公.md",
+      "x": 1575,
+      "y": 250,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "四天王A_icon",
+      "type": "file",
+      "file": "_icons/node_四天王A.png",
+      "x": 1925,
+      "y": 176,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "四天王A",
+      "type": "file",
+      "file": "character/四天王A.md",
+      "x": 1925,
+      "y": 250,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "王女_icon",
+      "type": "file",
+      "file": "_icons/node_王女.png",
+      "x": 2275,
+      "y": 176,
+      "width": 55,
+      "height": 55
+    },
+    {
+      "id": "王女",
+      "type": "file",
+      "file": "character/王女.md",
+      "x": 2275,
+      "y": 250,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "騎士団長_icon",
+      "type": "file",
+      "file": "_icons/node_騎士団長.png",
+      "x": 2625,
+      "y": 176,
+      "width": 60,
+      "height": 50
+    },
+    {
+      "id": "騎士団長",
+      "type": "file",
+      "file": "character/騎士団長.md",
+      "x": 2625,
+      "y": 250,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "予言者_icon",
+      "type": "file",
+      "file": "_icons/node_予言者.png",
+      "x": 1575,
+      "y": 426,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "予言者",
+      "type": "file",
+      "file": "character/予言者.md",
+      "x": 1575,
+      "y": 500,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "四天王B_icon",
+      "type": "file",
+      "file": "_icons/node_四天王B.png",
+      "x": 1925,
+      "y": 426,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "四天王B",
+      "type": "file",
+      "file": "character/四天王B.md",
+      "x": 1925,
+      "y": 500,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "盗賊_icon",
+      "type": "file",
+      "file": "_icons/node_盗賊.png",
+      "x": 2275,
+      "y": 426,
+      "width": 45,
+      "height": 50
+    },
+    {
+      "id": "盗賊",
+      "type": "file",
+      "file": "character/盗賊.md",
+      "x": 2275,
+      "y": 500,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "魔王_icon",
+      "type": "file",
+      "file": "_icons/node_魔王.png",
+      "x": 2625,
+      "y": 426,
+      "width": 80,
+      "height": 70
+    },
+    {
+      "id": "魔王",
+      "type": "file",
+      "file": "character/魔王.md",
+      "x": 2625,
+      "y": 500,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "元魔王_icon",
+      "type": "file",
+      "file": "_icons/node_元魔王.png",
+      "x": 1750,
+      "y": 676,
+      "width": 65,
+      "height": 65
+    },
+    {
+      "id": "元魔王",
+      "type": "file",
+      "file": "character/元魔王.md",
+      "x": 1750,
+      "y": 750,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "幼なじみ_icon",
+      "type": "file",
+      "file": "_icons/node_幼なじみ.png",
+      "x": 2100,
+      "y": 676,
+      "width": 40,
+      "height": 40
+    },
+    {
+      "id": "幼なじみ",
+      "type": "file",
+      "file": "character/幼なじみ.md",
+      "x": 2100,
+      "y": 750,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "賢者_icon",
+      "type": "file",
+      "file": "_icons/node_賢者.png",
+      "x": 2450,
+      "y": 676,
+      "width": 60,
+      "height": 60
+    },
+    {
+      "id": "賢者",
+      "type": "file",
+      "file": "character/賢者.md",
+      "x": 2450,
+      "y": 750,
+      "width": 160,
+      "height": 120,
+      "color": "#2196F3"
+    },
+    {
+      "id": "era_080_120_icon",
+      "type": "file",
+      "file": "_icons/node_era_080_120.png",
+      "x": 1750,
+      "y": 926,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "era_080_120",
+      "type": "file",
+      "file": "era/era_080_120.md",
+      "x": 1750,
+      "y": 1000,
+      "width": 220,
+      "height": 100,
+      "color": "#9C27B0"
+    },
+    {
+      "id": "era_120_150_icon",
+      "type": "file",
+      "file": "_icons/node_era_120_150.png",
+      "x": 2100,
+      "y": 926,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "era_120_150",
+      "type": "file",
+      "file": "era/era_120_150.md",
+      "x": 2100,
+      "y": 1000,
+      "width": 220,
+      "height": 100,
+      "color": "#9C27B0"
+    },
+    {
+      "id": "era_150_180_icon",
+      "type": "file",
+      "file": "_icons/node_era_150_180.png",
+      "x": 2450,
+      "y": 926,
+      "width": 50,
+      "height": 50
+    },
+    {
+      "id": "era_150_180",
+      "type": "file",
+      "file": "era/era_150_180.md",
+      "x": 2450,
+      "y": 1000,
+      "width": 220,
+      "height": 100,
+      "color": "#9C27B0"
+    },
+    {
+      "id": "勇者伝説編纂",
+      "type": "file",
+      "file": "event/勇者伝説編纂.md",
+      "x": 1050,
+      "y": 1250,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "地下迷宮出現",
+      "type": "file",
+      "file": "event/地下迷宮出現.md",
+      "x": 1400,
+      "y": 1250,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "平和条約締結",
+      "type": "file",
+      "file": "event/平和条約締結.md",
+      "x": 1750,
+      "y": 1250,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "新魔王戴冠",
+      "type": "file",
+      "file": "event/新魔王戴冠.md",
+      "x": 2100,
+      "y": 1250,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "王都防衛戦",
+      "type": "file",
+      "file": "event/王都防衛戦.md",
+      "x": 2450,
+      "y": 1250,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "賢者の塔完成",
+      "type": "file",
+      "file": "event/賢者の塔完成.md",
+      "x": 2800,
+      "y": 1250,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "魔法学園創設",
+      "type": "file",
+      "file": "event/魔法学園創設.md",
+      "x": 3150,
+      "y": 1250,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "和平交渉開始",
+      "type": "file",
+      "file": "event/和平交渉開始.md",
+      "x": 1225,
+      "y": 1500,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "大戦争勃発",
+      "type": "file",
+      "file": "event/大戦争勃発.md",
+      "x": 1575,
+      "y": 1500,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "復興大祭",
+      "type": "file",
+      "file": "event/復興大祭.md",
+      "x": 1925,
+      "y": 1500,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "王国建国",
+      "type": "file",
+      "file": "event/王国建国.md",
+      "x": 2275,
+      "y": 1500,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "竜の目覚め",
+      "type": "file",
+      "file": "event/竜の目覚め.md",
+      "x": 2625,
+      "y": 1500,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "魔族侵攻宣言",
+      "type": "file",
+      "file": "event/魔族侵攻宣言.md",
+      "x": 2975,
+      "y": 1500,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "王国",
+      "type": "file",
+      "file": "organization/王国.md",
+      "x": 1925,
+      "y": 1750,
+      "width": 200,
+      "height": 120,
+      "color": "#4CAF50"
+    },
+    {
+      "id": "魔族連合",
+      "type": "file",
+      "file": "organization/魔族連合.md",
+      "x": 2275,
+      "y": 1750,
+      "width": 200,
+      "height": 120,
+      "color": "#4CAF50"
+    },
+    {
+      "id": "冒険の始まり",
+      "type": "file",
+      "file": "scenario/冒険の始まり.md",
+      "x": 0,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "四天王会戦",
+      "type": "file",
+      "file": "scenario/四天王会戦.md",
+      "x": 350,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "塔の試練",
+      "type": "file",
+      "file": "scenario/塔の試練.md",
+      "x": 700,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "後日譚",
+      "type": "file",
+      "file": "scenario/後日譚.md",
+      "x": 1050,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "新たな旅立ち",
+      "type": "file",
+      "file": "scenario/新たな旅立ち.md",
+      "x": 1400,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "最後の試練",
+      "type": "file",
+      "file": "scenario/最後の試練.md",
+      "x": 1750,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "最終決戦",
+      "type": "file",
+      "file": "scenario/最終決戦.md",
+      "x": 2100,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "王都魔法大会",
+      "type": "file",
+      "file": "scenario/王都魔法大会.md",
+      "x": 2450,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "秘宝争奪戦",
+      "type": "file",
+      "file": "scenario/秘宝争奪戦.md",
+      "x": 2800,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "竜との邂逅",
+      "type": "file",
+      "file": "scenario/竜との邂逅.md",
+      "x": 3150,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "賢者との出会い",
+      "type": "file",
+      "file": "scenario/賢者との出会い.md",
+      "x": 3500,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "魔族領潜入",
+      "type": "file",
+      "file": "scenario/魔族領潜入.md",
+      "x": 3850,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "魔法学園編入",
+      "type": "file",
+      "file": "scenario/魔法学園編入.md",
+      "x": 4200,
+      "y": 2000,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "ancient",
+      "type": "file",
+      "file": "tag/ancient.md",
+      "x": 875,
+      "y": 2250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "demon",
+      "type": "file",
+      "file": "tag/demon.md",
+      "x": 1225,
+      "y": 2250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "human",
+      "type": "file",
+      "file": "tag/human.md",
+      "x": 1575,
+      "y": 2250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "leader",
+      "type": "file",
+      "file": "tag/leader.md",
+      "x": 1925,
+      "y": 2250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "main",
+      "type": "file",
+      "file": "tag/main.md",
+      "x": 2275,
+      "y": 2250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "rogue",
+      "type": "file",
+      "file": "tag/rogue.md",
+      "x": 2625,
+      "y": 2250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "ruler",
+      "type": "file",
+      "file": "tag/ruler.md",
+      "x": 2975,
+      "y": 2250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "wise",
+      "type": "file",
+      "file": "tag/wise.md",
+      "x": 3325,
+      "y": 2250,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "civilian",
+      "type": "file",
+      "file": "tag/civilian.md",
+      "x": 1050,
+      "y": 2500,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "general",
+      "type": "file",
+      "file": "tag/general.md",
+      "x": 1400,
+      "y": 2500,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "knight",
+      "type": "file",
+      "file": "tag/knight.md",
+      "x": 1750,
+      "y": 2500,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "mage",
+      "type": "file",
+      "file": "tag/mage.md",
+      "x": 2100,
+      "y": 2500,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "mystic",
+      "type": "file",
+      "file": "tag/mystic.md",
+      "x": 2450,
+      "y": 2500,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "royalty",
+      "type": "file",
+      "file": "tag/royalty.md",
+      "x": 2800,
+      "y": 2500,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    },
+    {
+      "id": "villain",
+      "type": "file",
+      "file": "tag/villain.md",
+      "x": 3150,
+      "y": 2500,
+      "width": 100,
+      "height": 80,
+      "color": "#607D8B"
+    }
+  ],
+  "edges": [
+    {
+      "id": "9a12806b-d6f6-4798-8e4b-50786fdf20b5",
+      "fromNode": "主人公",
+      "toNode": "main",
+      "label": "タグ"
+    },
+    {
+      "id": "1d7b9ad0-2715-4392-a96f-bea3f9844efb",
+      "fromNode": "主人公",
+      "toNode": "human",
+      "label": "タグ"
+    },
+    {
+      "id": "28f7e34f-20e8-43e9-ba29-726197bdb09a",
+      "fromNode": "主人公",
+      "toNode": "knight",
+      "label": "タグ"
+    },
+    {
+      "id": "21ad61cc-d9b2-48e3-8d0c-e0d599a02489",
+      "fromNode": "主人公",
+      "toNode": "王国",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "73b2b1fd-551e-442e-a18a-d1eee255fd78",
+      "fromNode": "主人公",
+      "toNode": "騎士団長",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "b6eaee19-d7d7-4c0a-8416-ce1059e063e3",
+      "fromNode": "主人公",
+      "toNode": "幼なじみ",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "87690c45-9756-40d1-8305-582096002d58",
+      "fromNode": "主人公",
+      "toNode": "盗賊",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "ace73add-f9a8-48e2-8279-fd68b53f6a6a",
+      "fromNode": "主人公",
+      "toNode": "賢者",
+      "label": "師弟",
+      "color": "#FF9800"
+    },
+    {
+      "id": "27108b34-db96-4f05-a342-1e478d67cb13",
+      "fromNode": "主人公",
+      "toNode": "騎士団長",
+      "label": "師弟",
+      "color": "#FF9800"
+    },
+    {
+      "id": "321af67b-6f2e-4d05-808d-682a536b919d",
+      "fromNode": "主人公",
+      "toNode": "四天王A",
+      "label": "敵対",
+      "color": "#F44336"
+    },
+    {
+      "id": "6474eeec-f2a4-40fd-8133-6df1e3f03c95",
+      "fromNode": "主人公",
+      "toNode": "四天王B",
+      "label": "嫌悪",
+      "color": "#9C27B0"
+    },
+    {
+      "id": "5c684f65-1845-4f80-8e43-e9728f60e3a6",
+      "fromNode": "主人公",
+      "toNode": "幼なじみ",
+      "label": "好意",
+      "color": "#E91E63"
+    },
+    {
+      "id": "7da1c93a-a17f-4122-93bc-f640d652a521",
+      "fromNode": "主人公",
+      "toNode": "王女",
+      "label": "好意",
+      "color": "#E91E63"
+    },
+    {
+      "id": "93389c4c-489b-4420-be55-4c335537491c",
+      "fromNode": "主人公",
+      "toNode": "冒険の始まり",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "3fb2b0bf-7b95-458f-920b-d46116442616",
+      "fromNode": "主人公",
+      "toNode": "賢者との出会い",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "0afddb55-4b77-43b4-bfa1-447ed2b2f42b",
+      "fromNode": "主人公",
+      "toNode": "最終決戦",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "7b4ec6c3-63a4-4431-b08d-e691d0f820ef",
+      "fromNode": "予言者",
+      "toNode": "human",
+      "label": "タグ"
+    },
+    {
+      "id": "48cf711f-d3a9-480d-b954-93168071a624",
+      "fromNode": "予言者",
+      "toNode": "mystic",
+      "label": "タグ"
+    },
+    {
+      "id": "b6e9bada-07d6-465a-a6dd-aa13b21350d7",
+      "fromNode": "予言者",
+      "toNode": "賢者",
+      "label": "好意",
+      "color": "#E91E63"
+    },
+    {
+      "id": "e49754ec-0097-47e1-8956-dd6bbd81872f",
+      "fromNode": "予言者",
+      "toNode": "王女",
+      "label": "師弟",
+      "color": "#FF9800"
+    },
+    {
+      "id": "c0ba0805-ddad-46f8-9ff1-d28e6db97331",
+      "fromNode": "予言者",
+      "toNode": "元魔王",
+      "label": "嫌悪",
+      "color": "#9C27B0"
+    },
+    {
+      "id": "6c2fefe9-3197-4ba6-bf63-01c25de7521a",
+      "fromNode": "元魔王",
+      "toNode": "demon",
+      "label": "タグ"
+    },
+    {
+      "id": "bb2ba9e5-3575-4713-87ca-37c11258e5e5",
+      "fromNode": "元魔王",
+      "toNode": "ancient",
+      "label": "タグ"
+    },
+    {
+      "id": "1b7cefb7-0987-460f-a1b8-525a88a6a2d1",
+      "fromNode": "元魔王",
+      "toNode": "魔王",
+      "label": "家族",
+      "color": "#00BCD4"
+    },
+    {
+      "id": "51fa3955-f9c8-45bd-91fb-2b014ce9a5eb",
+      "fromNode": "元魔王",
+      "toNode": "賢者",
+      "label": "敵対",
+      "color": "#F44336"
+    },
+    {
+      "id": "6cb8abfc-142b-47fc-85f9-9398c08bf7aa",
+      "fromNode": "元魔王",
+      "toNode": "予言者",
+      "label": "嫌悪",
+      "color": "#9C27B0"
+    },
+    {
+      "id": "36a708d3-c22b-4763-ac14-953bd82c3fb8",
+      "fromNode": "四天王A",
+      "toNode": "demon",
+      "label": "タグ"
+    },
+    {
+      "id": "6d37db93-df12-4cdd-a2c9-f5313ac888fc",
+      "fromNode": "四天王A",
+      "toNode": "general",
+      "label": "タグ"
+    },
+    {
+      "id": "02297800-a67a-4939-b8a3-146f94d840c7",
+      "fromNode": "四天王A",
+      "toNode": "魔族連合",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "9ce31c6a-8779-4269-9f9d-9e4023e814f3",
+      "fromNode": "四天王A",
+      "toNode": "主人公",
+      "label": "敵対",
+      "color": "#F44336"
+    },
+    {
+      "id": "73b3ec9a-50cf-476c-9482-8b8c23b4cfea",
+      "fromNode": "四天王A",
+      "toNode": "魔王",
+      "label": "嫌悪",
+      "color": "#9C27B0"
+    },
+    {
+      "id": "eb9171a6-b88d-4e09-ac92-26208c6a1e8f",
+      "fromNode": "四天王A",
+      "toNode": "四天王B",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "b83c0380-13c1-498c-b230-dbf5a345edb4",
+      "fromNode": "四天王B",
+      "toNode": "demon",
+      "label": "タグ"
+    },
+    {
+      "id": "99db3c8a-e5c9-4430-a314-7a876b03cb61",
+      "fromNode": "四天王B",
+      "toNode": "general",
+      "label": "タグ"
+    },
+    {
+      "id": "3e8aa064-665e-4900-ad67-e309d17ce4a9",
+      "fromNode": "四天王B",
+      "toNode": "魔族連合",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "2d13c46d-558a-4f34-838e-851ba86fd78f",
+      "fromNode": "四天王B",
+      "toNode": "魔王",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "1b1bf76f-cacc-4093-8923-780f987d0d12",
+      "fromNode": "四天王B",
+      "toNode": "四天王A",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "95f10cb5-16a3-43be-97b2-e8fa43a9d2f0",
+      "fromNode": "四天王B",
+      "toNode": "予言者",
+      "label": "嫌悪",
+      "color": "#9C27B0"
+    },
+    {
+      "id": "233c7f80-f074-484b-9cc2-a27b3a24d749",
+      "fromNode": "幼なじみ",
+      "toNode": "human",
+      "label": "タグ"
+    },
+    {
+      "id": "336b46ef-cc27-4251-b391-6864cd9adce2",
+      "fromNode": "幼なじみ",
+      "toNode": "civilian",
+      "label": "タグ"
+    },
+    {
+      "id": "1ea9d429-f0e7-40b8-a356-88b66e0aac9f",
+      "fromNode": "幼なじみ",
+      "toNode": "王国",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "e25be3d5-0a72-488d-910b-773d2699b72e",
+      "fromNode": "幼なじみ",
+      "toNode": "主人公",
+      "label": "好意",
+      "color": "#E91E63"
+    },
+    {
+      "id": "0876a36c-36d4-4dc8-9245-613c65509c0b",
+      "fromNode": "幼なじみ",
+      "toNode": "主人公",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "50b5f57e-798e-4ccc-b82e-4983f39b061c",
+      "fromNode": "幼なじみ",
+      "toNode": "盗賊",
+      "label": "家族",
+      "color": "#00BCD4"
+    },
+    {
+      "id": "7ea60ba1-ed5d-478e-a4ab-ed4d46ee3035",
+      "fromNode": "王女",
+      "toNode": "human",
+      "label": "タグ"
+    },
+    {
+      "id": "9354cc3d-a995-4044-b8c0-90f8ee15d5f7",
+      "fromNode": "王女",
+      "toNode": "royalty",
+      "label": "タグ"
+    },
+    {
+      "id": "d01b9578-6d7b-40f4-b44c-57d8eb0993cd",
+      "fromNode": "王女",
+      "toNode": "王国",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "83d80127-0a00-461a-bb44-5d3c21c2d127",
+      "fromNode": "王女",
+      "toNode": "主人公",
+      "label": "好意",
+      "color": "#E91E63"
+    },
+    {
+      "id": "473046f9-d7e8-4afd-aa88-afc17ba29f14",
+      "fromNode": "王女",
+      "toNode": "騎士団長",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "3496c6d6-a599-4c6a-81b7-c7c4829a0638",
+      "fromNode": "王女",
+      "toNode": "予言者",
+      "label": "師弟",
+      "color": "#FF9800"
+    },
+    {
+      "id": "b6980d5b-0e31-42e5-9d26-578457362241",
+      "fromNode": "盗賊",
+      "toNode": "human",
+      "label": "タグ"
+    },
+    {
+      "id": "89724256-2129-41a2-803d-42690cbf4792",
+      "fromNode": "盗賊",
+      "toNode": "rogue",
+      "label": "タグ"
+    },
+    {
+      "id": "2ddcf598-1bc4-485d-add3-ebc0a1a983f7",
+      "fromNode": "盗賊",
+      "toNode": "幼なじみ",
+      "label": "家族",
+      "color": "#00BCD4"
+    },
+    {
+      "id": "e3a5fd38-63b5-454d-9c09-0fbc2c8bb89e",
+      "fromNode": "盗賊",
+      "toNode": "主人公",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "b0283ecc-ccb1-4af8-9adc-0d27900ad1d4",
+      "fromNode": "盗賊",
+      "toNode": "四天王A",
+      "label": "敵対",
+      "color": "#F44336"
+    },
+    {
+      "id": "51d99921-c4bf-45d7-b388-e963fa3c8249",
+      "fromNode": "賢者",
+      "toNode": "wise",
+      "label": "タグ"
+    },
+    {
+      "id": "5a7f85dc-904b-41ad-a6f9-43ed6bc9e3bc",
+      "fromNode": "賢者",
+      "toNode": "human",
+      "label": "タグ"
+    },
+    {
+      "id": "589c86e1-337e-434f-8e52-d4084a89c640",
+      "fromNode": "賢者",
+      "toNode": "mage",
+      "label": "タグ"
+    },
+    {
+      "id": "f2474b1b-f58b-4bac-a5cd-0527096b3e46",
+      "fromNode": "賢者",
+      "toNode": "王国",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "20d57df8-4e15-4019-8307-b4c241c7a46d",
+      "fromNode": "賢者",
+      "toNode": "主人公",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "250888bc-66a6-4e31-b9ea-e8c07cfff89f",
+      "fromNode": "賢者",
+      "toNode": "主人公",
+      "label": "師弟",
+      "color": "#FF9800"
+    },
+    {
+      "id": "d7bc6948-384e-4dfe-8213-ebad4588694b",
+      "fromNode": "賢者",
+      "toNode": "予言者",
+      "label": "好意",
+      "color": "#E91E63"
+    },
+    {
+      "id": "c53e2c1a-10d2-482d-9068-d837d494d2c6",
+      "fromNode": "賢者",
+      "toNode": "元魔王",
+      "label": "敵対",
+      "color": "#F44336"
+    },
+    {
+      "id": "bc6a6328-a905-42df-9415-3ca9069272dc",
+      "fromNode": "賢者",
+      "toNode": "賢者との出会い",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "3f0e9d70-54b6-475c-9cf6-b4b17d343d6d",
+      "fromNode": "賢者",
+      "toNode": "最終決戦",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "4d76ac88-7252-4ee5-aff8-d0f12e698a34",
+      "fromNode": "騎士団長",
+      "toNode": "human",
+      "label": "タグ"
+    },
+    {
+      "id": "2d20aac6-7228-497c-b1ad-24c5919608a7",
+      "fromNode": "騎士団長",
+      "toNode": "knight",
+      "label": "タグ"
+    },
+    {
+      "id": "94eb45d8-5fb0-421f-b94e-eafdfeed9bbc",
+      "fromNode": "騎士団長",
+      "toNode": "leader",
+      "label": "タグ"
+    },
+    {
+      "id": "133cce66-e7d2-43be-b2a1-ed890693bf14",
+      "fromNode": "騎士団長",
+      "toNode": "王国",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "f757576a-4cbe-40f2-8050-f7afe352cc6d",
+      "fromNode": "騎士団長",
+      "toNode": "主人公",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "00b586a3-2e14-442b-aef9-766cb4545301",
+      "fromNode": "騎士団長",
+      "toNode": "主人公",
+      "label": "師弟",
+      "color": "#FF9800"
+    },
+    {
+      "id": "f5bb4c4f-29a6-462f-bb52-ded1bdbe0b22",
+      "fromNode": "騎士団長",
+      "toNode": "魔王",
+      "label": "敵対",
+      "color": "#F44336"
+    },
+    {
+      "id": "fee88bd7-f80f-4af6-a8ab-05dc80e755b0",
+      "fromNode": "騎士団長",
+      "toNode": "王女",
+      "label": "好意",
+      "color": "#E91E63"
+    },
+    {
+      "id": "9bcd6892-cf08-419f-9725-c3174eac1691",
+      "fromNode": "魔王",
+      "toNode": "villain",
+      "label": "タグ"
+    },
+    {
+      "id": "90ae8055-d266-43e9-8d32-1344d190b36a",
+      "fromNode": "魔王",
+      "toNode": "demon",
+      "label": "タグ"
+    },
+    {
+      "id": "46939676-70a3-4991-ac36-83dbeac95a82",
+      "fromNode": "魔王",
+      "toNode": "ruler",
+      "label": "タグ"
+    },
+    {
+      "id": "d872cb6a-0b3b-4703-ba4a-b3084fd6afb0",
+      "fromNode": "魔王",
+      "toNode": "魔族連合",
+      "label": "所属",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "a5d58a42-c233-48e1-a59c-24b9311613f1",
+      "fromNode": "魔王",
+      "toNode": "四天王B",
+      "label": "味方",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "43c73a25-a91b-4c8a-a486-6166568d356d",
+      "fromNode": "魔王",
+      "toNode": "騎士団長",
+      "label": "敵対",
+      "color": "#F44336"
+    },
+    {
+      "id": "2a4288e2-64c0-4bb0-8933-ff59677218b5",
+      "fromNode": "魔王",
+      "toNode": "元魔王",
+      "label": "家族",
+      "color": "#00BCD4"
+    },
+    {
+      "id": "d2d22fcb-eb8e-4fa2-a64b-ff12e9a6e59c",
+      "fromNode": "魔王",
+      "toNode": "四天王A",
+      "label": "嫌悪",
+      "color": "#9C27B0"
+    },
+    {
+      "id": "5566ce39-a6d4-426c-b6cf-5fe436b0d5bd",
+      "fromNode": "魔王",
+      "toNode": "大戦争勃発",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "b85fb853-3015-456a-ab33-599a27bf8734",
+      "fromNode": "魔王",
+      "toNode": "最終決戦",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "2eeb0f89-6ed1-49bd-87c0-f13c3a40a4c1",
+      "fromNode": "魔王",
+      "toNode": "平和条約締結",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "64f496c0-f034-4f36-aec5-58d1ce01e891",
+      "fromNode": "勇者伝説編纂",
+      "toNode": "主人公",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "f970c90e-510b-4e89-884b-ba96315fb8fc",
+      "fromNode": "勇者伝説編纂",
+      "toNode": "賢者",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "31cc5a7c-e36c-4cc2-bf6e-3bc543a5f980",
+      "fromNode": "和平交渉開始",
+      "toNode": "王女",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "a901016f-e0e1-4179-bb7b-554e460fd30b",
+      "fromNode": "和平交渉開始",
+      "toNode": "魔王",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "a9663faa-53c1-4811-a060-9f19195bf1b4",
+      "fromNode": "地下迷宮出現",
+      "toNode": "盗賊",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "1f6f93b3-823c-4438-a32f-debe197a69d6",
+      "fromNode": "大戦争勃発",
+      "toNode": "魔王",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "9096e0e7-1880-4ade-81dd-fe1e1223af62",
+      "fromNode": "大戦争勃発",
+      "toNode": "最終決戦",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "ec6fe50d-25e9-49c3-b6fe-0b398a03bda2",
+      "fromNode": "平和条約締結",
+      "toNode": "最終決戦",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "02c67bfb-8013-41b7-9977-b4e626fe7bb6",
+      "fromNode": "平和条約締結",
+      "toNode": "魔王",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "a8e666a9-7a7e-448d-bc6c-3e70f66b4860",
+      "fromNode": "平和条約締結",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "518677fc-7e35-4786-a200-2a132875b596",
+      "fromNode": "平和条約締結",
+      "toNode": "魔族連合",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "23ee47de-b9c2-4e3f-bf91-34b7e730a2bd",
+      "fromNode": "復興大祭",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "e6ccdea3-b77d-4869-81d5-4a1323c2ea7e",
+      "fromNode": "復興大祭",
+      "toNode": "魔族連合",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "e01d264f-8ff5-478f-90e7-a799dad7b78e",
+      "fromNode": "新魔王戴冠",
+      "toNode": "元魔王",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "f24257c5-42a0-447c-b961-a23449378146",
+      "fromNode": "王国建国",
+      "toNode": "王国",
+      "label": "舞台",
+      "color": "#795548"
+    },
+    {
+      "id": "3cf4cd60-818a-4d34-8f9c-f5bd2979b058",
+      "fromNode": "王国建国",
+      "toNode": "冒険の始まり",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "c81898e5-2327-425d-9514-e1d81c1093fd",
+      "fromNode": "王都防衛戦",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "53ae0cc6-eab1-4277-8494-a53ef1bdaa1e",
+      "fromNode": "王都防衛戦",
+      "toNode": "騎士団長",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "d5038806-4c3e-44f4-af33-64909a85dfb3",
+      "fromNode": "竜の目覚め",
+      "toNode": "賢者",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "4affca0c-a7c2-4c92-82b9-20c085635e3b",
+      "fromNode": "賢者の塔完成",
+      "toNode": "賢者",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "4d02feb7-583d-4723-9692-8724c7ca7053",
+      "fromNode": "魔族侵攻宣言",
+      "toNode": "魔王",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "46cafd17-2beb-4a2d-aced-fb7930715e0a",
+      "fromNode": "魔族侵攻宣言",
+      "toNode": "魔族連合",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "663fbf75-a43c-41fb-816e-9cf467cf7bba",
+      "fromNode": "魔法学園創設",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "983a742e-5086-47be-890d-ad8e111ab437",
+      "fromNode": "冒険の始まり",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "e7ce07e1-db70-4606-b912-898012750607",
+      "fromNode": "冒険の始まり",
+      "toNode": "王国建国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "b1a6396f-ffeb-4f8e-84af-6fe3cea02a73",
+      "fromNode": "冒険の始まり",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "49223580-4cc5-4634-b49d-a47db14fad97",
+      "fromNode": "四天王会戦",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "8d800e18-6d24-4ae6-b772-58be999aff1f",
+      "fromNode": "四天王会戦",
+      "toNode": "四天王A",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "a9e3b822-698e-410a-8a13-2a689c06f2f1",
+      "fromNode": "四天王会戦",
+      "toNode": "四天王B",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "10ac0014-8701-4672-8a41-56df2fb7d4f0",
+      "fromNode": "四天王会戦",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "689fc62a-452d-4c21-ab71-49f3411c2513",
+      "fromNode": "塔の試練",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "317ea14f-d409-4a6c-b6f5-05474a982dbe",
+      "fromNode": "塔の試練",
+      "toNode": "予言者",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "e0724c20-9d96-425a-a5e6-0b0dbbc551cc",
+      "fromNode": "塔の試練",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "7bf2f487-5d89-4fe9-9276-47e9279c5ee4",
+      "fromNode": "後日譚",
+      "toNode": "王女",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "2a997ba9-c434-4fd2-9be9-2835f5883ede",
+      "fromNode": "後日譚",
+      "toNode": "騎士団長",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "327a2a86-2667-4662-8ebe-7adc7d5d71b5",
+      "fromNode": "後日譚",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "75640366-2151-4f3c-a731-7720c08cbea4",
+      "fromNode": "新たな旅立ち",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "c43b9a13-5068-4f6c-bcce-c4e1fea7957f",
+      "fromNode": "新たな旅立ち",
+      "toNode": "幼なじみ",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "15cc9245-8f76-4253-99e8-99bc90900ab0",
+      "fromNode": "新たな旅立ち",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "cb709f5f-2e63-4de8-8668-46f3eb723e2e",
+      "fromNode": "最後の試練",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "b426c876-5796-4b92-b013-752712be1cbe",
+      "fromNode": "最後の試練",
+      "toNode": "元魔王",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "eb35b2fa-3d62-455b-b4e7-6b6d528666fe",
+      "fromNode": "最後の試練",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "1da5254a-eb1a-434e-af74-4c343dc980e2",
+      "fromNode": "最終決戦",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "ffa3862c-3d15-4710-87b0-b174f65f8e7f",
+      "fromNode": "最終決戦",
+      "toNode": "賢者",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "687f9342-8f73-4893-8eb4-e25304e88b45",
+      "fromNode": "最終決戦",
+      "toNode": "魔王",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "82c0ce5d-54db-4093-a17d-99f0a4718119",
+      "fromNode": "最終決戦",
+      "toNode": "大戦争勃発",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "e4f15789-5aee-4cde-9681-95032ea3729b",
+      "fromNode": "最終決戦",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "83ec0821-6945-40d5-8e11-e9215b84e7f9",
+      "fromNode": "最終決戦",
+      "toNode": "魔族連合",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "137408e6-39d3-45f1-a385-7b7f6901532d",
+      "fromNode": "王都魔法大会",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "36767788-50f8-4383-b1b3-724034e8a479",
+      "fromNode": "王都魔法大会",
+      "toNode": "賢者",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "fd544c46-48af-42b7-9109-6e46a46f184b",
+      "fromNode": "王都魔法大会",
+      "toNode": "王女",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "9e9a0415-35a6-4c8a-830e-8e41274654b7",
+      "fromNode": "王都魔法大会",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "0301d021-b7e8-4abd-9df4-16c5daabc37a",
+      "fromNode": "秘宝争奪戦",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "9649ad71-d642-4354-b594-4b7bc7f14775",
+      "fromNode": "秘宝争奪戦",
+      "toNode": "盗賊",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "0a376dbd-9994-454f-a585-be41fa9d737b",
+      "fromNode": "秘宝争奪戦",
+      "toNode": "四天王A",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "15d6f6b4-3e9e-426b-9c7d-1ec4266d915e",
+      "fromNode": "秘宝争奪戦",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "2b85af8e-087a-4cf6-acc3-21ab8a727094",
+      "fromNode": "竜との邂逅",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "7590949c-bc96-4068-889f-4c6807da2572",
+      "fromNode": "竜との邂逅",
+      "toNode": "賢者",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "5b5a772e-47d9-40f2-a22c-42f12508c27a",
+      "fromNode": "竜との邂逅",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "7142f240-401e-4882-adf4-536b38e0eac4",
+      "fromNode": "賢者との出会い",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "5ead0708-7cb7-49ee-aef7-ee335e67932e",
+      "fromNode": "賢者との出会い",
+      "toNode": "賢者",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "bff2ebec-420a-42d8-b3ec-ac3562d0888b",
+      "fromNode": "賢者との出会い",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "024345e5-3a96-4cae-99ab-4ddde5794f82",
+      "fromNode": "魔族領潜入",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "e85eaf9d-99d4-4e86-b8eb-6948c3ea0f6b",
+      "fromNode": "魔族領潜入",
+      "toNode": "盗賊",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "a9128035-18fc-43bf-adb7-5e1b1b25ffbd",
+      "fromNode": "魔族領潜入",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    },
+    {
+      "id": "dfe2f30a-d4be-49b7-990b-531e912d4bc2",
+      "fromNode": "魔法学園編入",
+      "toNode": "主人公",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "26844637-bb62-4e7d-b963-c2c939bf2b3e",
+      "fromNode": "魔法学園編入",
+      "toNode": "賢者",
+      "label": "登場人物",
+      "color": "#2196F3"
+    },
+    {
+      "id": "129eea3d-7e4c-4405-9bf3-d0f5f779efc5",
+      "fromNode": "魔法学園編入",
+      "toNode": "王国",
+      "label": "関連",
+      "color": "#9E9E9E"
+    }
+  ]
+}
