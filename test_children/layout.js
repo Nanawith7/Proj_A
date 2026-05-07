@@ -128,14 +128,14 @@ function findElementByLabel(label, el) {
 function parseRelative(rel) {
   if (rel === null || rel === undefined || rel === '') return null;
   const s = String(rel);
-  const leftM = s.match(/^left-(--?\d+)$/);
-  if (leftM) { const v = leftM[1]; const isO = v.startsWith('--'); return {dir: 'left', val: Math.abs(parseInt(v.replace('--', '-'))), isOutside: isO}; }
-  const rightM = s.match(/^right-(--?\d+)$/);
-  if (rightM) { const v = rightM[1]; const isO = v.startsWith('--'); return {dir: 'right', val: Math.abs(parseInt(v.replace('--', '-'))), isOutside: isO}; }
-  const topM = s.match(/^top-(--?\d+)$/);
-  if (topM) { const v = topM[1]; const isO = v.startsWith('--'); return {dir: 'top', val: Math.abs(parseInt(v.replace('--', '-'))), isOutside: isO}; }
-  const bottomM = s.match(/^bottom-(--?\d+)$/);
-  if (bottomM) { const v = bottomM[1]; const isO = v.startsWith('--'); return {dir: 'bottom', val: Math.abs(parseInt(v.replace('--', '-'))), isOutside: isO}; }
+  // Strip direction prefix, then check remainder
+  let dir = null, rest = null;
+  if (s.startsWith('left-')) { dir = 'left'; rest = s.slice(5); }
+  else if (s.startsWith('right-')) { dir = 'right'; rest = s.slice(6); }
+  else if (s.startsWith('top-')) { dir = 'top'; rest = s.slice(4); }
+  else if (s.startsWith('bottom-')) { dir = 'bottom'; rest = s.slice(7); }
+  if (dir && /^\d+$/.test(rest)) { return {dir, val: parseInt(rest), isOutside: false}; }
+  if (dir && /^-\d+$/.test(rest)) { return {dir, val: -parseInt(rest), isOutside: true}; }
   const numM = s.match(/^-?\d+$/);
   if (numM) return {dir: 'abs', val: parseInt(numM[0]), isOutside: false};
   return null;
