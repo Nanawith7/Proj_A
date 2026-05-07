@@ -39,9 +39,9 @@ function renderProps() {
   propsContent.appendChild(typeRow);
 
   // Size
-  const wInput = propRow('Width', el.w !== null ? el.w : 'auto', (v) => { el.w = v === 'auto' ? null : parseInt(v) || 0; window._render(); });
+  const wInput = propRow('Width', el.w !== null ? el.w : 'auto', (v) => { el.w = v === 'auto' ? null : parseInt(v) || 0; el._isManual = false; window._renderTree(); window._render(); });
   propsContent.appendChild(wInput);
-  const hInput = propRow('Height', el.h !== null ? el.h : 'auto', (v) => { el.h = v === 'auto' ? null : parseInt(v) || 0; window._render(); });
+  const hInput = propRow('Height', el.h !== null ? el.h : 'auto', (v) => { el.h = v === 'auto' ? null : parseInt(v) || 0; el._isManual = false; window._renderTree(); window._render(); });
   propsContent.appendChild(hInput);
 
   // Relative size
