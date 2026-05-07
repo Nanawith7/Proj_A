@@ -9,7 +9,7 @@ children_layout.html のリファクタリング後、各種テストケース�
 
 ## BUG #1: `_isManual` 子が `measureElement` で親サイズに含められる
 
-**状態**: 🔴 FIX REQUIRED  
+**状態**: ✅ FIXED (commit: resolvePositions NaN fix)  
 **影響度**: 高 — ドラッグ配置子が親のサイズを不正に膨張させる
 
 ### 再現ステップ
@@ -24,10 +24,8 @@ children_layout.html のリファクタリング後、各種テストケース�
 `_isManual` 子の `_cw` / `_ch` が `maxChildW` / `maxChildHForHeight` に加算される。  
 `resolvePositions` で `_isManual` を除外しようとするが、`measureElement` 時点で既に親サイズが膨張済み。
 
-### 修正方針
-- `measureElement` のchildrenループで `child._isManual === true` のケースを除外
-- 除外時は `maxChildW` / `maxChildHForHeight` に加えない
-- 既存の「自動レイアウトのみで親サイズを決定」の意図を維持
+### 修正（2026-05）
+✅ `measureElement` の children ループ（layout.js:27）で `child._isManual === true` をチェックし、continue するよう修正。既存の「自動レイアウトのみで親サイズを決定」の意図を維持。
 
 ---
 
@@ -45,6 +43,73 @@ children_layout.html のリファクタリング後、各種テストケース�
 ただし `measureElement` の値と一致しないため、`computeLayout` 収束ループで1〜2回の追加 iteration が必要。
 
 **対応**: 修正不要。既存設計の意図通り。
+
+---
+
+## BUG #7: `resolvePositions` 親サイズ再計算の未定義変数 `maxChildW`
+
+**状態**: ✅ FIXED (commit: fix resolvePositions removed undefined maxChildW)  
+**影響度**: 致命 — auto幅親が全て NaN に
+
+### 再現
+1. 親要素 w=null（auto幅）
+2. `resolvePositions` の再計算セクション実行
+3. 結果: `_cw = NaN`（親全体が破綻）
+
+### 原因
+`resolvePositions` の再計算ループ（layout.js:256）で:
+```javascript
+let childContentW = Math.max(maxRight, maxChildW, parentTextW);
+```
+`maxChildW` は Pass 1 で宣言済みだが Pass 2の再計算ブロックでは宣言されていない。未定義変数参照で `NaN` に。
+
+### 修正（2026-05）
+✅ `maxChildW` を削除し `Math.max(maxRight, parentTextW)` のみ使用。子要素の右端最大値(`maxRight`)と親テキスト幅(`parentTextW`)の最大値で計算。
+
+---
+
+## BUG #8: `parseRelative` の `--` (外側) パース失敗
+
+**状態**: ✅ FIXED (commit: parseRelative uses simple regex)  
+**影響度**: 高 — 外側配置の子が全て内侧として配置される
+
+### 再現
+1. `xRel="right--20"` を指定
+2. `parseRelative('right--20')` 実行
+3. 結果: `{dir:'right', val:-20, isOutside:false}`（期待: `isOutside:true`）
+4. 子は親右縁の内側に配置される（`right--20` は外側にはみ出す仕様）
+
+### 原因
+正規表現 `/^right-(--?\d+)$/` が `right--20` をマッチさせるが、`parseInt('--20')` が `NaN` を返す。結果として `val=0` とみなされ、`isOutside=false` になる。
+
+### 修正（2026-05）
+✅ direction prefix を `slice()` で除去後、残りに `/\d+/` （正数）または `/^-\d+$/` （負数）でマッチする単純ロジックに変更。
+
+```
+left-10     → {dir:'left', val:10, isOutside:false}
+left--10    → {dir:'left', val:-10, isOutside:true}
+right-5     → {dir:'right', val:5, isOutside:false}
+right--5    → {dir:'right', val:-5, isOutside:true}
+```
+
+---
+
+## BUG #9: `resolvePositions` Pass 1 にデッド変数
+
+**状態**: ✅ FIXED (commit: resolvePositions removed undefined maxChildW)  
+**影響度**: 低 — 動作には影響しないがコード品質問題
+
+### 問題
+Pass 1 ループ内で以下の4変数を宣言しているが、Pass 1 スコープ内で実際に使用されていない:
+- `maxX`: 未使用
+- `maxY`: 未使用
+- `maxChildW`: Pass 2 再計算ブロックで利用を試みるが未宣言
+- `maxChildH`: 未使用
+
+Pass 2 の再計算ブロックでは `maxRight` / `maxBottom` として再計算しているため、Pass 1 内の追跡は完全にデッドコード。
+
+### 修正（2026-05）
+✅ 4変数の宣言・更新を削除。Pass 2 再計算ブロックは既存の `maxRight` / `maxBottom` のまま。
 
 ---
 
@@ -317,4 +382,6 @@ w=100, h=100 固定なので適用される。
 |---------|------|------|
 | 問題なし | 23 | 既存設計の意図通り動作 |
 | 設計トレードオフ | 1 | auto-stack 高さ計算不一致（computeLayout収束で対応） |
-| **要修正** | 1 | `_isManual` 子が measureElement で親サイズに含められる |
+| 修正済み | 4 | #1 _isManual測定、#7 maxChildW未定義変数、#8 parseRelative外側パース、#9 デッドコード |
+
+*(2026-05 現在、修正未完了のバグはなし)*

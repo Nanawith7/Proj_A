@@ -297,9 +297,11 @@ for (iter = 0; iter < 5; iter++) {
 
 **親サイズ再計算:**
 ```
-parent._cw = max(maxRight, maxChildW, parentTextW) + 20（w=null の場合）
+parent._cw = max(maxRight, parentTextW) + 20（w=null の場合）
 parent._ch = max(maxBottom, 1) + 16（h=null の場合）
 ```
+
+> **注意:** `maxChildW` は Pass 2 再計算ブロックで未定義。子要素の右端最大値(`maxRight`)および親テキスト幅(`parentTextW`)の最大値を使用。`maxChildW` を含めると `NaN` が発生する（BUG#7）。
 
 **相対サイズ解決:** `wRel` / `hRel` を親サイズに基づいて解決し、子要素の `w` / `h` を上書き
 
