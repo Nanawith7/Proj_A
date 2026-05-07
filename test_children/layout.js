@@ -129,13 +129,13 @@ function parseRelative(rel) {
   if (rel === null || rel === undefined || rel === '') return null;
   const s = String(rel);
   const leftM = s.match(/^left-(--?\d+)$/);
-  if (leftM) { const v = leftM[1]; const isO = v.startsWith('--'); return {dir: 'left', val: Math.abs(parseInt(v)), isOutside: isO}; }
+  if (leftM) { const v = leftM[1]; const isO = v.startsWith('--'); return {dir: 'left', val: Math.abs(parseInt(v.replace('--', '-'))), isOutside: isO}; }
   const rightM = s.match(/^right-(--?\d+)$/);
-  if (rightM) { const v = rightM[1]; const isO = v.startsWith('--'); return {dir: 'right', val: Math.abs(parseInt(v)), isOutside: isO}; }
+  if (rightM) { const v = rightM[1]; const isO = v.startsWith('--'); return {dir: 'right', val: Math.abs(parseInt(v.replace('--', '-'))), isOutside: isO}; }
   const topM = s.match(/^top-(--?\d+)$/);
-  if (topM) { const v = topM[1]; const isO = v.startsWith('--'); return {dir: 'top', val: Math.abs(parseInt(v)), isOutside: isO}; }
+  if (topM) { const v = topM[1]; const isO = v.startsWith('--'); return {dir: 'top', val: Math.abs(parseInt(v.replace('--', '-'))), isOutside: isO}; }
   const bottomM = s.match(/^bottom-(--?\d+)$/);
-  if (bottomM) { const v = bottomM[1]; const isO = v.startsWith('--'); return {dir: 'bottom', val: Math.abs(parseInt(v)), isOutside: isO}; }
+  if (bottomM) { const v = bottomM[1]; const isO = v.startsWith('--'); return {dir: 'bottom', val: Math.abs(parseInt(v.replace('--', '-'))), isOutside: isO}; }
   const numM = s.match(/^-?\d+$/);
   if (numM) return {dir: 'abs', val: parseInt(numM[0]), isOutside: false};
   return null;
