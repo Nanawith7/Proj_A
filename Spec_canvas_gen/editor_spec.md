@@ -244,6 +244,10 @@ text-styleプロパティ・pill-styleプロパティの両方で `textColor` �
 
 エディタプレビューでプロパティの `textColor` が反映される（未設定時 `#fff`）。
 
+### 8.8 children描画プレビュー
+
+エディタのプレビューでは、propertiesがchildrenとして正しく描画される。`position` で指定されたx/y座標は `xRel: "left-N"` / `yRel: "top-N"` に変換され、`compute_children()` により `ax/ay` が計算される。
+
 ## 9. 結論
 
 Nodeview Editorは、Viewerサーバーと連携して既存テンプレートを読み込み、全パラメータをフォームで編集し、SVGライブプレビューで即時確認できるGUIツールである。テキストエディタでのJSON手書きに比べ、形状・opacity・背景・プロパティ配置を視覚的に設計できる。

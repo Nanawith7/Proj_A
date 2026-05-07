@@ -126,6 +126,12 @@ Vaultの `_types/type_definitions.yml` をJSONとして返す。nodeview名の�
 
 Vaultの `nodeview/{name}.json` を返す。ノード描画テンプレート。
 
+### 3.5 POST /api/children
+
+サーバーサイドのchildren配置計算（`compute_children()`）を実行し、結果を返す。
+**Request**: `{ nodeview: {...}, nodeProperties: {...}, parentWidth: 160, parentHeight: 120 }`
+**Response**: `{ children: [{ label: "...", ax: 10, ay: 8, cw: 160, ch: 22, ... }] }`
+
 ## 4. フロントエンド機能
 
 ### 4.1 SVGグラフ描画
@@ -297,6 +303,47 @@ nodeviewに `background` フィールド（例：`"era_bg.png"`）が指定さ�
 | `expandedFillOpacity` | 展開時のfill不透明度 | `1`（完全表示） |
 
 `applyNodeView()` 関数が状態に応じて自動的に適用する。`era_circle` の例では `collapsedFillOpacity=0.2`（薄い円）、`expandedFillOpacity=0`（完全透過＋背景画像100%）で使用している。
+
+### 5.8 Children描画（pre-computed / fallback）
+
+Canvas JSONに `children` 配列が含まれる場合、ビューアーは2つの描画パスのいずれかを用いて描画する。
+
+**Path A: pre-computed children（サーバー側計算済み）**
+- pipeline step 7bで`compute_children()`により `ax/ay/cw/ch` が計算済み
+- viewer.js は直接 `drawElement(child, g, nx+ax, ny+ay)` で描画
+- 性能: レイアウト計算不要、即時描画
+
+**Path B: fallback dynamic（クライアント側計算）**
+- CanvasJSONにchildrenがないか、pre-computedがない場合に使用
+- `nodeViewToChildren()` でproperties→children変換 → `computeChildrenLayout()` で配置計算
+- 既存Canvas（--node-viewsなし生成）もこのパスで描画される
+
+### 5.9 Canvas JSON childrenフォーマット
+
+```json
+{
+  "id": "protagonist",
+  "x": 0, "y": 0, "width": 160, "height": 120,
+  "children": [
+    {
+      "label": "tags",
+      "text": "...",
+      "ax": 10, "ay": 8,
+      "cw": 160, "ch": 22,
+      "pill": true,
+      "rx": 4,
+      "fill": "#fff1",
+      "textColor": "#eee",
+      "xRel": "left-10",
+      "yRel": "top-8"
+    }
+  ]
+}
+```
+
+- `ax/ay`: 親ノード左上からの絶対位置（ピクセル）
+- `cw/ch`: 各子要素の寸法
+- `pill/rx/fill/textColor`: pill描画プロパティ
 
 ## 6. フィルタエンジン（サーバー側）
 

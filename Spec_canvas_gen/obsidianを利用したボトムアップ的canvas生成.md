@@ -39,6 +39,7 @@ flowchart TD
         U2[フィルタ条件<br>filter / exclude]
         U3[ソート条件<br>sort_by]
         U4[X軸キー]
+        U5[node-views]
     end
     subgraph "データ抽出"
         D[Dataview API / ファイル読み込み]
@@ -50,10 +51,13 @@ flowchart TD
     subgraph "座標計算"
         C[X軸キー値からコンテナ生成<br>type定義に基づいて行配置<br>コンテナ幅を内包ノード数で決定<br>キー未指定時はcenteringを適用]
     end
-    subgraph "Canvas生成"
-        G[ノードとエッジをJSON化]
+    subgraph "children計算 (--node-views時)"
+        CH[nodeviewテンプレートから<br>properties→children変換<br>compute_children()で<br>ax/ay/cw/chを計算]
     end
-    U1 & U2 & U3 & U4 --> D --> F --> S --> C --> G --> O[.canvasファイル]
+    subgraph "Canvas生成"
+        G[ノードとエッジをJSON化<br>children配列を含める]
+    end
+    U1 & U2 & U3 & U4 & U5 --> D --> F --> S --> C --> CH --> G --> O[.canvasファイル]
 ```
 
 ## 2. データ層：ノートとメタデータ
@@ -300,6 +304,7 @@ STORY-ROW | 1      | 2      | 3      || 4      | 5      | 6      || 7      | (�
 | `label_mapping_path` | string（省略可） | ラベルマッピングファイルのパス。デフォルト: `_config/label_mappings.yml`。 |
 | `column_width` | integer | ノード間のX方向間隔（ピクセル相当）。 |
 | `row_height` | integer | 行間のY方向間隔。 |
+| `node_views` | boolean | trueの場合、childrenレイアウトを計算（pipeline step 7b）。nodeviewテンプレートを適用し、各ノードのpropertiesをchildren配列に変換。 |
 
 `filter`と`exclude`の両方が指定された場合、まず`filter`条件で候補を絞り込み、その結果に対して`exclude`条件で不要なノードを除去する。
 
@@ -471,7 +476,18 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
                     x_pos += column_width
                     all_canvas_nodes.append(node)
 
-    # 6. JSON出力（icon付き）
+    # 6. children計算（--node-viewsフラグ時、pipeline step 7b）
+    if args.node_views:
+        # nodeviewテンプレートからproperties→children変換
+        for node in all_canvas_nodes:
+            nv_key = type_defs.get(node.node_type, {}).get("nodeview")
+            if not nv_key or not node_views.get(nv_key):
+                continue
+            ch_root = nodeViewToChildren(node_views[nv_key], node.properties)
+            ch_root = compute_children(ch_root, node.width, node.height)
+            node.children = ch_root.get("children", [])
+
+    # 7. JSON出力（icon付き）
     canvas_nodes = []
     for node in all_canvas_nodes:
         if node.icon_path:
@@ -487,6 +503,7 @@ def generate_canvas(base_node, filter, exclude, sort_by, depth, x_axis_key,
             "x": int(node.x), "y": int(node.y),
             "width": int(node.width), "height": int(node.height),
             "color": node.color,
+            "children": node.children if node.children else None,  # pre-computed children
         })
     canvas_json = {"nodes": canvas_nodes, "edges": edges}
     write_file("output.canvas", canvas_json)
