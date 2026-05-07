@@ -17,8 +17,8 @@
 | 6 | レンダリングエンジン検証 | ✅ 完了 |
 | 7 | テンプレートロード実装 | ✅ 完了 |
 | 8 | pipeline.py統合（children server-side計算） | ✅ 完了 |
-| 9 | 統合テスト | 🔴 次 |
-| 10 | ドキュメント最適化 | - |
+| 9 | 統合テスト | ✅ 完了 |
+| 10 | ドキュメント最適化 | 🔴 次 |
 
 ## 新規ファイル
 - `canvas_gen/children.py` (419行) - Python版childrenレイアウトエンジン
@@ -39,24 +39,19 @@
 | drawElement() ax/ay/cw/ch両対応 | ✅ |
 | 58rects + 166 el-groups描画 OK | ✅ |
 
-## template.html修正項目
-| 修正 | 状態 |
-|------|------|
-| drawElement()関数の追加 | ✅ |
-| _wrapText/_measureText関数の追加 | ✅ |
-| renderGraph()のchildren描画パスをdrawElement()ベースに | ✅ |
-| loadNodeViewsAsync()関数の追加 | ✅ |
-| 初期実行をasyncに書き換え | ✅ |
-| JS構文バリデーション | ✅ 合格 |
-
 ## 検証結果
-| パス | rect数 | 子要素数 | state |
-|------|-------|---------|------|
-| viewer.js (index.html) | 58 | 166 | ✅ 正常 |
-| template.html | 37+ | 100+ | ✅ 正常（Phase 6検証） |
+| テスト項目 | 期待値 | 実際 | state |
+|-----------|-------|------|------|
+| JSON構造比較（ノード数） | 72/72 | 72/72 | ✅ |
+| JSON構造比較（children数） | 0/37 | 0/37 | ✅ |
+| JSON構造比較（children要素） | 0/166 | 0/166 | ✅ |
+| ブラウザ描画（親rect） | 58 | 58 | ✅ |
+| ブラウザ描画（子rect） | 166 | 166 | ✅ |
+| ブラウザ描画（エッジ） | 152 | 152 | ✅ |
+| template.html | 37+ | 100+ | ✅ |
 
 ## 重要な設計要素
-1. **サーバーサイド計算**: pipeline.py（Python）でlayout計算 → canvas JSONにax/ay/cw/chを埋め込む
+1. **サーバーサイド計算**: pipeline.py（Python）でlayout計算→canvas JSONにax/ay/cw/chを埋め込む
 2. **クライアントSide描画**: viewer.jsでpre-computed childrenを直接描画
 3. **後方互換性**: pre-computed children無→fallback dynamic計算
 4. **Type定義→ノードビューテンプレート**: nodeviewフィールドで紐付け
@@ -64,6 +59,7 @@
 
 ## 既存の課題
 - テキスト幅推定がブラウザ実測と異なる場合あり（近似値に基づく）
+- 大きなSVG（4880x2980）の描画が部分的（CSSサイズ問題）
 - _svgCanvas_getエラーは未対応（無害）
 - gapX（横間隔）は未実装
 
@@ -78,3 +74,5 @@
 - `canvas_gen/viewer/template.html` ← 修正済み（Phase 7）
 - `Obsidian_test/vault/nodeview/*.json` ← テンプレート
 - `test_children.canvas` ← children付きテストボルト
+- `test_old.canvas` ← 既存テストボルト
+- `test_compare_canvas.py` ← 比較検証スクリプト
