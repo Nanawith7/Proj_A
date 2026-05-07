@@ -9,6 +9,20 @@ function measureText(text, fontSize, fontFamily) {
   _measureCtx.font = `${fontSize}px ${fontFamily||'sans-serif'}`;
   return _measureCtx.measureText(text).width;
 }
+const _measureText = measureText;
+
+function _wrapText(text, maxW, fontSize) {
+  const lines = [];
+  let pos = 0;
+  while (pos < text.length) {
+    let len = 1;
+    while (pos + len <= text.length && measureText(text.slice(pos, pos + len), fontSize, 'sans-serif') < maxW) len++;
+    if (len === 1 && pos + 1 <= text.length) len = 2;
+    lines.push(text.slice(pos, pos + len - 1));
+    pos += len - 1;
+  }
+  return lines;
+}
 
 // ═══════ NodeView layout params ═══════
 // Fills missing layout params with defaults from nv shape.
@@ -115,9 +129,12 @@ function render() {
       children._cw = null, children._ch = null;
       computeChildrenLayout(children);
 
-      // Update node size from layout
-      children._cw = nw || children._cw || 200;
-      children._ch = nh || children._ch || 120;
+      // Update node dimensions from computed layout
+      if (!nw || nw <= 0) nw = children._cw || 200;
+      if (!nh || nh <= 0) nh = children._ch || 120;
+      if (children._cw > 0 && children._cw < nw) nw = children._cw;
+      if (children._ch > 0 && children._ch < nh) nh = children._ch;
+      n.width = nw; n.height = nh;
 
       // Draw parent rect
       const pRect = document.createElementNS(svgNS, 'rect');
@@ -182,33 +199,13 @@ function render() {
         g.appendChild(img);
       }
 
-      // Draw children rects
+      // Draw children rects via drawElement()
+      // children._ax/_ay are relative to the children root; set them to 0
+      // so that drawElement adds (nx, ny) from ox/oy for correct absolute positioning.
+      children._ax = 0;
+      children._ay = 0;
       for (const child of children.children) {
-        const childRect = document.createElementNS(svgNS, 'rect');
-        childRect.setAttribute('class', 'node-body');
-        childRect.setAttribute('x', child._ax || children._ax);
-        childRect.setAttribute('y', child._ay || children._ay);
-        childRect.setAttribute('width', child._cw || 0);
-        childRect.setAttribute('height', child._ch || 0);
-        childRect.setAttribute('rx', child.rx || 3);
-        childRect.setAttribute('ry', child.rx || 3);
-        childRect.setAttribute('fill', child.fill || '#fff2');
-        childRect.setAttribute('stroke', child.stroke || '#fff2');
-        childRect.setAttribute('stroke-width', 0.5);
-        g.appendChild(childRect);
-
-        // Child text
-        if (child.text) {
-          const cTxt = document.createElementNS(svgNS, 'text');
-          cTxt.setAttribute('class', 'node-body');
-          cTxt.setAttribute('x', (child._ax || children._ax) + (child._cw || 0) / 2);
-          cTxt.setAttribute('y', (child._ay || children._ay) + (child._ch || 0) / 2 + 3);
-          cTxt.setAttribute('text-anchor', 'middle');
-          cTxt.setAttribute('fill', child.textColor || '#eee');
-          cTxt.setAttribute('font-size', child.fontSize || 12);
-          cTxt.textContent = child.text;
-          g.appendChild(cTxt);
-        }
+        drawElement(child, g, nx, ny);
       }
 
       mainG.appendChild(g);
@@ -866,14 +863,16 @@ function drawElement(parentEl, parentGroup, ox, oy) {
 
 /**
  * Render a node with children (new layout system).
+ * This is now called from render() via drawElement(child, g, ox, oy) for each child.
+ * Kept for standalone use but does not call computeChildrenLayout (assumes pre-computed).
  */
-function renderNodeWithChildren(node, nv, mainG, svgNS) {
-  computeChildrenLayout(node);
+function renderNodeWithChildren(node, nv, g, mainG, svgNS, nx, ny, iconPath, fill, title, td) {
   // Update node dimensions from layout
   node.width = node._cw;
   node.height = node._ch;
   // Draw using new renderer
-  drawElement(node, mainG, 0, 0);
+  // (In modern usage, this is called from render() and g is the parent group)
+  drawElement(node, g, 0, 0);
 }
 
 function addRow(cid){const div=document.getElementById(cid);const row=document.createElement('div');row.className='filter-row';const logic=document.createElement('span');logic.className='logic';logic.textContent=div.children.length?'AND':'WHERE';const sel=document.createElement('select');sel.innerHTML='<option value="$or">$or</option>';const keys=new Set();Object.values(VAULT).forEach(v=>{if(v.props)Object.keys(v.props).forEach(k=>keys.add(k));});[...keys].sort().forEach(k=>{sel.innerHTML+=`<option value="${k}">${k}</option>`;});const inp=document.createElement('input');inp.placeholder='value or val1|val2';const del=document.createElement('button');del.textContent='x';del.style.background='#533483';del.style.padding='2px 6px';del.onclick=()=>row.remove();row.appendChild(logic);row.appendChild(sel);row.appendChild(inp);row.appendChild(del);div.appendChild(row);}
