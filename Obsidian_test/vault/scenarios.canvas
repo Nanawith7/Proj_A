@@ -1,11 +1,135 @@
 {
-	"nodes":[
-		{"id":"冒険の始まり_icon","type":"file","file":"_icons/type_scenario.png","x":0,"y":-54,"width":50,"height":50},
-		{"id":"冒険の始まり","type":"file","file":"scenario/冒険の始まり.md","x":0,"y":0,"width":280,"height":160,"color":"#FF9800"},
-		{"id":"賢者との出会い_icon","type":"file","file":"_icons/type_scenario.png","x":350,"y":-54,"width":50,"height":50},
-		{"id":"賢者との出会い","type":"file","file":"scenario/賢者との出会い.md","x":350,"y":0,"width":280,"height":160,"color":"#FF9800"},
-		{"id":"最終決戦_icon","type":"file","file":"_icons/type_scenario.png","x":700,"y":-54,"width":50,"height":50},
-		{"id":"最終決戦","type":"file","file":"scenario/最終決戦.md","x":700,"y":0,"width":280,"height":160,"color":"#FF9800"}
-	],
-	"edges":[]
+  "nodes": [
+    {
+      "id": "冒険の始まり",
+      "type": "file",
+      "file": "scenario/冒険の始まり.md",
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "魔法学園編入",
+      "type": "file",
+      "file": "scenario/魔法学園編入.md",
+      "x": 350,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "竜との邂逅",
+      "type": "file",
+      "file": "scenario/竜との邂逅.md",
+      "x": 700,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "賢者との出会い",
+      "type": "file",
+      "file": "scenario/賢者との出会い.md",
+      "x": 1050,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "王都魔法大会",
+      "type": "file",
+      "file": "scenario/王都魔法大会.md",
+      "x": 1400,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "塔の試練",
+      "type": "file",
+      "file": "scenario/塔の試練.md",
+      "x": 1750,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "魔族領潜入",
+      "type": "file",
+      "file": "scenario/魔族領潜入.md",
+      "x": 2100,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "四天王会戦",
+      "type": "file",
+      "file": "scenario/四天王会戦.md",
+      "x": 2450,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "秘宝争奪戦",
+      "type": "file",
+      "file": "scenario/秘宝争奪戦.md",
+      "x": 2800,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "最終決戦",
+      "type": "file",
+      "file": "scenario/最終決戦.md",
+      "x": 3150,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "最後の試練",
+      "type": "file",
+      "file": "scenario/最後の試練.md",
+      "x": 3500,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "新たな旅立ち",
+      "type": "file",
+      "file": "scenario/新たな旅立ち.md",
+      "x": 3850,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    },
+    {
+      "id": "後日譚",
+      "type": "file",
+      "file": "scenario/後日譚.md",
+      "x": 4200,
+      "y": 0,
+      "width": 280,
+      "height": 160,
+      "color": "#FF9800"
+    }
+  ],
+  "edges": []
 }

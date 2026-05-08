@@ -1,15 +1,6 @@
 {
   "nodes": [
     {
-      "id": "王国建国_icon",
-      "type": "file",
-      "file": "_icons/type_event.png",
-      "x": 0,
-      "y": -54,
-      "width": 50,
-      "height": 50
-    },
-    {
       "id": "王国建国",
       "type": "file",
       "file": "event/王国建国.md",
@@ -20,18 +11,9 @@
       "color": "#E91E63"
     },
     {
-      "id": "大戦争勃発_icon",
+      "id": "魔法学園創設",
       "type": "file",
-      "file": "_icons/type_event.png",
-      "x": 350,
-      "y": -54,
-      "width": 50,
-      "height": 50
-    },
-    {
-      "id": "大戦争勃発",
-      "type": "file",
-      "file": "event/大戦争勃発.md",
+      "file": "event/魔法学園創設.md",
       "x": 350,
       "y": 0,
       "width": 220,
@@ -39,19 +21,110 @@
       "color": "#E91E63"
     },
     {
-      "id": "平和条約締結_icon",
+      "id": "竜の目覚め",
       "type": "file",
-      "file": "_icons/type_event.png",
+      "file": "event/竜の目覚め.md",
       "x": 700,
-      "y": -54,
-      "width": 50,
-      "height": 50
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "王都防衛戦",
+      "type": "file",
+      "file": "event/王都防衛戦.md",
+      "x": 1050,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "賢者の塔完成",
+      "type": "file",
+      "file": "event/賢者の塔完成.md",
+      "x": 1400,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "魔族侵攻宣言",
+      "type": "file",
+      "file": "event/魔族侵攻宣言.md",
+      "x": 1750,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "大戦争勃発",
+      "type": "file",
+      "file": "event/大戦争勃発.md",
+      "x": 2100,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "地下迷宮出現",
+      "type": "file",
+      "file": "event/地下迷宮出現.md",
+      "x": 2450,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "新魔王戴冠",
+      "type": "file",
+      "file": "event/新魔王戴冠.md",
+      "x": 2800,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
     },
     {
       "id": "平和条約締結",
       "type": "file",
       "file": "event/平和条約締結.md",
-      "x": 700,
+      "x": 3150,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "和平交渉開始",
+      "type": "file",
+      "file": "event/和平交渉開始.md",
+      "x": 3500,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "復興大祭",
+      "type": "file",
+      "file": "event/復興大祭.md",
+      "x": 3850,
+      "y": 0,
+      "width": 220,
+      "height": 140,
+      "color": "#E91E63"
+    },
+    {
+      "id": "勇者伝説編纂",
+      "type": "file",
+      "file": "event/勇者伝説編纂.md",
+      "x": 4200,
       "y": 0,
       "width": 220,
       "height": 140,
