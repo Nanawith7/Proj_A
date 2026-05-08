@@ -130,6 +130,7 @@ function render() {
 
     // ── Render children ──
     const canvasChildren = n.children; // Pre-computed from canvas file
+    const collapsedChildren = n?.collapsed_children ?? [];
     const usePrecomputed = canvasChildren && Array.isArray(canvasChildren) && canvasChildren.length > 0;
 
     if (usePrecomputed) {
