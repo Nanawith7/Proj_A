@@ -282,6 +282,7 @@ function render() {
           }
         }
         rendered = true;
+        mainG.appendChild(g);
       }
 
       if (!rendered) {
