@@ -57,6 +57,8 @@ def _make_file_node(node: PositionedNode, node_id: str) -> dict[str, Any]:
         obj["color"] = node.color
     if node.children:
         obj["children"] = _serialize_children(node.children)
+    if hasattr(node, 'collapsed_children'):
+        obj["collapsed_children"] = node.collapsed_children
     return obj
 
 

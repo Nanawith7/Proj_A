@@ -90,6 +90,7 @@ def run(
                     ch_root = nodeViewToChildren(nv, pn.properties)
                     ch_root = compute_children(ch_root, pn.width, pn.height)
                     pn.children = ch_root.get('children', [])
+                    pn.collapsed_children = []
                 except Exception:
                     pass
 
