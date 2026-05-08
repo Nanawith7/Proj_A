@@ -178,8 +178,10 @@ function render() {
       }
 
          // Draw children directly (positions are relative to parent origin)
-      for (const child of canvasChildren) {
-        drawElement(child, g, nx + (child.ax || 0), ny + (child.ay || 0));
+      if (expandedId === n.id) {
+        for (const child of canvasChildren) {
+          drawElement(child, g, nx + (child.ax || 0), ny + (child.ay || 0));
+        }
       }
 
       mainG.appendChild(g);
@@ -264,8 +266,10 @@ function render() {
         // Children via drawElement()
         children._ax = 0;
         children._ay = 0;
-        for (const child of children.children) {
-          drawElement(child, g, nx, ny);
+        if (expandedId === n.id) {
+          for (const child of children.children) {
+            drawElement(child, g, nx, ny);
+          }
         }
         rendered = true;
       }
