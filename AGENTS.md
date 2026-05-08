@@ -12,6 +12,8 @@ Canvas generator + NodeView editor for Obsidian vaults. **No build system.** All
 | `test_children/` | Layout engine test (`children_layout.html`) |
 | `Obsidian_test/vault/` | Test vault (~50 notes) |
 | `Spec_canvas_gen/` | Design specs (editor, viewer, generation) |
+| `Deep_Coding_logs/` | Deep Coding session logs — each project is a subdirectory with `summary.md`, `pitfalls.md`, phase results |
+| `DC_workstate/` | Deep Coding working state history |
 
 ## Canvas Generator (Python)
 ```bash
