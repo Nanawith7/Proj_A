@@ -24,6 +24,16 @@
 - 層3（ユニットテスト）: `runTier3_UnitTests()`（finalizeGroup単体テスト）
 - 統合関数: `runAllTests()`（window公開）
 
+### テスト実行結果（Phase 3.5完了）
+- `runAllTests()`実行: 全ユニットテスト（Tier 3）PASS
+  - Test 1 (normal append): PASS
+  - Test 2 (null child): PASS
+  - Test 3 (null parent): PASS
+  - Test 4 (return chain): PASS
+- viewerサーバー起動: http://127.0.0.1:8765/ 正常動作
+- SVG DOM検証: 46954文字のSVGコンテンツ（58+ノード）
+- ページロードエラー: なし（クリーン起動確認）
+
 ### 変更ファイル
 - `canvas_gen/viewer/viewer.js`（Phase 1: +1行、Phase 2: 3行置き換え+6行追加、Phase 3: +約120行）
 
