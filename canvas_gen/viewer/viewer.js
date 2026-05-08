@@ -983,4 +983,127 @@ function buildFilterStr(cid){const pairs=[];document.getElementById(cid).querySe
 async function apply(){const params={filter:buildFilterStr('filter-rows'),exclude:buildFilterStr('exclude-rows'),include:document.getElementById('include-types').value||'',sortKey:document.getElementById('sort-key').value,sortDesc:document.getElementById('sort-desc').checked,prune:document.getElementById('prune-orphans').checked,baseNode:document.getElementById('base-node').value||'',depth:document.getElementById('depth').value||''};const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params)});const data=await res.json();currentNodes=data.nodes;currentEdges=data.edges;render();}
 function reset(){document.getElementById('filter-rows').innerHTML='';document.getElementById('exclude-rows').innerHTML='';document.getElementById('sort-key').value='';document.getElementById('sort-desc').checked=false;document.getElementById('prune-orphans').checked=false;currentNodes=ALL_NODES;currentEdges=ALL_EDGES;panX=0;panY=0;zoom=1;expandedId=null;render();addRow('filter-rows');}
 
+// ═══════════════════════════════════════════════════════
+// TEST SUITE: Render Path DOM Verification (Phase 3)
+// ═══════════════════════════════════════════════════════
+
+function createMockNodePrecomputed() {
+    return {
+        id: 'test-precomputed', x: 0, y: 0, width: 160, height: 120,
+        usePrecomputed: true,
+        children: [{ label: 'test', text: 'Child 1', ax: 10, ay: 8, cw: 80, ch: 22 }],
+        title: 'Precomputed Node', color: '#4CAF50'
+    };
+}
+
+function createMockNodeDynamic() {
+    return {
+        id: 'test-dynamic', x: 0, y: 0, width: 160, height: 120,
+        usePrecomputed: false,
+        title: 'Dynamic Node', color: '#FF9800'
+    };
+}
+
+function createMockNodeFallback() {
+    return {
+        id: 'test-fallback', x: 0, y: 0, width: 160, height: 40,
+        usePrecomputed: false,
+        title: 'Fallback Node', color: '#2196F3'
+    };
+}
+
+function runTier1_ManualTests() {
+    console.group('%c[Tier 1] Manual DOM Verification', 'font-weight:bold;color:#FF9800');
+    console.log('Testing that all render paths append <g> elements to mainG...');
+    console.log('Open DevTools Console to see results.');
+    console.log('To verify: inspect SVG elements after running.');
+    
+    const testNode = createMockNodePrecomputed();
+    console.log('\n--- Test Node: Precomputed ---');
+    console.log('  id:', testNode.id);
+    console.log('  usePrecomputed:', testNode.usePrecomputed);
+    console.log('  children count:', testNode.children ? testNode.children.length : 0);
+    console.log('\nTo verify Path A: Open viewer, expand this node type, check DOM tree for <g> elements.');
+    console.log('Path A should have: rect + title + children <g> + mainG connection');
+    
+    const mockNode = createMockNodeFallback();
+    console.log('\n--- Test Node: Fallback ---');
+    console.log('  id:', mockNode.id);
+    console.log('  usePrecomputed:', mockNode.usePrecomputed);
+    console.log('  children:', mockNode.children);
+    console.log('\nTo verify Path B-2: Check DOM tree for <g> with only rect + title.');
+    console.log('Path B-2 should have: rect + title + mainG connection');
+    
+    console.groupEnd();
+    return true;
+}
+
+function runTier3_UnitTests() {
+    console.group('%c[Tier 3] finalizeGroup Unit Tests', 'font-weight:bold;color:#9C27B0');
+    let allPassed = true;
+
+    const test1 = (() => {
+        const parent = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const child = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const result = finalizeGroup(child, parent);
+        const passed = result === child && child.parentNode === parent;
+        console.log(`Test 1 (normal): result=child, child.parentNode=parent -> ${passed ? 'PASS' : 'FAIL'}`);
+        if (!passed) allPassed = false;
+        return passed;
+    })();
+
+    const test2 = (() => {
+        const parent = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const result = finalizeGroup(null, parent);
+        const passed = result === null;
+        console.log(`Test 2 (null child): result=null -> ${passed ? 'PASS' : 'FAIL'}`);
+        if (!passed) allPassed = false;
+        return passed;
+    })();
+
+    const test3 = (() => {
+        const child = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const result = finalizeGroup(child, null);
+        const passed = result === null && child.parentNode === null;
+        console.log(`Test 3 (null parent): result=null, child.parentNode=null -> ${passed ? 'PASS' : 'FAIL'}`);
+        if (!passed) allPassed = false;
+        return passed;
+    })();
+
+    const test4 = (() => {
+        const parent = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const child = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const passed = finalizeGroup(child, parent) === child;
+        console.log(`Test 4 (return chain): result === child -> ${passed ? 'PASS' : 'FAIL'}`);
+        if (!passed) allPassed = false;
+        return passed;
+    })();
+
+    console.log(allPassed ? '\n✅ All unit tests passed' : '\n❌ Some unit tests failed');
+    console.groupEnd();
+    return allPassed;
+}
+
+function runAllTests() {
+    console.clear();
+    console.log('%c=== SVG Viewer 3-Tier Test Suite ===', 'font-size:16px;font-weight:bold');
+    console.time('Total test time');
+    
+    runTier1_ManualTests();
+    const tier3 = runTier3_UnitTests();
+    
+    console.timeEnd('Total test time');
+    console.log('\n=== Summary ===');
+    console.log('Tier 1 (Manual): Run in browser DevTools after viewer loads');
+    console.log(`Tier 2 (Snapshot): Manual verification needed (open viewer)`);
+    console.log(`Tier 3 (Unit): ${tier3 ? 'PASS' : 'FAIL'}`);
+    console.log('\nTo verify Path A/B-1/B-2 rendering:');
+    console.log('  1. Open http://127.0.0.1:8765/');
+    console.log('  2. Check DevTools Elements for <g> elements under <svg>');
+    console.log('  3. Verify each node type has mainG as parentNode');
+}
+
+window.runAllTests = runAllTests;
+window.runTier3_UnitTests = runTier3_UnitTests;
+
 init();
