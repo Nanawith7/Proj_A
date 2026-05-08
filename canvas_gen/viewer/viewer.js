@@ -190,7 +190,7 @@ function render() {
         }
       }
 
-      mainG.appendChild(g);
+      finalizeGroup(g, mainG);
     } else {
       // ── Path B: Existing rendering path (no pre-computed children) ──
       const children = nodeViewToChildren(nv, v || {});
@@ -282,7 +282,7 @@ function render() {
           }
         }
         rendered = true;
-        mainG.appendChild(g);
+        finalizeGroup(g, mainG);
       }
 
       if (!rendered) {
@@ -343,7 +343,7 @@ function render() {
           img.style.pointerEvents = 'none';
           g.appendChild(img);
         }
-          mainG.appendChild(g);
+          finalizeGroup(g, mainG);
       }
     }
   });
@@ -973,6 +973,12 @@ function renderNodeWithChildren(node, nv, g, mainG, svgNS, nx, ny, iconPath, fil
 }
 
 function addRow(cid){const div=document.getElementById(cid);const row=document.createElement('div');row.className='filter-row';const logic=document.createElement('span');logic.className='logic';logic.textContent=div.children.length?'AND':'WHERE';const sel=document.createElement('select');sel.innerHTML='<option value="$or">$or</option>';const keys=new Set();Object.values(VAULT).forEach(v=>{if(v.props)Object.keys(v.props).forEach(k=>keys.add(k));});[...keys].sort().forEach(k=>{sel.innerHTML+=`<option value="${k}">${k}</option>`;});const inp=document.createElement('input');inp.placeholder='value or val1|val2';const del=document.createElement('button');del.textContent='x';del.style.background='#533483';del.style.padding='2px 6px';del.onclick=()=>row.remove();row.appendChild(logic);row.appendChild(sel);row.appendChild(inp);row.appendChild(del);div.appendChild(row);}
+
+function finalizeGroup(g, parentGroup) {
+    if (!g || !parentGroup) return null;
+    parentGroup.appendChild(g);
+    return g;
+}
 function buildFilterStr(cid){const pairs=[];document.getElementById(cid).querySelectorAll('.filter-row').forEach(r=>{const s=r.querySelector('select'),i=r.querySelector('input');if(s&&i&&i.value.trim())pairs.push(s.value+'='+i.value.trim());});return pairs.join(',');}
 async function apply(){const params={filter:buildFilterStr('filter-rows'),exclude:buildFilterStr('exclude-rows'),include:document.getElementById('include-types').value||'',sortKey:document.getElementById('sort-key').value,sortDesc:document.getElementById('sort-desc').checked,prune:document.getElementById('prune-orphans').checked,baseNode:document.getElementById('base-node').value||'',depth:document.getElementById('depth').value||''};const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params)});const data=await res.json();currentNodes=data.nodes;currentEdges=data.edges;render();}
 function reset(){document.getElementById('filter-rows').innerHTML='';document.getElementById('exclude-rows').innerHTML='';document.getElementById('sort-key').value='';document.getElementById('sort-desc').checked=false;document.getElementById('prune-orphans').checked=false;currentNodes=ALL_NODES;currentEdges=ALL_EDGES;panX=0;panY=0;zoom=1;expandedId=null;render();addRow('filter-rows');}
