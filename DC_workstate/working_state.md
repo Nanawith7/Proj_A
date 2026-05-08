@@ -1,31 +1,37 @@
 # Working State
 
-## 現在の状態: 段階1完了
+## 現在の状態: 段階2完了
 
 ### 完了した段階
 - **段階1**: Collapsed時Children描画ガード ✓ 完了
+- **段階2**: Collapsed高さの固定値化 ✓ 完了
 
 ### 進行中の段階
-- なし
+- 阶段性
 
 ### 次の予定段階
-- **段階2**: Collapsed高さの固定値化
-  - 目標: collapsed状態のノード高さを固定値(30-40px)に設定
-  - 対象ファイル: `canvas_gen/viewer/viewer.js`
-  - 修正箇所: Line 136-138 (Path A: childrenサイズ初期化), Line 376-393 (applyNodeView)
+- **段階3**: Python事前計算の分離
+  - collapsed用children配列の生成
+  - `pn.children` (expanded用) と `pn.collapsedChildren` (collapsed用) の2系統
+- **段階4**: Text width推定精度改善
+- **段階5**: 統合テスト
 
 ### 各段階の成果物一覧
 | 段階 | Phase-X_result.md | working_state.md | git commit | 状態 |
 |------|-------------------|------------------|------------|------|
-| 1    | 作成済み          | 作成済み         | 保留       | 完了 |
+| 1    | 作成済み          | 更新済み         | 完了       | 完了 |
+| 2    | 作成済み          | 更新済み         | 保留       | 完了 |
+| 3    | 保留              | 保留             | 保留       | 未着手 |
 
-### 変更ファイル一覧
-- `canvas_gen/viewer/viewer.js` (Line 180-185, Line 266-273)
-  - 追加: `if (expandedId === n.id)` ガード (Path A, Path B両方)
+### 変更ファイル一覧（未コミット）
+- `canvas_gen/viewer/viewer.js`
+  - Line 6: `const COLLAPSED_HEIGHT = 35;` 追加
+  - Line 138-142: Path Aにcollapsed高さ分岐追加
+  - Line 205-209: Path Bにcollapsed高さ分岐追加
 
-### 確定された詳細な要点
+### 確定された詳細な要点（段階1-2まて）
 1. `expandedId` グローバル変数がexpanded/collapsed状態管理の単一情報源
-2. Path AとPath Bの両方に同一のガード条件を追加する必要がある
-3. `drawElement()` 関数内には変更なし(呼び出し側で制御)
-4. ループ自体を条件で囲むアプローチを選択(Performance最適)
-5. 次の段階では、collapsed時のノード高さ計算を修正する必要がある
+2. Path AとPath Bの両方にcollapsed判定ガードを追加済み（段階1）
+3. COLLAPSED_HEIGHT定数 = 35px（段階2）
+4. `n.height` を直接書き換えることで `applyNodeView` との整合性を維持
+5. 段階3では、Python側でcollapsed用children配列を生成する

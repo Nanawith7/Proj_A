@@ -3,6 +3,7 @@ const API = '/api/filter';
 let ALL_NODES=[], ALL_EDGES=[], VAULT={}, TYPEDEFS={}, NODEVIEWS={};
 let currentNodes=[], currentEdges=[];
 let panX=0, panY=0, zoom=1, dragging=false, dsX=0, dsY=0, expandedId=null;
+const COLLAPSED_HEIGHT = 35;
 // Allow debugging
 window.NODEVIEWS = NODEVIEWS;
 
@@ -134,7 +135,11 @@ function render() {
     if (usePrecomputed) {
       // ── Path A: Pre-computed children from pipeline ──
       childW = n.width || childW;
-      childH = n.height || childH;
+      if (expandedId === n.id) {
+        childH = n.height || childH;
+      } else {
+        childH = COLLAPSED_HEIGHT;
+      }
       n.width = childW; n.height = childH;
 
       // Draw parent rect
@@ -197,7 +202,11 @@ function render() {
         computeChildrenLayout(children);
 
         childW = !childW || childW <= 0 ? children._cw || 200 : children._cw < childW ? children._cw : childW;
-        childH = !childH || childH <= 0 ? children._ch || 120 : children._ch < childH ? children._ch : childH;
+        if (expandedId === n.id) {
+          childH = !childH || childH <= 0 ? children._ch || 120 : children._ch < childH ? children._ch : childH;
+        } else {
+          childH = COLLAPSED_HEIGHT;
+        }
         n.width = childW; n.height = childH;
 
         // Draw parent rect
