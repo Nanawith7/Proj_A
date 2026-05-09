@@ -1,1 +1,1 @@
-{"shape":"round","rx":22,"stroke":"#fff8","strokeWidth":1.5,"fontSize":11,"titleY":"center","titlePad":6,"background":"tag_bg.png","layout":{"contentPadX":12,"contentPadY":8,"titlePadX":10,"titlePadY":6,"expandMinW":100,"expandMinH":80}}
+{"shape":"round","rx":22,"stroke":"#fff8","strokeWidth":1.5,"fontSize":11,"titleY":"center","titlePad":6,"background":"tag_bg.png","layout":{"contentPadX":12,"contentPadY":8,"titlePadX":10,"titlePadY":6,"expandMinW":100,"expandMinH":80,"collapsedFillOpacity":0.8,"expandedFillOpacity":1.0}}

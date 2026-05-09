@@ -3,7 +3,7 @@ const API = '/api/filter';
 let ALL_NODES=[], ALL_EDGES=[], VAULT={}, TYPEDEFS={}, NODEVIEWS={};
 let currentNodes=[], currentEdges=[];
 let panX=0, panY=0, zoom=1, dragging=false, dsX=0, dsY=0, expandedId=null;
-const COLLAPSED_HEIGHT = 35;
+const COLLAPSED_HEIGHT = 40;
 // Allow debugging
 window.NODEVIEWS = NODEVIEWS;
 
@@ -868,7 +868,7 @@ function resolvePositions(el) {
       const cr = child._ax + (child._cw || 0);
       if (cr > maxRight) maxRight = cr;
     }
-    el._cw = Math.max(maxRight, el._cw) + padX * 2;
+    el._cw = Math.max(maxRight, el._cw - padX * 2) + padX * 2;
   }
   if (el.h === null) {
     el._ch = Math.max(maxBottom, 1) + padY * 2;
@@ -957,7 +957,7 @@ function drawElement(parentEl, parentGroup, ox, oy) {
   g.appendChild(rect);
 
   // Text
-  if (parentEl.text && (parentEl.w === null || !parentEl.children)) {
+  if (parentEl.text && (parentEl.w == null || !parentEl.children)) {
     const lineHeight = (parentEl.fontSize || 12) + 4;
     const txt = document.createElementNS(svgNS, 'text');
     txt.setAttribute('x', px + padX);

@@ -1,1 +1,1 @@
-{"shape":"rect","rx":4,"stroke":"#fff6","strokeWidth":1,"fontSize":12,"titleY":"center","titlePad":6,"layout":{"contentPadX":10,"contentPadY":10,"titlePadX":10,"titlePadY":6,"expandMinW":200,"expandMinH":120}}
+{"shape":"rect","rx":4,"stroke":"#fff6","strokeWidth":1,"fontSize":12,"titleY":"center","titlePad":6,"layout":{"contentPadX":10,"contentPadY":10,"titlePadX":10,"titlePadY":6,"expandMinW":200,"expandMinH":120,"collapsedFillOpacity":0.8,"expandedFillOpacity":1.0}}
