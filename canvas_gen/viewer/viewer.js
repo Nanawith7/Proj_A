@@ -482,9 +482,9 @@ function toggleExpand(node, g, mainG) {
   const neededH=lineH+cpY*2+16;
   let expW=Math.max(minW,neededW);
   let expH=Math.max(minH,neededH);
-  // Maintain ratio from expandMin (or original node)
-  const ow=nv.shape==='circle'?minW:(node.width||200);
-  const oh=nv.shape==='circle'?minH:(node.height||120);
+  // Maintain ratio from type definition (not mutated node.width/height)
+  const ow=nv.shape==='circle'?minW:(td.node_width||minW);
+  const oh=nv.shape==='circle'?minH:(td.node_height||minH);
   if(ow>0&&oh>0){
     const ratio=ow/oh;
     if(expW/expH>ratio)expH=expW/ratio;
