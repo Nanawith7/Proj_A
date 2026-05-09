@@ -12,7 +12,10 @@ which the viewer can render directly without re-computing layout.
 from __future__ import annotations
 
 import math
+import os
+import platform
 import re
+from pathlib import Path
 from typing import Any
 
 
@@ -24,6 +27,56 @@ DEFAULT_TEXT_H = 20
 DEFAULT_PAD_X = 10
 DEFAULT_PAD_Y = 8
 DEFAULT_GAP_Y = 5
+
+
+# ── Font file paths for accurate text measurement ───────────────────
+_SYSTEM_FONT_PATHS = {
+    "Windows": [
+        "C:/Windows/Fonts/meiryo.ttc",
+        "C:/Windows/Fonts/msgothic.ttc",
+        "C:/Windows/Fonts/arial.ttf",
+    ],
+    "Darwin": [
+        "/System/Library/Fonts/Supplemental/Arial.ttf",
+        "/System/Library/Fonts/Helvetica.ttc",
+    ],
+    "Linux": [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    ],
+}
+
+_font_cache: dict[int, Any] = {}
+_font_path: str | None = None
+
+
+def _find_system_font() -> str | None:
+    """Find a system font file path for text measurement."""
+    global _font_path
+    if _font_path:
+        return _font_path
+    system = platform.system()
+    candidates = _SYSTEM_FONT_PATHS.get(system, [])
+    for path in candidates:
+        if Path(path).exists():
+            _font_path = path
+            return path
+    return None
+
+
+def _get_font(font_size: int):
+    """Get a font object from cache or create new one."""
+    if font_size in _font_cache:
+        return _font_cache[font_size]
+    font_path = _find_system_font()
+    if font_path:
+        try:
+            from PIL import ImageFont
+            _font_cache[font_size] = ImageFont.truetype(font_path, font_size)
+            return _font_cache[font_size]
+        except Exception:
+            pass
+    return None
 
 
 # ── Text sizing helpers ─────────────────────────────────────────────
@@ -59,18 +112,58 @@ _CHAR_WIDTH_RATIOS = {
 _DEFAULT_RATIO = 0.56
 
 
-def _estimate_text_w_v2(text: str, font_size: int = 11) -> float:
-    """Estimate text width using character-width table (browser-aligned).
+def _is_cjk(char: str) -> bool:
+    """Check if a character is CJK (Chinese/Japanese/Korean)."""
+    cp = ord(char)
+    return (
+        0x4E00 <= cp <= 0x9FFF or  # CJK Unified Ideographs
+        0x3040 <= cp <= 0x309F or  # Hiragana
+        0x30A0 <= cp <= 0x30FF or  # Katakana
+        0x3400 <= cp <= 0x4DBF or  # CJK Extension A
+        0xAC00 <= cp <= 0xD7AF or  # Hangul
+        0xFF00 <= cp <= 0xFFEF or  # Fullwidth Forms
+        0x3000 <= cp <= 0x303F      # CJK Symbols
+    )
 
-    Uses per-character width ratios measured from Arial/sans-serif font.
-    Provides ~5% accuracy vs browser measureText().
+
+def _estimate_text_w_pillow(text: str, font_size: int = 11) -> float | None:
+    """Estimate text width using Pillow getlength() (most accurate).
+
+    Uses Pillow's FreeType-based measurement for accurate results.
+    Returns None if font file is not available.
+    Applies 3% safety margin for rendering differences.
+    """
+    if not text:
+        return 0.0
+    font = _get_font(font_size)
+    if font is None:
+        return None
+    try:
+        from PIL import ImageFont
+        if hasattr(font, 'getlength'):
+            return font.getlength(text) * 1.03
+    except Exception:
+        pass
+    return None
+
+
+def _estimate_text_w_v2(text: str, font_size: int = 11) -> float:
+    """Estimate text width using CJK-aware character width table.
+
+    Uses per-character width ratios with 1.0 for CJK characters.
+    Provides ~10% accuracy vs browser measureText().
+    Pillow-based measurement attempted but falls back due to font mismatch.
     """
     if not text:
         return 0
+
     total = 0.0
     for ch in text:
-        total += font_size * _CHAR_WIDTH_RATIOS.get(ch, _DEFAULT_RATIO)
-    return max(total + 4, DEFAULT_TEXT_W * 0.6)
+        if _is_cjk(ch):
+            total += font_size * 1.0  # CJK: full-width (1em)
+        else:
+            total += font_size * _CHAR_WIDTH_RATIOS.get(ch, _DEFAULT_RATIO)
+    return max(total, DEFAULT_TEXT_W * 0.6)
 
 
 def _estimate_text_h(font_size: int = 11) -> float:
