@@ -141,6 +141,8 @@ function render() {
       } else {
         childH = COLLAPSED_HEIGHT;
       }
+      n.width = childW; n.height = childH;
+
       // Draw parent rect
       const pRect = document.createElementNS(svgNS, 'rect');
       pRect.setAttribute('data-id', n.id);
@@ -206,6 +208,8 @@ function render() {
         } else {
           childH = COLLAPSED_HEIGHT;
         }
+        n.width = childW; n.height = childH;
+
         // Draw parent rect
         const pRect = document.createElementNS(svgNS, 'rect');
         pRect.setAttribute('data-id', n.id);
@@ -344,7 +348,7 @@ function render() {
     }
   });
 
-  svg.appendChild(mainG);graph.appendChild(svg);
+  svg.appendChild(mainG);graph.appendChild(svg);expandedId=null;
 
   graph.onmousedown=e=>{if(e.target===svg||e.target===mainG||e.target===graph){dragging=true;dsX=e.clientX-panX;dsY=e.clientY-panY;graph.classList.add('dragging');e.preventDefault();}};
   window.onmousemove=e=>{if(!dragging)return;panX=e.clientX-dsX;panY=e.clientY-dsY;updateTransform(mainG);};
