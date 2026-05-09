@@ -178,10 +178,33 @@ function render() {
         txt.setAttribute('y', ny + lp.titleY);
         txt.setAttribute('fill', '#fff');
         txt.textContent = tText || title;
-        g.appendChild(txt);
+       g.appendChild(txt);
       }
 
-         // Draw children directly (positions are relative to parent origin)
+      // Icon
+      const iconPath = v?.props?.icon;
+      if (iconPath) {
+        const isz = Math.min(childW, childH) * 0.45;
+        const anchorX = nv.layout?.iconAnchorX || 'center';
+        const anchorY = nv.layout?.iconAnchorY || 'center';
+        const ipx = nv.layout?.iconPadX || 0, ipy = nv.layout?.iconPadY || 0;
+        let ix, iy;
+        if (anchorX === 'left') ix = nx + ipx;
+        else if (anchorX === 'right') ix = nx + childW - isz - ipx;
+        else ix = nx + (childW - isz) / 2;
+        if (anchorY === 'top') iy = ny + ipy;
+        else if (anchorY === 'bottom') iy = ny + childH - isz - ipy;
+        else iy = ny + (childH - isz) / 2;
+        const img = document.createElementNS(svgNS, 'image');
+        img.setAttribute('href', '/_icons/' + iconPath.split('/').pop());
+        img.setAttribute('x', ix); img.setAttribute('y', iy);
+        img.setAttribute('width', isz); img.setAttribute('height', isz);
+        img.setAttribute('class', 'node-icon-img');
+        img.style.pointerEvents = 'none';
+        g.appendChild(img);
+      }
+
+      // Draw children directly (positions are relative to parent origin)
       if (expandedId === n.id) {
         for (const child of canvasChildren) {
           drawElement(child, g, nx + (child.ax || 0), ny + (child.ay || 0));
