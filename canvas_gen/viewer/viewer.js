@@ -141,8 +141,6 @@ function render() {
       } else {
         childH = COLLAPSED_HEIGHT;
       }
-      n.width = childW; n.height = childH;
-
       // Draw parent rect
       const pRect = document.createElementNS(svgNS, 'rect');
       pRect.setAttribute('data-id', n.id);
@@ -208,8 +206,6 @@ function render() {
         } else {
           childH = COLLAPSED_HEIGHT;
         }
-        n.width = childW; n.height = childH;
-
         // Draw parent rect
         const pRect = document.createElementNS(svgNS, 'rect');
         pRect.setAttribute('data-id', n.id);
@@ -348,7 +344,7 @@ function render() {
     }
   });
 
-  svg.appendChild(mainG);graph.appendChild(svg);expandedId=null;
+  svg.appendChild(mainG);graph.appendChild(svg);
 
   graph.onmousedown=e=>{if(e.target===svg||e.target===mainG||e.target===graph){dragging=true;dsX=e.clientX-panX;dsY=e.clientY-panY;graph.classList.add('dragging');e.preventDefault();}};
   window.onmousemove=e=>{if(!dragging)return;panX=e.clientX-dsX;panY=e.clientY-dsY;updateTransform(mainG);};
@@ -390,8 +386,9 @@ function drawWrappedTitle(g, svgNS, title, fs, lp, nx, ny, nv) {
 
 function applyNodeView(rect, node, expanded) {
   const type=nodeType(node),td=TYPEDEFS[type]||{},nvName=td.nodeview||'plain',nv=NODEVIEWS[nvName]||{shape:'rect',rx:4};
-  let nw=node.width||200,nh=node.height||120;
-  if(expanded) { nw=expanded.width; nh=expanded.height; }
+  let nw=td.node_width||200,nh=td.node_height||120;
+  if(expanded && expanded.width) { nw=expanded.width; nh=expanded.height; }
+  else { nh=COLLAPSED_HEIGHT; }
   rect.setAttribute('x',node.x||0);rect.setAttribute('y',node.y||0);
   rect.setAttribute('width',nw);rect.setAttribute('height',nh);
   const shape=nv.shape||'rect';
